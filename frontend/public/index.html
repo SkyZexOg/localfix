@@ -827,27 +827,40 @@ async function loadAdminDash() {
   }
 
   // Build workers list
-  const workers = workersData.data || [];
-  const pendingFirst = [...workers.filter(w=>w.status==='pending'), ...workers.filter(w=>w.status!=='pending')];
-  const workerRowsHtml = pendingFirst.map(w => {
-    const scol = { available:'var(--green)', busy:'#FF9800', offline:'#555', pending:'var(--orange)' };
-    return `<div class="admin-worker-row" id="awr_${w.id}">
-      <div class="admin-worker-avatar">${w.name.split(' ').map(n=>n[0]).join('').slice(0,2).toUpperCase()}</div>
-      <div style="flex:1;min-width:120px">
-        <div style="font-weight:600;font-size:0.92rem">${esc(w.name)}</div>
-        <div style="font-size:0.76rem;color:var(--text-dim)">${esc(w.skill)} • ${esc(w.city)} • 📞 ${esc(w.phone)}</div>
-        <div style="font-size:0.72rem;color:#444;margin-top:2px">Views: ${w.profile_views} | Calls: ${w.call_clicks} | WA: ${w.whatsapp_clicks}</div>
-      </div>
-      <div style="display:flex;align-items:center;gap:5px;flex-shrink:0">
-        <div style="width:6px;height:6px;border-radius:50%;background:${scol[w.status]||'#555'}"></div>
-        <span style="font-size:0.75rem;color:${scol[w.status]||'#555'};font-weight:600">${w.status.toUpperCase()}</span>
-      </div>
-      <div class="admin-actions">
-        ${w.status==='pending' ? `<button class="admin-btn approve" onclick="adminApprove(${w.id})">✓ Approve</button><button class="admin-btn reject" onclick="adminReject(${w.id})">✕ Reject</button>` : ''}
-        <button class="admin-btn delete" onclick="adminDelete(${w.id})">🗑 Delete</button>
-      </div>
-    </div>`;
-  }).join('');
+const workers = workersData.data || [];
+
+const pendingFirst = [
+  ...workers.filter(w => w.status && w.status.toLowerCase()==='pending'),
+  ...workers.filter(w => !w.status || w.status.toLowerCase()!=='pending')
+];
+
+const workerRowsHtml = pendingFirst.map(w => {
+  const scol = { available:'var(--green)', busy:'#FF9800', offline:'#555', pending:'var(--orange)' };
+
+  return `<div class="admin-worker-row" id="awr_${w.id}">
+    <div class="admin-worker-avatar">${w.name.split(' ').map(n=>n[0]).join('').slice(0,2).toUpperCase()}</div>
+
+    <div style="flex:1;min-width:120px">
+      <div style="font-weight:600;font-size:0.92rem">${esc(w.name)}</div>
+      <div style="font-size:0.76rem;color:var(--text-dim)">${esc(w.skill)} • ${esc(w.city)} • 📞 ${esc(w.phone)}</div>
+      <div style="font-size:0.72rem;color:#444;margin-top:2px">Views: ${w.profile_views} | Calls: ${w.call_clicks} | WA: ${w.whatsapp_clicks}</div>
+    </div>
+
+    <div style="display:flex;align-items:center;gap:5px;flex-shrink:0">
+      <div style="width:6px;height:6px;border-radius:50%;background:${scol[w.status]||'#555'}"></div>
+      <span style="font-size:0.75rem;color:${scol[w.status]||'#555'};font-weight:600">${(w.status||'offline').toUpperCase()}</span>
+    </div>
+
+    <div class="admin-actions">
+      ${w.status && w.status.toLowerCase()==='pending'
+        ? `<button class="admin-btn approve" onclick="adminApprove(${w.id})">✓ Approve</button>
+           <button class="admin-btn reject" onclick="adminReject(${w.id})">✕ Reject</button>`
+        : ''}
+      <button class="admin-btn delete" onclick="adminDelete(${w.id})">🗑 Delete</button>
+    </div>
+
+  </div>`;
+}).join('');
 
   document.getElementById('adminDashContent').innerHTML = `
     <div class="admin-stat-grid">
