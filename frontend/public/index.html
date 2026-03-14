@@ -545,8 +545,8 @@ function workerCard(w) {
       <div><span class="stars">${starsHtml||'☆☆☆☆☆'}</span> <span class="rating-text">${w.rating||'0.0'} (${w.total_reviews} reviews)</span></div>
     </div>
     <div class="worker-actions" onclick="event.stopPropagation()">
-      <button class="btn-call" onclick="trackAndCall(${w.id},'${esc(w.phone||'')}','${esc(w.name)}')">📞 Call Now</button>
-      <button class="btn-wa" onclick="trackAndWa(${w.id},'${esc(w.phone||'')}','${esc(w.name)}')">💬</button>
+      <button class="btn-call" onclick="trackAndCall(${w.id},this)">📞 Call Now</button>
+      <button class="btn-wa" onclick="trackAndWa(${w.id},this)">💬</button>
     </div>
   </div>`;
 }
@@ -635,14 +635,15 @@ async function submitReview(workerId) {
 // ============================================================
 // CALL & WHATSAPP TRACKING
 // ============================================================
-async function trackAndCall(id, phone, name) {
+async function trackAndCall(id, btn) {
   await api('POST', `/api/workers/${id}/track`, { type:'call' });
-  showToast(`Calling ${name}...`, 'success');
-  window.location.href = `tel:${phone}`;
+  const data = await api('GET', `/api/workers/${id}`);
+  if(data.success){ window.location.href = `tel:${data.data.phone}`; }
 }
-async function trackAndWa(id, phone, name) {
+async function trackAndWa(id, btn) {
   await api('POST', `/api/workers/${id}/track`, { type:'whatsapp' });
-  window.open(`https://wa.me/91${phone}?text=Hi%20${encodeURIComponent(name)}%2C%20I%20found%20you%20on%20LocalFix.%20I%20need%20your%20service.`, '_blank');
+  const data = await api('GET', `/api/workers/${id}`);
+  if(data.success){ window.open(`https://wa.me/91${data.data.phone}?text=Hi%20${encodeURIComponent(data.data.name)}%2C%20I%20found%20you%20on%20LocalFix.%20I%20need%20your%20service.`, '_blank'); }
 }
 
 // ============================================================
@@ -827,7 +828,7 @@ async function loadAdminDash() {
   }
 
   // Build workers list
-const workers = workersData.data  [];
+  const workers = workersData.data || [];
   const pendingFirst = [...workers.filter(w=>w.status==='pending'), ...workers.filter(w=>w.status!=='pending')];
   const workerRowsHtml = pendingFirst.map(w => {
     const scol = { available:'var(--green)', busy:'#FF9800', offline:'#555', pending:'var(--orange)' };
@@ -839,11 +840,11 @@ const workers = workersData.data  [];
         <div style="font-size:0.72rem;color:#444;margin-top:2px">Views: ${w.profile_views} | Calls: ${w.call_clicks} | WA: ${w.whatsapp_clicks}</div>
       </div>
       <div style="display:flex;align-items:center;gap:5px;flex-shrink:0">
-        <div style="width:6px;height:6px;border-radius:50%;background:${scol[w.status]'#555'}"></div>
+        <div style="width:6px;height:6px;border-radius:50%;background:${scol[w.status]||'#555'}"></div>
         <span style="font-size:0.75rem;color:${scol[w.status]||'#555'};font-weight:600">${w.status.toUpperCase()}</span>
       </div>
       <div class="admin-actions">
-        ${w.status==='pending' ? <button class="admin-btn approve" onclick="adminApprove(${w.id})">✓ Approve</button><button class="admin-btn reject" onclick="adminReject(${w.id})">✕ Reject</button> : ''}
+        ${w.status==='pending' ? `<button class="admin-btn approve" onclick="adminApprove(${w.id})">✓ Approve</button><button class="admin-btn reject" onclick="adminReject(${w.id})">✕ Reject</button>` : ''}
         <button class="admin-btn delete" onclick="adminDelete(${w.id})">🗑 Delete</button>
       </div>
     </div>`;
