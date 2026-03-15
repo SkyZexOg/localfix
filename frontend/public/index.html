@@ -386,7 +386,7 @@ const API = window.location.origin;
 
 let workerToken = localStorage.getItem('lf_wtoken') || null;
 let workerData  = JSON.parse(localStorage.getItem('lf_wdata') || 'null');
-let adminToken  = sessionStorage.getItem('lf_atoken') || null;
+let adminToken  = localStorage.getItem('lf_atoken') || null;
 let currentFilter = 'all';
 let currentCategory = '';
 let currentCity = '';
@@ -702,7 +702,7 @@ async function doAdminLogin() {
   const data = await api('POST', '/api/admin/login', { username, password });
   if (data.success) {
     adminToken = data.token;
-    sessionStorage.setItem('lf_atoken', adminToken);
+    localStorage.setItem('lf_atoken', adminToken);
     closeModal('adminLoginModal');
     showAdminBar();
     loadAdminDash();
@@ -717,7 +717,7 @@ function showAdminBar() {
 
 function adminLogout() {
   adminToken = null;
-  sessionStorage.removeItem('lf_atoken');
+  localStorage.removeItem('lf_atoken');
   document.getElementById('adminBar').style.display = 'none';
   showToast('Admin logged out', 'success');
 }
