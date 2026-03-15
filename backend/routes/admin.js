@@ -29,7 +29,6 @@ router.get('/dashboard', verifyAdmin, async (req, res) => {
       FROM workers WHERE is_active = TRUE
     `);
 
-    // Registrations last 7 days
     const [recentRegs] = await pool.execute(`
       SELECT DATE(created_at) as date, COUNT(*) as count
       FROM workers
@@ -37,21 +36,18 @@ router.get('/dashboard', verifyAdmin, async (req, res) => {
       GROUP BY DATE(created_at) ORDER BY date ASC
     `);
 
-    // Top skills
     const [topSkills] = await pool.execute(`
       SELECT skill, COUNT(*) as count FROM workers
-      WHERE is_active=TRUE AND status != 'pending'
+      WHERE is_active=TRUE AND status IN ('available','busy','offline')
       GROUP BY skill ORDER BY count DESC LIMIT 5
     `);
 
-    // Top cities
     const [topCities] = await pool.execute(`
       SELECT city, COUNT(*) as count FROM workers
-      WHERE is_active=TRUE AND status != 'pending'
+      WHERE is_active=TRUE AND status IN ('available','busy','offline')
       GROUP BY city ORDER BY count DESC LIMIT 5
     `);
 
-    // Analytics last 7 days
     const [activityLog] = await pool.execute(`
       SELECT event_type, COUNT(*) as count, DATE(created_at) as date
       FROM analytics
@@ -60,7 +56,6 @@ router.get('/dashboard', verifyAdmin, async (req, res) => {
       ORDER BY date DESC
     `);
 
-    // Total events summary
     const [[eventTotals]] = await pool.execute(`
       SELECT
         SUM(event_type='view')           as total_views,
@@ -84,7 +79,7 @@ router.get('/dashboard', verifyAdmin, async (req, res) => {
 // ── GET /api/admin/workers ── All workers with filters
 router.get('/workers', verifyAdmin, async (req, res) => {
   try {
-    const { status, skill, city, search, page = 1, limit = 20 } = req.query;
+    const { status, skill, city, search, page = 1, limit = 50 } = req.query;
     let sql = `
       SELECT id, name, phone, skill, experience, city, area, status,
              rating, total_reviews, profile_views, call_clicks, whatsapp_clicks,
@@ -101,16 +96,14 @@ router.get('/workers', verifyAdmin, async (req, res) => {
       params.push(`%${search}%`, `%${search}%`, `%${search}%`);
     }
 
-    // Count total
     const countSql = sql.replace(
       /SELECT .+ FROM workers/,
       'SELECT COUNT(*) as total FROM workers'
     );
     const [[{ total }]] = await pool.execute(countSql, params);
 
-    // Pagination
     const offset = (parseInt(page) - 1) * parseInt(limit);
-    sql += ' ORDER BY created_at DESC LIMIT ? OFFSET ?';
+    sql += ' ORDER BY FIELD(status,"pending","available","busy","offline"), created_at DESC LIMIT ? OFFSET ?';
     params.push(parseInt(limit), offset);
 
     const [workers] = await pool.execute(sql, params);
@@ -124,7 +117,7 @@ router.get('/workers', verifyAdmin, async (req, res) => {
 router.put('/workers/:id/approve', verifyAdmin, async (req, res) => {
   try {
     const [result] = await pool.execute(
-      `UPDATE workers SET status = 'available' WHERE id = ? AND status = 'pending'`,
+      `UPDATE workers SET status = 'available', is_active = TRUE WHERE id = ? AND status = 'pending'`,
       [req.params.id]
     );
     if (!result.affectedRows) {
@@ -136,13 +129,16 @@ router.put('/workers/:id/approve', verifyAdmin, async (req, res) => {
   }
 });
 
-// ── PUT /api/admin/workers/:id/reject ── Reject (soft delete) pending worker
+// ── PUT /api/admin/workers/:id/reject ── Reject worker (pending ya approved dono)
 router.put('/workers/:id/reject', verifyAdmin, async (req, res) => {
   try {
-    await pool.execute(
-      `UPDATE workers SET is_active = FALSE, status = 'offline' WHERE id = ?`,
+    const [result] = await pool.execute(
+      `UPDATE workers SET is_active = FALSE, status = 'pending' WHERE id = ?`,
       [req.params.id]
     );
+    if (!result.affectedRows) {
+      return res.status(404).json({ success: false, message: 'Worker not found' });
+    }
     res.json({ success: true, message: 'Worker rejected and hidden from platform' });
   } catch (err) {
     res.status(500).json({ success: false, message: 'Server error' });
@@ -182,7 +178,6 @@ router.get('/analytics', verifyAdmin, async (req, res) => {
   try {
     const { days = 7 } = req.query;
 
-    // Daily events
     const [dailyEvents] = await pool.execute(`
       SELECT DATE(created_at) as date,
              SUM(event_type='view') as views,
@@ -194,12 +189,11 @@ router.get('/analytics', verifyAdmin, async (req, res) => {
       GROUP BY DATE(created_at) ORDER BY date ASC
     `, [parseInt(days)]);
 
-    // Most viewed workers
     const [topWorkers] = await pool.execute(`
       SELECT w.id, w.name, w.skill, w.city,
              w.profile_views, w.call_clicks, w.whatsapp_clicks
       FROM workers w
-      WHERE w.is_active=TRUE AND w.status != 'pending'
+      WHERE w.is_active=TRUE AND w.status IN ('available','busy','offline')
       ORDER BY w.profile_views DESC LIMIT 10
     `);
 
