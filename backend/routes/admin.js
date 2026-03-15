@@ -22,27 +22,21 @@ router.get('/dashboard', verifyAdmin, async (req, res) => {
     const [[totals]] = await pool.execute(
       "SELECT COUNT(*) as total, SUM(status = 'pending') as pending, SUM(status = 'available') as available, SUM(status = 'busy') as busy, SUM(status = 'offline') as offline FROM workers WHERE is_active = TRUE"
     );
-
     const [recentRegs] = await pool.execute(
       "SELECT DATE(created_at) as date, COUNT(*) as count FROM workers WHERE created_at >= DATE_SUB(NOW(), INTERVAL 7 DAY) GROUP BY DATE(created_at) ORDER BY date ASC"
     );
-
     const [topSkills] = await pool.execute(
       "SELECT skill, COUNT(*) as count FROM workers WHERE is_active=TRUE AND status IN ('available','busy','offline') GROUP BY skill ORDER BY count DESC LIMIT 5"
     );
-
     const [topCities] = await pool.execute(
       "SELECT city, COUNT(*) as count FROM workers WHERE is_active=TRUE AND status IN ('available','busy','offline') GROUP BY city ORDER BY count DESC LIMIT 5"
     );
-
     const [activityLog] = await pool.execute(
       "SELECT event_type, COUNT(*) as count, DATE(created_at) as date FROM analytics WHERE created_at >= DATE_SUB(NOW(), INTERVAL 7 DAY) GROUP BY event_type, DATE(created_at) ORDER BY date DESC"
     );
-
     const [[eventTotals]] = await pool.execute(
       "SELECT SUM(event_type='view') as total_views, SUM(event_type='call_click') as total_calls, SUM(event_type='whatsapp_click') as total_wa, SUM(event_type='search') as total_searches, SUM(event_type='registration') as total_registrations FROM analytics"
     );
-
     res.json({
       success: true,
       data: { totals, recentRegs, topSkills, topCities, activityLog, eventTotals }
@@ -58,6 +52,7 @@ router.get('/workers', verifyAdmin, async (req, res) => {
   try {
     const { status, skill, city, search, page = 1, limit = 50 } = req.query;
 
+    // Count query
     const countParams = [];
     let countSql = 'SELECT COUNT(*) as total FROM workers WHERE 1=1';
     if (status) { countSql += ' AND status = ?';  countParams.push(status); }
@@ -69,6 +64,7 @@ router.get('/workers', verifyAdmin, async (req, res) => {
     }
     const [[{ total }]] = await pool.execute(countSql, countParams);
 
+    // Main query — LIMIT/OFFSET directly in string (no ? placeholder) to avoid ER_WRONG_ARGUMENTS
     const params = [];
     let sql = 'SELECT id, name, phone, skill, experience, city, area, status, rating, total_reviews, profile_views, call_clicks, whatsapp_clicks, is_active, created_at FROM workers WHERE 1=1';
     if (status) { sql += ' AND status = ?';  params.push(status); }
@@ -79,12 +75,12 @@ router.get('/workers', verifyAdmin, async (req, res) => {
       params.push('%' + search + '%', '%' + search + '%', '%' + search + '%');
     }
 
-    const offset = (parseInt(page) - 1) * parseInt(limit);
-    sql += " ORDER BY FIELD(status,'pending','available','busy','offline'), created_at DESC LIMIT ? OFFSET ?";
-    params.push(parseInt(limit), offset);
+    const limitNum  = parseInt(limit);
+    const offsetNum = (parseInt(page) - 1) * limitNum;
+    sql += " ORDER BY FIELD(status,'pending','available','busy','offline'), created_at DESC LIMIT " + limitNum + " OFFSET " + offsetNum;
 
     const [workers] = await pool.execute(sql, params);
-    res.json({ success: true, data: workers, total, page: parseInt(page), limit: parseInt(limit) });
+    res.json({ success: true, data: workers, total, page: parseInt(page), limit: limitNum });
   } catch (err) {
     console.error(err);
     res.status(500).json({ success: false, message: 'Server error' });
@@ -155,16 +151,13 @@ router.put('/workers/:id/status', verifyAdmin, async (req, res) => {
 router.get('/analytics', verifyAdmin, async (req, res) => {
   try {
     const days = parseInt(req.query.days) || 7;
-
     const [dailyEvents] = await pool.execute(
       "SELECT DATE(created_at) as date, SUM(event_type='view') as views, SUM(event_type='call_click') as calls, SUM(event_type='whatsapp_click') as whatsapp, SUM(event_type='registration') as registrations FROM analytics WHERE created_at >= DATE_SUB(NOW(), INTERVAL ? DAY) GROUP BY DATE(created_at) ORDER BY date ASC",
       [days]
     );
-
     const [topWorkers] = await pool.execute(
       "SELECT w.id, w.name, w.skill, w.city, w.profile_views, w.call_clicks, w.whatsapp_clicks FROM workers w WHERE w.is_active=TRUE AND w.status IN ('available','busy','offline') ORDER BY w.profile_views DESC LIMIT 10"
     );
-
     res.json({ success: true, data: { dailyEvents, topWorkers } });
   } catch (err) {
     res.status(500).json({ success: false, message: 'Server error' });
