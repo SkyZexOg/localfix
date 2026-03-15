@@ -16,7 +16,7 @@ router.post('/login', (req, res) => {
   res.status(401).json({ success: false, message: 'Invalid admin credentials' });
 });
 
-// ── GET /api/admin/dashboard ── Summary stats
+// ── GET /api/admin/dashboard ──
 router.get('/dashboard', verifyAdmin, async (req, res) => {
   try {
     const [[totals]] = await pool.execute(`
@@ -80,6 +80,20 @@ router.get('/dashboard', verifyAdmin, async (req, res) => {
 router.get('/workers', verifyAdmin, async (req, res) => {
   try {
     const { status, skill, city, search, page = 1, limit = 50 } = req.query;
+
+    // ── FIXED: build count query separately (regex replace was crashing) ──
+    const countParams = [];
+    let countSql = 'SELECT COUNT(*) as total FROM workers WHERE 1=1';
+    if (status) { countSql += ' AND status = ?';            countParams.push(status); }
+    if (skill)  { countSql += ' AND skill = ?';             countParams.push(skill); }
+    if (city)   { countSql += ' AND city LIKE ?';           countParams.push(`%${city}%`); }
+    if (search) {
+      countSql += ' AND (name LIKE ? OR phone LIKE ? OR city LIKE ?)';
+      countParams.push(`%${search}%`, `%${search}%`, `%${search}%`);
+    }
+    const [[{ total }]] = await pool.execute(countSql, countParams);
+
+    // ── Main query ──
     let sql = `
       SELECT id, name, phone, skill, experience, city, area, status,
              rating, total_reviews, profile_views, call_clicks, whatsapp_clicks,
@@ -87,20 +101,13 @@ router.get('/workers', verifyAdmin, async (req, res) => {
       FROM workers WHERE 1=1
     `;
     const params = [];
-
-    if (status)  { sql += ' AND status = ?'; params.push(status); }
-    if (skill)   { sql += ' AND skill = ?'; params.push(skill); }
-    if (city)    { sql += ' AND city LIKE ?'; params.push(`%${city}%`); }
-    if (search)  {
+    if (status) { sql += ' AND status = ?';                          params.push(status); }
+    if (skill)  { sql += ' AND skill = ?';                           params.push(skill); }
+    if (city)   { sql += ' AND city LIKE ?';                         params.push(`%${city}%`); }
+    if (search) {
       sql += ' AND (name LIKE ? OR phone LIKE ? OR city LIKE ?)';
       params.push(`%${search}%`, `%${search}%`, `%${search}%`);
     }
-
-    const countSql = sql.replace(
-      /SELECT .+ FROM workers/,
-      'SELECT COUNT(*) as total FROM workers'
-    );
-    const [[{ total }]] = await pool.execute(countSql, params);
 
     const offset = (parseInt(page) - 1) * parseInt(limit);
     sql += ' ORDER BY FIELD(status,"pending","available","busy","offline"), created_at DESC LIMIT ? OFFSET ?';
@@ -109,11 +116,12 @@ router.get('/workers', verifyAdmin, async (req, res) => {
     const [workers] = await pool.execute(sql, params);
     res.json({ success: true, data: workers, total, page: parseInt(page), limit: parseInt(limit) });
   } catch (err) {
+    console.error(err);
     res.status(500).json({ success: false, message: 'Server error' });
   }
 });
 
-// ── PUT /api/admin/workers/:id/approve ── Approve pending worker
+// ── PUT /api/admin/workers/:id/approve ──
 router.put('/workers/:id/approve', verifyAdmin, async (req, res) => {
   try {
     const [result] = await pool.execute(
@@ -129,7 +137,7 @@ router.put('/workers/:id/approve', verifyAdmin, async (req, res) => {
   }
 });
 
-// ── PUT /api/admin/workers/:id/reject ── Reject worker (pending ya approved dono)
+// ── PUT /api/admin/workers/:id/reject ── Remove from site
 router.put('/workers/:id/reject', verifyAdmin, async (req, res) => {
   try {
     const [result] = await pool.execute(
@@ -145,7 +153,7 @@ router.put('/workers/:id/reject', verifyAdmin, async (req, res) => {
   }
 });
 
-// ── DELETE /api/admin/workers/:id ── Permanently delete worker
+// ── DELETE /api/admin/workers/:id ── Permanently delete
 router.delete('/workers/:id', verifyAdmin, async (req, res) => {
   try {
     const [result] = await pool.execute('DELETE FROM workers WHERE id = ?', [req.params.id]);
@@ -158,7 +166,7 @@ router.delete('/workers/:id', verifyAdmin, async (req, res) => {
   }
 });
 
-// ── PUT /api/admin/workers/:id/status ── Force change any worker status
+// ── PUT /api/admin/workers/:id/status ── Force change status
 router.put('/workers/:id/status', verifyAdmin, async (req, res) => {
   try {
     const { status } = req.body;
@@ -173,7 +181,7 @@ router.put('/workers/:id/status', verifyAdmin, async (req, res) => {
   }
 });
 
-// ── GET /api/admin/analytics ── Detailed analytics
+// ── GET /api/admin/analytics ──
 router.get('/analytics', verifyAdmin, async (req, res) => {
   try {
     const { days = 7 } = req.query;
