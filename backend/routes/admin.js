@@ -19,52 +19,29 @@ router.post('/login', (req, res) => {
 // ── GET /api/admin/dashboard ──
 router.get('/dashboard', verifyAdmin, async (req, res) => {
   try {
-    const [[totals]] = await pool.execute(`
-      SELECT
-        COUNT(*) as total,
-        SUM(status = 'pending')   as pending,
-        SUM(status = 'available') as available,
-        SUM(status = 'busy')      as busy,
-        SUM(status = 'offline')   as offline
-      FROM workers WHERE is_active = TRUE
-    `);
+    const [[totals]] = await pool.execute(
+      "SELECT COUNT(*) as total, SUM(status = 'pending') as pending, SUM(status = 'available') as available, SUM(status = 'busy') as busy, SUM(status = 'offline') as offline FROM workers WHERE is_active = TRUE"
+    );
 
-    const [recentRegs] = await pool.execute(`
-      SELECT DATE(created_at) as date, COUNT(*) as count
-      FROM workers
-      WHERE created_at >= DATE_SUB(NOW(), INTERVAL 7 DAY)
-      GROUP BY DATE(created_at) ORDER BY date ASC
-    `);
+    const [recentRegs] = await pool.execute(
+      "SELECT DATE(created_at) as date, COUNT(*) as count FROM workers WHERE created_at >= DATE_SUB(NOW(), INTERVAL 7 DAY) GROUP BY DATE(created_at) ORDER BY date ASC"
+    );
 
-    const [topSkills] = await pool.execute(`
-      SELECT skill, COUNT(*) as count FROM workers
-      WHERE is_active=TRUE AND status IN ('available','busy','offline')
-      GROUP BY skill ORDER BY count DESC LIMIT 5
-    `);
+    const [topSkills] = await pool.execute(
+      "SELECT skill, COUNT(*) as count FROM workers WHERE is_active=TRUE AND status IN ('available','busy','offline') GROUP BY skill ORDER BY count DESC LIMIT 5"
+    );
 
-    const [topCities] = await pool.execute(`
-      SELECT city, COUNT(*) as count FROM workers
-      WHERE is_active=TRUE AND status IN ('available','busy','offline')
-      GROUP BY city ORDER BY count DESC LIMIT 5
-    `);
+    const [topCities] = await pool.execute(
+      "SELECT city, COUNT(*) as count FROM workers WHERE is_active=TRUE AND status IN ('available','busy','offline') GROUP BY city ORDER BY count DESC LIMIT 5"
+    );
 
-    const [activityLog] = await pool.execute(`
-      SELECT event_type, COUNT(*) as count, DATE(created_at) as date
-      FROM analytics
-      WHERE created_at >= DATE_SUB(NOW(), INTERVAL 7 DAY)
-      GROUP BY event_type, DATE(created_at)
-      ORDER BY date DESC
-    `);
+    const [activityLog] = await pool.execute(
+      "SELECT event_type, COUNT(*) as count, DATE(created_at) as date FROM analytics WHERE created_at >= DATE_SUB(NOW(), INTERVAL 7 DAY) GROUP BY event_type, DATE(created_at) ORDER BY date DESC"
+    );
 
-    const [[eventTotals]] = await pool.execute(`
-      SELECT
-        SUM(event_type='view')           as total_views,
-        SUM(event_type='call_click')     as total_calls,
-        SUM(event_type='whatsapp_click') as total_wa,
-        SUM(event_type='search')         as total_searches,
-        SUM(event_type='registration')   as total_registrations
-      FROM analytics
-    `);
+    const [[eventTotals]] = await pool.execute(
+      "SELECT SUM(event_type='view') as total_views, SUM(event_type='call_click') as total_calls, SUM(event_type='whatsapp_click') as total_wa, SUM(event_type='search') as total_searches, SUM(event_type='registration') as total_registrations FROM analytics"
+    );
 
     res.json({
       success: true,
@@ -76,41 +53,34 @@ router.get('/dashboard', verifyAdmin, async (req, res) => {
   }
 });
 
-// ── GET /api/admin/workers ── All workers with filters
+// ── GET /api/admin/workers ──
 router.get('/workers', verifyAdmin, async (req, res) => {
   try {
     const { status, skill, city, search, page = 1, limit = 50 } = req.query;
 
-    // ── FIXED: build count query separately (regex replace was crashing) ──
     const countParams = [];
     let countSql = 'SELECT COUNT(*) as total FROM workers WHERE 1=1';
-    if (status) { countSql += ' AND status = ?';            countParams.push(status); }
-    if (skill)  { countSql += ' AND skill = ?';             countParams.push(skill); }
-    if (city)   { countSql += ' AND city LIKE ?';           countParams.push(`%${city}%`); }
+    if (status) { countSql += ' AND status = ?';  countParams.push(status); }
+    if (skill)  { countSql += ' AND skill = ?';   countParams.push(skill); }
+    if (city)   { countSql += ' AND city LIKE ?'; countParams.push('%' + city + '%'); }
     if (search) {
       countSql += ' AND (name LIKE ? OR phone LIKE ? OR city LIKE ?)';
-      countParams.push(`%${search}%`, `%${search}%`, `%${search}%`);
+      countParams.push('%' + search + '%', '%' + search + '%', '%' + search + '%');
     }
     const [[{ total }]] = await pool.execute(countSql, countParams);
 
-    // ── Main query ──
-    let sql = `
-      SELECT id, name, phone, skill, experience, city, area, status,
-             rating, total_reviews, profile_views, call_clicks, whatsapp_clicks,
-             is_active, created_at
-      FROM workers WHERE 1=1
-    `;
     const params = [];
-    if (status) { sql += ' AND status = ?';                          params.push(status); }
-    if (skill)  { sql += ' AND skill = ?';                           params.push(skill); }
-    if (city)   { sql += ' AND city LIKE ?';                         params.push(`%${city}%`); }
+    let sql = 'SELECT id, name, phone, skill, experience, city, area, status, rating, total_reviews, profile_views, call_clicks, whatsapp_clicks, is_active, created_at FROM workers WHERE 1=1';
+    if (status) { sql += ' AND status = ?';  params.push(status); }
+    if (skill)  { sql += ' AND skill = ?';   params.push(skill); }
+    if (city)   { sql += ' AND city LIKE ?'; params.push('%' + city + '%'); }
     if (search) {
       sql += ' AND (name LIKE ? OR phone LIKE ? OR city LIKE ?)';
-      params.push(`%${search}%`, `%${search}%`, `%${search}%`);
+      params.push('%' + search + '%', '%' + search + '%', '%' + search + '%');
     }
 
     const offset = (parseInt(page) - 1) * parseInt(limit);
-    sql += ' ORDER BY FIELD(status,"pending","available","busy","offline"), created_at DESC LIMIT ? OFFSET ?';
+    sql += " ORDER BY FIELD(status,'pending','available','busy','offline'), created_at DESC LIMIT ? OFFSET ?";
     params.push(parseInt(limit), offset);
 
     const [workers] = await pool.execute(sql, params);
@@ -125,7 +95,7 @@ router.get('/workers', verifyAdmin, async (req, res) => {
 router.put('/workers/:id/approve', verifyAdmin, async (req, res) => {
   try {
     const [result] = await pool.execute(
-      `UPDATE workers SET status = 'available', is_active = TRUE WHERE id = ? AND status = 'pending'`,
+      "UPDATE workers SET status = 'available', is_active = TRUE WHERE id = ? AND status = 'pending'",
       [req.params.id]
     );
     if (!result.affectedRows) {
@@ -137,11 +107,11 @@ router.put('/workers/:id/approve', verifyAdmin, async (req, res) => {
   }
 });
 
-// ── PUT /api/admin/workers/:id/reject ── Remove from site
+// ── PUT /api/admin/workers/:id/reject ──
 router.put('/workers/:id/reject', verifyAdmin, async (req, res) => {
   try {
     const [result] = await pool.execute(
-      `UPDATE workers SET is_active = FALSE, status = 'pending' WHERE id = ?`,
+      "UPDATE workers SET is_active = FALSE, status = 'pending' WHERE id = ?",
       [req.params.id]
     );
     if (!result.affectedRows) {
@@ -153,7 +123,7 @@ router.put('/workers/:id/reject', verifyAdmin, async (req, res) => {
   }
 });
 
-// ── DELETE /api/admin/workers/:id ── Permanently delete
+// ── DELETE /api/admin/workers/:id ──
 router.delete('/workers/:id', verifyAdmin, async (req, res) => {
   try {
     const [result] = await pool.execute('DELETE FROM workers WHERE id = ?', [req.params.id]);
@@ -166,7 +136,7 @@ router.delete('/workers/:id', verifyAdmin, async (req, res) => {
   }
 });
 
-// ── PUT /api/admin/workers/:id/status ── Force change status
+// ── PUT /api/admin/workers/:id/status ──
 router.put('/workers/:id/status', verifyAdmin, async (req, res) => {
   try {
     const { status } = req.body;
@@ -175,7 +145,7 @@ router.put('/workers/:id/status', verifyAdmin, async (req, res) => {
       return res.status(400).json({ success: false, message: 'Invalid status' });
     }
     await pool.execute('UPDATE workers SET status = ? WHERE id = ?', [status, req.params.id]);
-    res.json({ success: true, message: `Worker status updated to ${status}` });
+    res.json({ success: true, message: 'Worker status updated to ' + status });
   } catch (err) {
     res.status(500).json({ success: false, message: 'Server error' });
   }
@@ -184,26 +154,16 @@ router.put('/workers/:id/status', verifyAdmin, async (req, res) => {
 // ── GET /api/admin/analytics ──
 router.get('/analytics', verifyAdmin, async (req, res) => {
   try {
-    const { days = 7 } = req.query;
+    const days = parseInt(req.query.days) || 7;
 
-    const [dailyEvents] = await pool.execute(`
-      SELECT DATE(created_at) as date,
-             SUM(event_type='view') as views,
-             SUM(event_type='call_click') as calls,
-             SUM(event_type='whatsapp_click') as whatsapp,
-             SUM(event_type='registration') as registrations
-      FROM analytics
-      WHERE created_at >= DATE_SUB(NOW(), INTERVAL ? DAY)
-      GROUP BY DATE(created_at) ORDER BY date ASC
-    `, [parseInt(days)]);
+    const [dailyEvents] = await pool.execute(
+      "SELECT DATE(created_at) as date, SUM(event_type='view') as views, SUM(event_type='call_click') as calls, SUM(event_type='whatsapp_click') as whatsapp, SUM(event_type='registration') as registrations FROM analytics WHERE created_at >= DATE_SUB(NOW(), INTERVAL ? DAY) GROUP BY DATE(created_at) ORDER BY date ASC",
+      [days]
+    );
 
-    const [topWorkers] = await pool.execute(`
-      SELECT w.id, w.name, w.skill, w.city,
-             w.profile_views, w.call_clicks, w.whatsapp_clicks
-      FROM workers w
-      WHERE w.is_active=TRUE AND w.status IN ('available','busy','offline')
-      ORDER BY w.profile_views DESC LIMIT 10
-    `);
+    const [topWorkers] = await pool.execute(
+      "SELECT w.id, w.name, w.skill, w.city, w.profile_views, w.call_clicks, w.whatsapp_clicks FROM workers w WHERE w.is_active=TRUE AND w.status IN ('available','busy','offline') ORDER BY w.profile_views DESC LIMIT 10"
+    );
 
     res.json({ success: true, data: { dailyEvents, topWorkers } });
   } catch (err) {
