@@ -11,7 +11,7 @@ router.get('/', async (req, res) => {
                       rating, total_reviews, profile_views, call_clicks, whatsapp_clicks,
                       created_at
                FROM workers
-               WHERE is_active = TRUE AND status != 'pending'`;
+               WHERE is_active = TRUE AND status IN ('available','busy','offline')`;
     const params = [];
 
     if (skill) { sql += ' AND skill = ?'; params.push(skill); }
@@ -32,13 +32,13 @@ router.get('/', async (req, res) => {
 router.get('/stats', async (req, res) => {
   try {
     const [[total]] = await pool.execute(
-      `SELECT COUNT(*) as total FROM workers WHERE is_active=TRUE AND status != 'pending'`
+      `SELECT COUNT(*) as total FROM workers WHERE is_active=TRUE AND status IN ('available','busy','offline')`
     );
     const [[available]] = await pool.execute(
       `SELECT COUNT(*) as available FROM workers WHERE status='available' AND is_active=TRUE`
     );
     const [[cities]] = await pool.execute(
-      `SELECT COUNT(DISTINCT LOWER(city)) as cities FROM workers WHERE is_active=TRUE AND status != 'pending'`
+      `SELECT COUNT(DISTINCT LOWER(city)) as cities FROM workers WHERE is_active=TRUE AND status IN ('available','busy','offline')`
     );
     res.json({ success: true, data: { total: total.total, available: available.available, cities: cities.cities } });
   } catch (err) {
@@ -51,7 +51,7 @@ router.get('/categories', async (req, res) => {
   try {
     const [rows] = await pool.execute(
       `SELECT skill, COUNT(*) as count FROM workers
-       WHERE is_active=TRUE AND status != 'pending'
+       WHERE is_active=TRUE AND status IN ('available','busy','offline')
        GROUP BY skill ORDER BY count DESC`
     );
     res.json({ success: true, data: rows });
@@ -66,7 +66,7 @@ router.get('/:id', async (req, res) => {
     const [rows] = await pool.execute(
       `SELECT id, name, skill, experience, city, area, about, status,
               rating, total_reviews, created_at
-       FROM workers WHERE id = ? AND is_active = TRUE AND status != 'pending'`,
+       FROM workers WHERE id = ? AND is_active = TRUE AND status IN ('available','busy','offline')`,
       [req.params.id]
     );
     if (!rows.length) return res.status(404).json({ success: false, message: 'Worker not found' });
@@ -200,7 +200,7 @@ router.post('/:id/review', async (req, res) => {
       return res.status(400).json({ success: false, message: 'Name and rating (1-5) required' });
     }
     const [check] = await pool.execute(
-      `SELECT id FROM workers WHERE id = ? AND status != 'pending'`, [req.params.id]
+      `SELECT id FROM workers WHERE id = ? AND status IN ('available','busy','offline')`, [req.params.id]
     );
     if (!check.length) return res.status(404).json({ success: false, message: 'Worker not found' });
 
