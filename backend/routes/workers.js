@@ -59,7 +59,7 @@ router.get('/categories', async (req, res) => {
 router.get('/:id', async (req, res) => {
   try {
     const [rows] = await pool.execute(
-      "SELECT id, name, skill, experience, city, area, about, status, rating, total_reviews, created_at FROM workers WHERE id = ? AND is_active = TRUE AND status IN ('available','busy','offline')",
+     "SELECT id, name, phone, skill, experience, city, area, about, status, rating, total_reviews, created_at FROM workers WHERE id = ? AND is_active = TRUE AND status IN ('available','busy','offline')"
       [req.params.id]
     );
     if (!rows.length) return res.status(404).json({ success: false, message: 'Worker not found' });
