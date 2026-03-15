@@ -600,12 +600,14 @@ async function trackAndCall(id) {
   else showToast('Could not get phone number','error');
 }
 async function trackAndWa(id) {
-  await api('POST','/api/workers/'+id+'/track',{type:'whatsapp'});
-  const d = await api('GET','/api/workers/'+id);
-  if(d.success && d.data && d.data.phone) {
-    const msg='Hi '+encodeURIComponent(d.data.name)+', I found you on LocalFix. I need your '+encodeURIComponent(d.data.skill)+' service. Are you available?';
-    window.open('https://wa.me/91'+d.data.phone+'?text='+msg,'_blank');
-  } else showToast('Could not get WhatsApp number','error');
+  const d = await api('GET', '/api/workers/' + id);
+  if (d.success && d.data && d.data.phone) {
+    const msg = 'Hi ' + encodeURIComponent(d.data.name) + ', I found you on LocalFix. I need your ' + encodeURIComponent(d.data.skill) + ' service. Are you available?';
+    await api('POST', '/api/workers/' + id + '/track', {type:'whatsapp'});
+    window.location.href = 'https://wa.me/91' + d.data.phone + '?text=' + msg;
+  } else {
+    showToast('Could not get WhatsApp number', 'error');
+  }
 }
 
 async function doRegister() {
