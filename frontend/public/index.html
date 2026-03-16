@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>LocalFix -- Find Verified Local Workers</title>
+  <title>LocalFix — Find Verified Local Workers</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Clash+Display:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
@@ -234,18 +234,17 @@ footer { background:var(--bg2); border-top:1px solid var(--border); padding:40px
 }
 
 .voice-btn{background:var(--bg4);border:1px solid var(--border2);border-radius:12px;padding:13px 16px;cursor:pointer;font-size:1.2rem;transition:all 0.2s;color:var(--text2);}
-.voice-btn:hover{border-color:var(--orange);color:var(--orange);}
-.voice-btn.listening{background:rgba(255,92,0,0.15);border-color:var(--orange);color:var(--orange);animation:vpulse 1s infinite;}
+.voice-btn:hover,.voice-btn.listening{border-color:var(--orange);color:var(--orange);}
+.voice-btn.listening{background:rgba(255,92,0,0.15);animation:vpulse 1s infinite;}
 @keyframes vpulse{0%,100%{box-shadow:0 0 0 0 rgba(255,92,0,0.4)}50%{box-shadow:0 0 0 8px rgba(255,92,0,0)}}
 .nearby-btn{background:var(--bg4);border:1px solid var(--border2);border-radius:12px;padding:10px 18px;cursor:pointer;font-size:0.85rem;font-weight:600;color:var(--text2);transition:all 0.2s;display:inline-flex;align-items:center;gap:6px;}
 .nearby-btn:hover{border-color:var(--blue);color:var(--blue);}
 #voiceStatus{display:none;background:rgba(255,92,0,0.1);border:1px solid rgba(255,92,0,0.3);border-radius:12px;padding:10px 16px;margin:0 auto 16px;max-width:720px;font-size:0.88rem;color:var(--orange);text-align:center;}
 .dist-badge{font-size:0.68rem;font-weight:700;background:rgba(74,158,255,0.1);color:var(--blue);border:1px solid rgba(74,158,255,0.2);padding:2px 8px;border-radius:5px;}
 .btn-book{padding:11px 14px;border-radius:12px;background:rgba(74,158,255,0.1);color:var(--blue);border:1px solid rgba(74,158,255,0.25);cursor:pointer;font-size:0.8rem;font-weight:700;transition:all 0.2s;}
-.btn-book:hover{background:rgba(74,158,255,0.2);transform:translateY(-1px);}
+.btn-book:hover{background:rgba(74,158,255,0.2);}
 #mapContainer{height:400px;border-radius:16px;overflow:hidden;border:1px solid var(--border);}
-.leaflet-popup-content-wrapper{background:var(--bg3)!important;color:var(--text)!important;border:1px solid var(--border2)!important;border-radius:12px!important;}
-.leaflet-popup-tip{background:var(--bg3)!important;}
+.leaflet-popup-content-wrapper{background:var(--bg3)!important;color:var(--text)!important;border-radius:12px!important;}
 .booking-badge{display:inline-block;padding:3px 10px;border-radius:6px;font-size:0.72rem;font-weight:700;}
 .booking-badge.pending{background:rgba(255,184,0,0.15);color:var(--yellow);}
 .booking-badge.accepted{background:rgba(0,208,132,0.15);color:var(--green);}
@@ -281,7 +280,7 @@ footer { background:var(--bg2); border-top:1px solid var(--border); padding:40px
   <div class="hero-content">
     <div class="hero-eyebrow"><span class="live-dot"></span>Verified professionals near you</div>
     <h1>Find Trusted <span class="hl">Local Workers</span><br>In Minutes</h1>
-    <p class="hero-sub">Plumbers, electricians, carpenters &amp; more -- verified, rated, and ready to help right now.</p>
+    <p class="hero-sub">Plumbers, electricians, carpenters &amp; more — verified, rated, and ready to help right now.</p>
     <div id="voiceStatus"></div>
     <div class="search-wrap">
       <select id="searchCategory">
@@ -292,7 +291,7 @@ footer { background:var(--bg2); border-top:1px solid var(--border); padding:40px
       </select>
       <input type="text" id="searchCity" placeholder="City or area..."/>
       <button class="search-btn" onclick="doSearch()">Search &#8594;</button>
-      <button class="voice-btn" id="voiceBtn" onclick="toggleVoice()" title="Speak">&#127908;</button>
+      <button class="voice-btn" id="voiceBtn" onclick="toggleVoice()">&#127908;</button>
     </div>
     <div style="display:flex;justify-content:center;gap:10px;margin-bottom:24px;flex-wrap:wrap">
       <button class="nearby-btn" onclick="findNearby()">&#128205; Workers Near Me</button>
@@ -336,7 +335,7 @@ footer { background:var(--bg2); border-top:1px solid var(--border); padding:40px
   <div class="steps-grid">
     <div class="step-card"><div class="step-num">01</div><div class="step-title">Search Your Need</div><div class="step-desc">Choose service, enter city or area to find verified workers instantly.</div></div>
     <div class="step-card"><div class="step-num">02</div><div class="step-title">See Verified Profiles</div><div class="step-desc">Browse workers with skills, experience, ratings, and verified badges.</div></div>
-    <div class="step-card"><div class="step-num">03</div><div class="step-title">Call or WhatsApp</div><div class="step-desc">Contact directly -- no middleman, no commission. One tap away.</div></div>
+    <div class="step-card"><div class="step-num">03</div><div class="step-title">Call or WhatsApp</div><div class="step-desc">Contact directly — no middleman, no commission. One tap away.</div></div>
     <div class="step-card"><div class="step-num">04</div><div class="step-title">Job Done &#10003;</div><div class="step-desc">Worker arrives, fixes the problem. Leave a review to help others.</div></div>
   </div>
 </section>
@@ -362,9 +361,7 @@ footer { background:var(--bg2); border-top:1px solid var(--border); padding:40px
     <p style="text-align:center;margin-top:12px;font-size:0.82rem;color:var(--text2)">New here? <a href="#" style="color:var(--orange);font-weight:600" onclick="switchModal('userLoginModal','userRegModal')">Create account</a></p>
   </div>
 </div>
-
 <!-- USER REGISTER -->
-
 <div class="modal-overlay" id="userRegModal">
   <div class="modal" style="max-width:400px">
     <button class="modal-close" onclick="closeModal('userRegModal')">&#10005;</button>
@@ -377,9 +374,7 @@ footer { background:var(--bg2); border-top:1px solid var(--border); padding:40px
     <p style="text-align:center;margin-top:12px;font-size:0.82rem;color:var(--text2)">Have account? <a href="#" style="color:var(--orange);font-weight:600" onclick="switchModal('userRegModal','userLoginModal')">Sign in</a></p>
   </div>
 </div>
-
 <!-- BOOKING -->
-
 <div class="modal-overlay" id="bookingModal">
   <div class="modal" style="max-width:420px">
     <button class="modal-close" onclick="closeModal('bookingModal')">&#10005;</button>
@@ -392,9 +387,7 @@ footer { background:var(--bg2); border-top:1px solid var(--border); padding:40px
     <button class="form-submit" onclick="doBooking()">Confirm Booking &#8594;</button>
   </div>
 </div>
-
 <!-- MY BOOKINGS -->
-
 <div class="modal-overlay" id="myBookingsModal">
   <div class="modal" style="max-width:560px">
     <button class="modal-close" onclick="closeModal('myBookingsModal')">&#10005;</button>
@@ -403,9 +396,7 @@ footer { background:var(--bg2); border-top:1px solid var(--border); padding:40px
     <div id="myBookingsContent"><div class="loading"><div class="spinner"></div></div></div>
   </div>
 </div>
-
 <!-- WORKER BOOKINGS -->
-
 <div class="modal-overlay" id="workerBookingsModal">
   <div class="modal" style="max-width:580px">
     <button class="modal-close" onclick="closeModal('workerBookingsModal')">&#10005;</button>
@@ -414,9 +405,7 @@ footer { background:var(--bg2); border-top:1px solid var(--border); padding:40px
     <div id="workerBookingsContent"><div class="loading"><div class="spinner"></div></div></div>
   </div>
 </div>
-
 <!-- MAP -->
-
 <div class="modal-overlay" id="mapModal">
   <div class="modal" style="max-width:720px">
     <button class="modal-close" onclick="closeModal('mapModal')">&#10005;</button>
@@ -425,14 +414,12 @@ footer { background:var(--bg2); border-top:1px solid var(--border); padding:40px
     <div id="mapContainer"></div>
   </div>
 </div>
-
 <!-- REGISTER -->
-
 <div class="modal-overlay" id="registerModal">
   <div class="modal">
     <button class="modal-close" onclick="closeModal('registerModal')">&#10005;</button>
     <h2>Join as Worker</h2>
-    <p class="modal-sub">Create your profile -- customers will find you directly.</p>
+    <p class="modal-sub">Create your profile — customers will find you directly.</p>
     <div id="registerFormWrap">
       <div class="form-row">
         <div class="form-group"><label class="form-label">Full Name *</label><input class="form-input" id="r_name" placeholder="Ramesh Kumar"/></div>
@@ -638,7 +625,7 @@ function workerCard(w) {
     +'<div class="wc-actions" onclick="event.stopPropagation()">'
     +'<button class="btn-call" onclick="trackAndCall('+w.id+')">&#128222; Call Now</button>'
     +'<button class="btn-wa" onclick="trackAndWa('+w.id+')">&#128172;</button>'
-    +'<button class="btn-book" onclick="event.stopPropagation();openBooking('+w.id+',\''+esc(w.name)+'\')" >&#128197;</button>'
+    +'<button class="btn-book" onclick="event.stopPropagation();openBooking('+w.id+',this.closest(\'.worker-card\').querySelector(\'.wc-name\').textContent)">&#128197;</button>'
     +'</div></div>';
 }
 
@@ -712,7 +699,7 @@ if(d.success){ showToast(‘Review submitted!’,‘success’); openWorkerDetai
 else showToast(d.message||‘Error’,‘error’);
 }
 
-//  CALL & WHATSAPP FIX – phone fetched from API
+// ── CALL & WHATSAPP FIX — phone fetched from API ──
 async function trackAndCall(id) {
 await api(‘POST’,’/api/workers/’+id+’/track’,{type:‘call’});
 const d = await api(‘GET’,’/api/workers/’+id);
@@ -852,10 +839,7 @@ async function adminApprove(id){ const d=await api(‘PUT’,’/api/admin/worke
 async function adminReject(id){ if(!confirm(‘Remove this worker from the site?’)) return; const d=await api(‘PUT’,’/api/admin/workers/’+id+’/reject’,null,adminToken); if(d.success){showToast(‘Worker removed’,‘success’);loadAdminDash();loadWorkers();loadStats();loadCategories();}else showToast(d.message||‘Error’,‘error’); }
 async function adminDelete(id){ if(!confirm(‘Permanently delete? Cannot be undone.’)) return; const d=await api(‘DELETE’,’/api/admin/workers/’+id,null,adminToken); if(d.success){showToast(‘Worker deleted’,‘success’);loadAdminDash();loadWorkers();loadStats();loadCategories();}else showToast(d.message||‘Error’,‘error’); }
 
-function openModal(id){
-document.getElementById(id).classList.add(‘open’);
-if(id===‘mapModal’) setTimeout(initMap,200);
-}
+function openModal(id){ document.getElementById(id).classList.add(‘open’); if(id===‘mapModal’) setTimeout(initMap,200); }
 function closeModal(id){ document.getElementById(id).classList.remove(‘open’); }
 function switchModal(c,o){ closeModal(c); openModal(o); }
 document.querySelectorAll(’.modal-overlay’).forEach(m=>{ m.addEventListener(‘click’,e=>{if(e.target===m) m.classList.remove(‘open’);}); });
@@ -865,21 +849,15 @@ function showToast(msg,type){ type=type||‘success’; const t=document.getElem
 
 function esc(str){ if(!str) return ‘’; return String(str).replace(/&/g,’&’).replace(/</g,’<’).replace(/>/g,’>’).replace(/”/g,’"’); }
 
-// ===============================
-// USER AUTH
-// ===============================
-let userToken = localStorage.getItem(‘lf_utoken’) || null;
-let userData  = JSON.parse(localStorage.getItem(‘lf_udata’) || ‘null’);
-
-if(userToken && userData) {
-document.addEventListener(‘DOMContentLoaded’, () => showUserNav());
-}
+var userToken = localStorage.getItem(‘lf_utoken’) || null;
+var userData  = JSON.parse(localStorage.getItem(‘lf_udata’) || ‘null’);
+if(userToken && userData){ document.addEventListener(‘DOMContentLoaded’, function(){ showUserNav(); }); }
 
 async function doUserLogin(){
-const email=document.getElementById(‘ul_email’).value.trim();
-const password=document.getElementById(‘ul_pass’).value;
+var email=document.getElementById(‘ul_email’).value.trim();
+var password=document.getElementById(‘ul_pass’).value;
 if(!email||!password){showToast(‘Email and password required’,‘error’);return;}
-const d=await api(‘POST’,’/api/users/login’,{email,password});
+var d=await api(‘POST’,’/api/users/login’,{email:email,password:password});
 if(d.success){
 userToken=d.token; userData=d.user;
 localStorage.setItem(‘lf_utoken’,userToken);
@@ -890,29 +868,29 @@ showToast(‘Welcome, ‘+userData.name.split(’ ‘)[0]+’!’,‘success’)
 }
 
 async function doUserRegister(){
-const name=document.getElementById(‘ur_name’).value.trim();
-const email=document.getElementById(‘ur_email’).value.trim();
-const password=document.getElementById(‘ur_pass’).value;
+var name=document.getElementById(‘ur_name’).value.trim();
+var email=document.getElementById(‘ur_email’).value.trim();
+var password=document.getElementById(‘ur_pass’).value;
 if(!name||!email||!password){showToast(‘All fields required’,‘error’);return;}
-const d=await api(‘POST’,’/api/users/register’,{name,email,password});
+var d=await api(‘POST’,’/api/users/register’,{name:name,email:email,password:password});
 if(d.success){
 userToken=d.token; userData=d.user;
 localStorage.setItem(‘lf_utoken’,userToken);
 localStorage.setItem(‘lf_udata’,JSON.stringify(userData));
 closeModal(‘userRegModal’); showUserNav();
-showToast(‘Welcome, ‘+userData.name.split(’ ‘)[0]+’!’,‘success’);
+showToast(‘Account created!’,‘success’);
 } else showToast(d.message||‘Registration failed’,‘error’);
 }
 
 function showUserNav(){
 if(document.getElementById(‘userNavSpan’)) return;
-const nav=document.getElementById(‘navLinks’);
-const span=document.createElement(‘div’);
+var nav=document.getElementById(‘navLinks’);
+var span=document.createElement(‘div’);
 span.id=‘userNavSpan’;
 span.style.cssText=‘display:flex;align-items:center;gap:8px’;
-span.innerHTML=’<span style="font-size:0.8rem;color:var(--green)">👤 ‘+esc(userData.name.split(’ ‘)[0])+’</span>’+
-‘<button class="nav-btn ghost" style="font-size:0.78rem;padding:6px 12px" onclick="loadMyBookings()">My Bookings</button>’+
-‘<button class="nav-btn ghost" style="font-size:0.72rem;padding:5px 10px;color:var(--red);border-color:rgba(255,68,68,0.3)" onclick="userLogout()">Sign Out</button>’;
+span.innerHTML=’<span style="font-size:0.8rem;color:var(--green)">👤 ‘+esc(userData.name.split(’ ‘)[0])+’</span>’
++’<button class="nav-btn ghost" style="font-size:0.78rem;padding:6px 12px" onclick="loadMyBookings()">My Bookings</button>’
++’<button class="nav-btn ghost" style="font-size:0.72rem;padding:5px 10px;color:var(--red)" onclick="userLogout()">Sign Out</button>’;
 nav.insertBefore(span, nav.firstChild);
 }
 
@@ -920,52 +898,49 @@ function userLogout(){
 userToken=null; userData=null;
 localStorage.removeItem(‘lf_utoken’);
 localStorage.removeItem(‘lf_udata’);
-const s=document.getElementById(‘userNavSpan’);
+var s=document.getElementById(‘userNavSpan’);
 if(s) s.remove();
 showToast(‘Signed out’,‘success’);
 }
 
-// ===============================
-// VOICE ASSISTANT
-// ===============================
-const SKILL_KW = {
-‘Plumber’:[‘pipe’,‘water’,‘leak’,‘tap’,‘flush’,‘toilet’,‘bathroom’,‘plumb’],
-‘Electrician’:[‘electric’,‘fan’,‘light’,‘wire’,‘switch’,‘power’,‘bulb’,‘socket’,‘fuse’],
-‘Carpenter’:[‘wood’,‘door’,‘window’,‘furniture’,‘cabinet’,‘carpent’],
-‘Painter’:[‘paint’,‘wall’,‘colour’,‘color’,‘brush’],
+var SKILL_KW = {
+Plumber:[‘pipe’,‘water’,‘leak’,‘tap’,‘flush’,‘toilet’,‘bathroom’,‘plumb’],
+Electrician:[‘electric’,‘fan’,‘light’,‘wire’,‘switch’,‘power’,‘bulb’,‘socket’,‘fuse’],
+Carpenter:[‘wood’,‘door’,‘window’,‘furniture’,‘cabinet’,‘carpent’],
+Painter:[‘paint’,‘wall’,‘colour’,‘color’,‘brush’],
 ‘AC Technician’:[‘ac’,‘air condition’,‘cool’,‘compressor’,‘refriger’,‘fridge’],
-‘Mason’:[‘cement’,‘brick’,‘plaster’,‘construct’],
-‘Welder’:[‘weld’,‘iron’,‘metal’,‘gate’,‘grill’],
-‘Cleaner’:[‘clean’,‘sweep’,‘mop’,‘wash’,‘dust’]
+Mason:[‘cement’,‘brick’,‘plaster’,‘construct’],
+Welder:[‘weld’,‘iron’,‘metal’,‘gate’,‘grill’],
+Cleaner:[‘clean’,‘sweep’,‘mop’,‘wash’,‘dust’]
 };
-let recognition=null, isListening=false;
+var recognition=null, isListening=false;
 
 function toggleVoice(){
 if(!(‘webkitSpeechRecognition’ in window)&&!(‘SpeechRecognition’ in window)){
-showToast(‘Voice not supported here’,‘error’); return;
+showToast(‘Voice not supported in this browser’,‘error’); return;
 }
 if(isListening){stopVoice();return;}
 startVoice();
 }
 
 function startVoice(){
-const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+var SR=window.SpeechRecognition||window.webkitSpeechRecognition;
 recognition=new SR();
 recognition.lang=‘en-IN’;
 recognition.continuous=false;
 recognition.interimResults=false;
-recognition.onstart=()=>{
+recognition.onstart=function(){
 isListening=true;
 document.getElementById(‘voiceBtn’).classList.add(‘listening’);
 showVoiceStatus(’🎤 Listening… Speak your problem’);
 };
-recognition.onresult=(e)=>{
-const t=e.results[0][0].transcript.toLowerCase();
+recognition.onresult=function(e){
+var t=e.results[0][0].transcript.toLowerCase();
 showVoiceStatus(‘You said: “’+t+’”’);
 processVoice(t);
 };
-recognition.onerror=()=>{stopVoice();showToast(‘Could not hear. Try again.’,‘error’);};
-recognition.onend=()=>stopVoice();
+recognition.onerror=function(){stopVoice();showToast(‘Could not hear. Try again.’,‘error’);};
+recognition.onend=function(){stopVoice();};
 recognition.start();
 }
 
@@ -976,23 +951,28 @@ if(recognition) recognition.stop();
 }
 
 function processVoice(text){
-let detected=’’;
-for(const [skill,kws] of Object.entries(SKILL_KW)){
-if(kws.some(k=>text.includes(k))){detected=skill;break;}
+var detected=’’;
+var skills=Object.keys(SKILL_KW);
+for(var i=0;i<skills.length;i++){
+var kws=SKILL_KW[skills[i]];
+for(var j=0;j<kws.length;j++){
+if(text.indexOf(kws[j])>=0){detected=skills[i];break;}
+}
+if(detected) break;
 }
 if(detected){
 currentCategory=detected;
 document.getElementById(‘searchCategory’).value=detected;
-speak(‘I found ‘+detected+‘s near you. Showing results now.’);
-showVoiceStatus(’✓ Detected: ‘+detected+’ – showing results…’);
+speak(’I found ’+detected+‘s near you. Showing results now.’);
+showVoiceStatus(‘Detected: ‘+detected+’ – showing results…’);
 loadCategories(); loadWorkers();
-setTimeout(()=>{
+setTimeout(function(){
 document.getElementById(‘workers-section’).scrollIntoView({behavior:‘smooth’});
 hideVoiceStatus();
 },2500);
 } else {
 speak(‘Could not detect service. Please try again.’);
-showVoiceStatus(’✕ Could not detect. Try saying “pipe leak” or “fan not working”’);
+showVoiceStatus(‘Could not detect. Try saying pipe leak or fan not working’);
 setTimeout(hideVoiceStatus, 3000);
 }
 }
@@ -1000,96 +980,93 @@ setTimeout(hideVoiceStatus, 3000);
 function speak(text){
 if(!(‘speechSynthesis’ in window)) return;
 window.speechSynthesis.cancel();
-const u=new SpeechSynthesisUtterance(text);
+var u=new SpeechSynthesisUtterance(text);
 u.lang=‘en-IN’; u.rate=0.95;
 window.speechSynthesis.speak(u);
 }
 
 function showVoiceStatus(msg){
-const el=document.getElementById(‘voiceStatus’);
-el.innerHTML=msg; el.style.display=‘block’;
+var el=document.getElementById(‘voiceStatus’);
+if(el){el.innerHTML=msg; el.style.display=‘block’;}
 }
 function hideVoiceStatus(){
-const el=document.getElementById(‘voiceStatus’);
+var el=document.getElementById(‘voiceStatus’);
 if(el) el.style.display=‘none’;
 }
 
-// ===============================
-// NEARBY WORKERS
-// ===============================
 function findNearby(){
 if(!navigator.geolocation){showToast(‘Geolocation not supported’,‘error’);return;}
 showToast(‘Getting your location…’,‘success’);
-navigator.geolocation.getCurrentPosition(async pos=>{
-const {latitude:lat,longitude:lng}=pos.coords;
-const skill=document.getElementById(‘searchCategory’).value;
-let url=’/api/nearby?lat=’+lat+’&lng=’+lng+’&radius=20’;
+navigator.geolocation.getCurrentPosition(function(pos){
+var lat=pos.coords.latitude, lng=pos.coords.longitude;
+var skill=document.getElementById(‘searchCategory’).value;
+var url=’/api/nearby?lat=’+lat+’&lng=’+lng+’&radius=20’;
 if(skill) url+=’&skill=’+encodeURIComponent(skill);
-const d=await api(‘GET’,url);
+api(‘GET’,url).then(function(d){
 if(d.success){
 showToast(‘Found ‘+d.data.length+’ workers nearby’,‘success’);
-const grid=document.getElementById(‘workersGrid’);
+var grid=document.getElementById(‘workersGrid’);
 if(!d.data.length){
 grid.innerHTML=’<div class="empty-state"><div class="empty-icon">📍</div><p>No workers found within 20km.</p></div>’;
 return;
 }
-grid.innerHTML=d.data.map(w=>{
-const initials=(w.name||’?’).split(’ ‘).map(n=>n[0]||’’).join(’’).slice(0,2).toUpperCase();
-const scol={available:‘var(–green)’,busy:‘var(–yellow)’,offline:‘var(–text3)’};
-const slabel={available:‘Available Now’,busy:‘Busy’,offline:‘Offline’};
-const rating=parseFloat(w.rating)||0;
+grid.innerHTML=d.data.map(function(w){
+var initials=(w.name||’?’).split(’ ‘).map(function(n){return n[0]||’’;}).join(’’).slice(0,2).toUpperCase();
+var scol={available:‘var(–green)’,busy:‘var(–yellow)’,offline:‘var(–text3)’};
+var slabel={available:‘Available Now’,busy:‘Busy’,offline:‘Offline’};
+var rating=parseFloat(w.rating)||0;
 return ‘<div class="worker-card" onclick="openWorkerDetail('+w.id+')">’
 +’<div class="wc-top"><div class="wc-avatar">’+initials+’<div class="verified-badge">✓</div></div>’
 +’<div class="wc-info"><div class="wc-name">’+esc(w.name)+’</div>’
 +’<div class="wc-tags"><span class="skill-tag">’+esc(w.skill)+’</span>’
-+’<span class="status-tag"><span class="sdot '+w.status+'"></span><span style="color:'+(scol[w.status]||'#555')+'">’+(slabel[w.status]||‘Offline’)+’</span></span>’
++’<span class="status-tag"><span class="sdot '+w.status+'"></span>’
++’<span style="color:'+(scol[w.status]||'#555')+'">’+(slabel[w.status]||‘Offline’)+’</span></span>’
 +’<span class="dist-badge">📍 ‘+w.distance.toFixed(1)+’ km</span>’
 +’</div></div></div>’
 +’<div class="wc-meta">’
 +’<div class="wc-meta-row"><span class="ic">📍</span>’+esc(w.area)+’, ‘+esc(w.city)+’</div>’
 +’<div class="wc-meta-row"><span class="ic">🕐</span>’+w.experience+’ years</div>’
 +’</div>’
-+’<div class="wc-rating"><div class="stars-row">’+starsHTML(rating)+’<span class="rating-num">’+rating.toFixed(1)+’</span><span class="rating-count">(’+( w.total_reviews||0)+’)</span></div>’
++’<div class="wc-rating"><div class="stars-row">’+starsHTML(rating)
++’<span class="rating-num">’+rating.toFixed(1)+’</span>’
++’<span class="rating-count">(’+( w.total_reviews||0)+’)</span></div>’
 +’<span class="exp-badge">’+w.experience+‘y exp</span></div>’
 +’<div class="wc-actions" onclick="event.stopPropagation()">’
 +’<button class="btn-call" onclick="trackAndCall('+w.id+')">📞 Call Now</button>’
 +’<button class="btn-wa" onclick="trackAndWa('+w.id+')">💬</button>’
-+’<button class="btn-book" onclick="openBooking('+w.id+',\''+esc(w.name)+'\')" >📅</button>’
++’<button class="btn-book" onclick="openBooking('+w.id+',\''+esc(w.name)+'\')">📅</button>’
 +’</div></div>’;
 }).join(’’);
 document.getElementById(‘workers-section’).scrollIntoView({behavior:‘smooth’});
 } else showToast(‘No nearby workers found’,‘error’);
-},()=>showToast(‘Location access denied. Please allow location.’,‘error’));
+});
+},function(){showToast(‘Location access denied’,‘error’);});
 }
 
-// ===============================
-// MAP
-// ===============================
-let mapInstance=null;
+var mapInstance=null;
 
 function initMap(){
 if(mapInstance){mapInstance.remove();mapInstance=null;}
-if(typeof L===‘undefined’){showToast(‘Map is loading…’,‘success’);return;}
+if(typeof L===‘undefined’){showToast(‘Map loading…’,‘success’);return;}
 mapInstance=L.map(‘mapContainer’).setView([26.7606,83.3732],12);
 L.tileLayer(‘https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png’,{
 attribution:’© OpenStreetMap’,maxZoom:18
 }).addTo(mapInstance);
-
 if(navigator.geolocation){
-navigator.geolocation.getCurrentPosition(pos=>{
-const {latitude:lat,longitude:lng}=pos.coords;
+navigator.geolocation.getCurrentPosition(function(pos){
+var lat=pos.coords.latitude, lng=pos.coords.longitude;
 mapInstance.setView([lat,lng],13);
 L.circleMarker([lat,lng],{radius:10,fillColor:’#FF5C00’,color:’#fff’,weight:3,fillOpacity:1})
-.addTo(mapInstance).bindPopup(’<b>📍 You are here</b>’);
-api(‘GET’,’/api/nearby?lat=’+lat+’&lng=’+lng+’&radius=30’).then(d=>{
+.addTo(mapInstance).bindPopup(’<b>You are here</b>’);
+api(‘GET’,’/api/nearby?lat=’+lat+’&lng=’+lng+’&radius=30’).then(function(d){
 if(!d.success) return;
-d.data.forEach(w=>{
+d.data.forEach(function(w){
 if(!w.lat||!w.lng) return;
-const popup=’<b>’+esc(w.name)+’</b><br>’
-+’<span style="color:#FF5C00">’+esc(w.skill)+’</span> • ‘+esc(w.city)+’<br>’
-+’⭐ ‘+parseFloat(w.rating||0).toFixed(1)+’ • ‘+w.distance.toFixed(1)+’ km<br>’
+var popup=’<b>’+esc(w.name)+’</b><br>’
++’<span style="color:#FF5C00">’+esc(w.skill)+’</span> - ‘+esc(w.city)+’<br>’
++‘Rating: ‘+parseFloat(w.rating||0).toFixed(1)+’ - ‘+w.distance.toFixed(1)+’ km<br>’
 +’<button onclick=“openWorkerDetail(’+w.id+’);closeModal('mapModal')” ’
-+‘style=“margin-top:6px;background:#FF5C00;color:#fff;border:none;padding:4px 10px;border-radius:6px;cursor:pointer;font-size:0.8rem”>View Profile</button>’;
++‘style=“margin-top:6px;background:#FF5C00;color:#fff;border:none;padding:4px 10px;border-radius:6px;cursor:pointer”>View</button>’;
 L.marker([parseFloat(w.lat),parseFloat(w.lng)]).addTo(mapInstance).bindPopup(popup);
 });
 });
@@ -1097,17 +1074,11 @@ L.marker([parseFloat(w.lat),parseFloat(w.lng)]).addTo(mapInstance).bindPopup(pop
 }
 }
 
-// ===============================
-// BOOKING
-// ===============================
 function openBooking(workerId,workerName){
-if(!userToken){
-showToast(‘Please sign in to book’,‘error’);
-openModal(‘userLoginModal’); return;
-}
+if(!userToken){showToast(‘Please sign in to book’,‘error’);openModal(‘userLoginModal’);return;}
 document.getElementById(‘booking_worker_id’).value=workerId;
 document.getElementById(‘booking_worker_name’).textContent=‘Booking for: ‘+workerName;
-const today=new Date().toISOString().split(‘T’)[0];
+var today=new Date().toISOString().split(‘T’)[0];
 document.getElementById(‘b_date’).min=today;
 document.getElementById(‘b_date’).value=’’;
 document.getElementById(‘b_time’).value=’’;
@@ -1116,79 +1087,67 @@ openModal(‘bookingModal’);
 }
 
 async function doBooking(){
-const worker_id=document.getElementById(‘booking_worker_id’).value;
-const booking_date=document.getElementById(‘b_date’).value;
-const booking_time=document.getElementById(‘b_time’).value;
-const note=document.getElementById(‘b_note’).value.trim();
+var worker_id=document.getElementById(‘booking_worker_id’).value;
+var booking_date=document.getElementById(‘b_date’).value;
+var booking_time=document.getElementById(‘b_time’).value;
+var note=document.getElementById(‘b_note’).value.trim();
 if(!booking_date||!booking_time){showToast(‘Date and time required’,‘error’);return;}
-const d=await api(‘POST’,’/api/bookings’,{worker_id,booking_date,booking_time,note},userToken);
-if(d.success){
-closeModal(‘bookingModal’);
-showToast(‘Booking sent! Worker will confirm soon.’,‘success’);
-} else showToast(d.message||‘Booking failed’,‘error’);
+var d=await api(‘POST’,’/api/bookings’,{worker_id:worker_id,booking_date:booking_date,booking_time:booking_time,note:note},userToken);
+if(d.success){closeModal(‘bookingModal’);showToast(‘Booking sent! Worker will confirm soon.’,‘success’);}
+else showToast(d.message||‘Booking failed’,‘error’);
 }
 
 async function loadMyBookings(){
 openModal(‘myBookingsModal’);
 document.getElementById(‘myBookingsContent’).innerHTML=’<div class="loading"><div class="spinner"></div></div>’;
-const d=await api(‘GET’,’/api/bookings/my’,null,userToken);
+var d=await api(‘GET’,’/api/bookings/my’,null,userToken);
 if(!d.success||!d.data.length){
 document.getElementById(‘myBookingsContent’).innerHTML=’<p style="color:var(--text2);text-align:center;padding:20px">No bookings yet.</p>’;
 return;
 }
-document.getElementById(‘myBookingsContent’).innerHTML=d.data.map(b=>
-‘<div class="admin-worker-row" style="margin-bottom:10px">’
+document.getElementById(‘myBookingsContent’).innerHTML=d.data.map(function(b){
+return ‘<div class="admin-worker-row" style="margin-bottom:10px">’
 +’<div style="flex:1"><div style="font-weight:700">’+esc(b.worker_name)
 +’ <span class="skill-tag">’+esc(b.skill)+’</span></div>’
 +’<div style="font-size:0.78rem;color:var(--text2);margin-top:4px">’+b.booking_date+’ at ‘+b.booking_time+’</div>’
 +(b.note?’<div style="font-size:0.78rem;color:var(--text3);margin-top:2px">’+esc(b.note)+’</div>’:’’)
 +’</div><span class="booking-badge '+b.status+'">’+b.status.toUpperCase()+’</span>’
-+’</div>’
-).join(’’);
++’</div>’;
+}).join(’’);
 }
 
 async function openWorkerBookings(){
 openModal(‘workerBookingsModal’);
 document.getElementById(‘workerBookingsContent’).innerHTML=’<div class="loading"><div class="spinner"></div></div>’;
-const d=await api(‘GET’,’/api/bookings/worker’,null,workerToken);
+var d=await api(‘GET’,’/api/bookings/worker’,null,workerToken);
 if(!d.success||!d.data.length){
 document.getElementById(‘workerBookingsContent’).innerHTML=’<p style="color:var(--text2);text-align:center;padding:20px">No booking requests yet.</p>’;
 return;
 }
-document.getElementById(‘workerBookingsContent’).innerHTML=d.data.map(b=>
-‘<div class="admin-worker-row" style="margin-bottom:10px">’
+document.getElementById(‘workerBookingsContent’).innerHTML=d.data.map(function(b){
+var actions=’’;
+if(b.status===‘pending’){
+actions=’<div class="admin-actions">’
++’<button class="admin-btn approve" onclick="respondBooking('+b.id+',\'accepted\')">Accept</button>’
++’<button class="admin-btn delete" onclick="respondBooking('+b.id+',\'rejected\')">Reject</button>’
++’</div>’;
+} else if(b.status===‘accepted’){
+actions=’<button class="admin-btn approve" onclick="respondBooking('+b.id+',\'completed\')">Done</button>’;
+}
+return ‘<div class="admin-worker-row" style="margin-bottom:10px">’
 +’<div style="flex:1"><div style="font-weight:700">’+esc(b.user_name)+’</div>’
 +’<div style="font-size:0.78rem;color:var(--text2);margin-top:4px">’+b.booking_date+’ at ‘+b.booking_time+’</div>’
 +(b.note?’<div style="font-size:0.78rem;color:var(--text3);margin-top:2px">’+esc(b.note)+’</div>’:’’)
 +’</div>’
 +’<span class="booking-badge '+b.status+'">’+b.status.toUpperCase()+’</span>’
-+(b.status===‘pending’
-?’<div class="admin-actions">’
-+’<button class="admin-btn approve" onclick="respondBooking('+b.id+',\'accepted\')">✓ Accept</button>’
-+’<button class="admin-btn delete" onclick="respondBooking('+b.id+',\'rejected\')">✕ Reject</button>’
-+’</div>’
-:(b.status===‘accepted’
-?’<button class="admin-btn approve" onclick="respondBooking('+b.id+',\'completed\')">✅ Done</button>’
-:’’))
-+’</div>’
-).join(’’);
++actions
++’</div>’;
+}).join(’’);
 }
 
 async function respondBooking(id,status){
-const d=await api(‘PUT’,’/api/bookings/’+id+’/status’,{status},workerToken);
+var d=await api(‘PUT’,’/api/bookings/’+id+’/status’,{status:status},workerToken);
 if(d.success){showToast(’Booking ’+status,‘success’);openWorkerBookings();}
-else showToast(d.message||‘Error’,‘error’);
-}
-
-// ===============================
-// SECURE REVIEW
-// ===============================
-async function submitSecureReview(workerId){
-if(!userToken){showToast(‘Please sign in to review’,‘error’);return;}
-const comment=document.getElementById(‘rv_comment’)?.value.trim()||’’;
-if(!pickedStar){showToast(‘Please select a rating’,‘error’);return;}
-const d=await api(‘POST’,’/api/ratings’,{worker_id:workerId,rating:pickedStar,review:comment},userToken);
-if(d.success){showToast(‘Review submitted!’,‘success’);openWorkerDetail(workerId);pickedStar=0;}
 else showToast(d.message||‘Error’,‘error’);
 }
 
