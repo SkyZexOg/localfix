@@ -1,0 +1,6 @@
+[build]
+builder = "NIXPACKS"
+
+[deploy]
+startCommand = "cd backend && node server.js"
+restartPolicyType = "on_failure"

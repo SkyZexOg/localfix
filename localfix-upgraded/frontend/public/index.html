@@ -1,0 +1,1071 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LocalFix — Find Verified Local Workers</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Clash+Display:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg:#080A0E; --bg2:#0E1117; --bg3:#141820; --bg4:#1A2030;
+      --border:rgba(255,255,255,0.07); --border2:rgba(255,255,255,0.12);
+      --orange:#FF5C00; --orange2:#FF7A2E; --orange3:rgba(255,92,0,0.12);
+      --green:#00D084; --green2:rgba(0,208,132,0.12);
+      --yellow:#FFB800; --red:#FF4444; --blue:#4A9EFF;
+      --text:#F0F2F5; --text2:#8B95A8; --text3:#4A5568; --gold:#FFD700;
+    }
+    html { scroll-behavior:smooth; }
+    body { font-family:'Plus Jakarta Sans',sans-serif; background:var(--bg); color:var(--text); min-height:100vh; overflow-x:hidden; }
+    ::-webkit-scrollbar { width:4px; }
+    ::-webkit-scrollbar-track { background:var(--bg2); }
+    ::-webkit-scrollbar-thumb { background:var(--orange); border-radius:4px; }
+
+    nav {
+      position:fixed; top:0; left:0; right:0; z-index:200;
+      display:flex; align-items:center; justify-content:space-between;
+      padding:0 5%; height:64px;
+      background:rgba(8,10,14,0.93); backdrop-filter:blur(20px);
+      border-bottom:1px solid var(--border);
+    }
+    .logo { font-family:'Clash Display',sans-serif; font-size:1.5rem; font-weight:700; letter-spacing:-0.5px; }
+    .logo span { color:var(--orange); }
+    .logo-badge { font-size:0.52rem; font-weight:700; background:var(--orange); color:#fff; padding:1px 5px; border-radius:3px; vertical-align:super; margin-left:3px; letter-spacing:0.5px; }
+    .nav-right { display:flex; align-items:center; gap:8px; }
+    .nav-btn { padding:8px 16px; border-radius:8px; font-size:0.82rem; font-family:'Plus Jakarta Sans',sans-serif; font-weight:600; cursor:pointer; border:none; transition:all 0.2s; }
+    .nav-btn.ghost { background:transparent; color:var(--text2); border:1px solid var(--border2); }
+    .nav-btn.ghost:hover { color:var(--text); border-color:var(--orange); }
+    .nav-btn.primary { background:var(--orange); color:#fff; }
+    .nav-btn.primary:hover { background:var(--orange2); transform:translateY(-1px); }
+    .nav-btn.sm { font-size:0.72rem; padding:6px 12px; opacity:0.6; }
+    .nav-btn.sm:hover { opacity:1; }
+
+    .admin-bar { background:linear-gradient(90deg,rgba(255,92,0,0.15),rgba(255,92,0,0.05)); border-bottom:1px solid rgba(255,92,0,0.2); padding:8px 5%; display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:8px; }
+    .admin-tag { background:var(--orange3); border:1px solid rgba(255,92,0,0.3); color:var(--orange); font-size:0.72rem; font-weight:700; padding:3px 10px; border-radius:4px; letter-spacing:1px; }
+
+    .hero { min-height:100vh; display:flex; align-items:center; justify-content:center; padding:100px 5% 60px; position:relative; overflow:hidden; }
+    .hero-bg { position:absolute; inset:0; background:radial-gradient(ellipse 60% 50% at 20% 50%,rgba(255,92,0,0.08) 0%,transparent 60%),radial-gradient(ellipse 40% 40% at 80% 30%,rgba(74,158,255,0.05) 0%,transparent 50%); pointer-events:none; }
+    .hero-lines { position:absolute; inset:0; background-image:linear-gradient(rgba(255,255,255,0.02) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,0.02) 1px,transparent 1px); background-size:80px 80px; mask-image:radial-gradient(ellipse 80% 80% at 50% 50%,black 0%,transparent 100%); }
+    .hero-content { text-align:center; position:relative; z-index:1; max-width:860px; width:100%; }
+    .hero-eyebrow { display:inline-flex; align-items:center; gap:8px; background:var(--bg3); border:1px solid var(--border2); padding:6px 16px; border-radius:50px; font-size:0.78rem; color:var(--text2); margin-bottom:28px; animation:fadeUp 0.6s ease both; }
+    .live-dot { width:6px; height:6px; border-radius:50%; background:var(--green); flex-shrink:0; animation:pulse 2s infinite; box-shadow:0 0 0 3px rgba(0,208,132,0.2); }
+    @keyframes pulse { 0%,100%{transform:scale(1)} 50%{transform:scale(1.4)} }
+    @keyframes fadeUp { from{opacity:0;transform:translateY(16px)} to{opacity:1;transform:translateY(0)} }
+    .hero h1 { font-family:'Clash Display',sans-serif; font-size:clamp(2.4rem,6.5vw,5rem); font-weight:700; line-height:1.05; letter-spacing:-1.5px; margin-bottom:20px; animation:fadeUp 0.6s 0.1s ease both; }
+    .hero h1 .hl { background:linear-gradient(135deg,#FF5C00,#FF9A00); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
+    .hero-sub { font-size:1.05rem; color:var(--text2); max-width:520px; margin:0 auto 40px; line-height:1.8; animation:fadeUp 0.6s 0.2s ease both; }
+
+    .search-wrap { background:var(--bg3); border:1px solid var(--border2); border-radius:20px; padding:12px; display:flex; flex-wrap:wrap; gap:8px; max-width:720px; margin:0 auto 32px; box-shadow:0 24px 60px rgba(0,0,0,0.4); animation:fadeUp 0.6s 0.3s ease both; }
+    .search-wrap select, .search-wrap input { flex:1; min-width:140px; background:var(--bg4); border:1px solid var(--border); border-radius:12px; padding:13px 16px; color:var(--text); font-family:'Plus Jakarta Sans',sans-serif; font-size:0.9rem; outline:none; transition:all 0.2s; }
+    .search-wrap select:focus, .search-wrap input:focus { border-color:var(--orange); background:var(--bg3); }
+    .search-wrap select option { background:var(--bg3); }
+    .search-wrap input::placeholder { color:var(--text3); }
+    .search-btn { background:linear-gradient(135deg,var(--orange),var(--orange2)); color:#fff; border:none; border-radius:12px; padding:13px 28px; font-size:0.92rem; font-weight:700; cursor:pointer; font-family:'Plus Jakarta Sans',sans-serif; transition:all 0.2s; white-space:nowrap; box-shadow:0 8px 20px rgba(255,92,0,0.3); }
+    .search-btn:hover { transform:translateY(-2px); box-shadow:0 12px 28px rgba(255,92,0,0.4); }
+
+    .hero-stats { display:flex; gap:40px; justify-content:center; flex-wrap:wrap; animation:fadeUp 0.6s 0.4s ease both; }
+    .hero-stat { text-align:center; }
+    .hero-stat-num { font-family:'Clash Display',sans-serif; font-size:1.8rem; font-weight:700; color:var(--orange); display:block; }
+    .hero-stat-label { font-size:0.7rem; color:var(--text3); margin-top:2px; letter-spacing:0.5px; text-transform:uppercase; }
+
+    section { padding:70px 5%; }
+    .sec-label { font-size:0.68rem; font-weight:700; letter-spacing:2.5px; color:var(--orange); text-transform:uppercase; margin-bottom:8px; }
+    .sec-title { font-family:'Clash Display',sans-serif; font-size:clamp(1.6rem,3vw,2.4rem); font-weight:700; letter-spacing:-0.5px; margin-bottom:10px; }
+    .sec-sub { color:var(--text2); max-width:460px; line-height:1.8; margin-bottom:40px; font-size:0.95rem; }
+
+    .cats-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(130px,1fr)); gap:12px; }
+    .cat-card { background:var(--bg3); border:1px solid var(--border); border-radius:16px; padding:20px 12px; text-align:center; cursor:pointer; transition:all 0.25s; position:relative; overflow:hidden; }
+    .cat-card::before { content:''; position:absolute; inset:0; background:linear-gradient(135deg,var(--orange3),transparent); opacity:0; transition:opacity 0.25s; }
+    .cat-card:hover, .cat-card.active { border-color:var(--orange); transform:translateY(-3px); }
+    .cat-card:hover::before, .cat-card.active::before { opacity:1; }
+    .cat-icon { font-size:1.8rem; margin-bottom:8px; }
+    .cat-name { font-size:0.82rem; font-weight:600; }
+    .cat-count { font-size:0.68rem; color:var(--text3); margin-top:3px; }
+
+    #workers-section { background:var(--bg2); }
+    .workers-top { display:flex; align-items:flex-start; justify-content:space-between; margin-bottom:28px; flex-wrap:wrap; gap:16px; }
+    .filter-row { display:flex; gap:8px; flex-wrap:wrap; }
+    .ftab { padding:7px 16px; border-radius:50px; font-size:0.8rem; font-weight:600; background:var(--bg3); border:1px solid var(--border); color:var(--text2); cursor:pointer; transition:all 0.2s; font-family:'Plus Jakarta Sans',sans-serif; }
+    .ftab:hover { border-color:var(--orange); color:var(--text); }
+    .ftab.active { background:var(--orange); border-color:var(--orange); color:#fff; }
+
+    .workers-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(320px,1fr)); gap:16px; }
+    .worker-card { background:var(--bg3); border:1px solid var(--border); border-radius:20px; padding:20px; transition:all 0.3s; cursor:pointer; position:relative; overflow:hidden; }
+    .worker-card::after { content:''; position:absolute; top:0; left:0; right:0; height:2px; background:linear-gradient(90deg,var(--orange),var(--orange2)); transform:scaleX(0); transform-origin:left; transition:transform 0.3s; }
+    .worker-card:hover { border-color:var(--border2); transform:translateY(-4px); box-shadow:0 20px 50px rgba(0,0,0,0.4); }
+    .worker-card:hover::after { transform:scaleX(1); }
+
+    .wc-top { display:flex; gap:14px; margin-bottom:14px; }
+    .wc-avatar { width:54px; height:54px; border-radius:14px; flex-shrink:0; background:linear-gradient(135deg,var(--orange),#FF9A00); display:flex; align-items:center; justify-content:center; font-family:'Clash Display',sans-serif; font-size:1.2rem; font-weight:700; color:#fff; position:relative; }
+    .verified-badge { position:absolute; bottom:-4px; right:-4px; width:18px; height:18px; background:var(--blue); border-radius:50%; display:flex; align-items:center; justify-content:center; border:2px solid var(--bg3); font-size:0.55rem; color:#fff; font-weight:700; }
+    .wc-info { flex:1; min-width:0; }
+    .wc-name { font-family:'Clash Display',sans-serif; font-size:1rem; font-weight:600; margin-bottom:6px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    .wc-tags { display:flex; gap:6px; flex-wrap:wrap; }
+    .skill-tag { padding:2px 8px; border-radius:5px; font-size:0.68rem; font-weight:700; background:var(--orange3); color:var(--orange); border:1px solid rgba(255,92,0,0.2); letter-spacing:0.3px; }
+    .status-tag { display:flex; align-items:center; gap:4px; font-size:0.68rem; font-weight:600; }
+    .sdot { width:5px; height:5px; border-radius:50%; flex-shrink:0; }
+    .sdot.available { background:var(--green); box-shadow:0 0 0 3px rgba(0,208,132,0.2); }
+    .sdot.busy { background:var(--yellow); }
+    .sdot.offline { background:var(--text3); }
+
+    .wc-meta { display:flex; flex-direction:column; gap:6px; margin-bottom:12px; }
+    .wc-meta-row { display:flex; align-items:center; gap:7px; font-size:0.8rem; color:var(--text2); }
+    .wc-meta-row .ic { font-size:0.85rem; width:16px; text-align:center; flex-shrink:0; }
+
+    .wc-rating { display:flex; align-items:center; justify-content:space-between; margin-bottom:14px; }
+    .stars-row { display:flex; align-items:center; gap:2px; }
+    .star { color:var(--text3); font-size:0.85rem; }
+    .star.filled { color:var(--gold); }
+    .star.half { color:var(--gold); opacity:0.6; }
+    .rating-num { font-size:0.82rem; font-weight:700; margin-left:4px; }
+    .rating-count { font-size:0.72rem; color:var(--text3); margin-left:2px; }
+    .exp-badge { font-size:0.68rem; font-weight:700; background:var(--bg4); border:1px solid var(--border); color:var(--text2); padding:2px 8px; border-radius:5px; }
+
+    .wc-actions { display:flex; gap:8px; }
+    .btn-call { flex:1; padding:11px 12px; border-radius:12px; background:linear-gradient(135deg,var(--orange),var(--orange2)); color:#fff; border:none; font-size:0.85rem; font-weight:700; cursor:pointer; font-family:'Plus Jakarta Sans',sans-serif; transition:all 0.2s; display:flex; align-items:center; justify-content:center; gap:6px; box-shadow:0 4px 15px rgba(255,92,0,0.25); }
+    .btn-call:hover { transform:translateY(-1px); box-shadow:0 8px 20px rgba(255,92,0,0.35); }
+    .btn-wa { padding:11px 14px; border-radius:12px; background:rgba(0,208,132,0.1); color:var(--green); border:1px solid rgba(0,208,132,0.25); cursor:pointer; font-size:1rem; transition:all 0.2s; display:flex; align-items:center; justify-content:center; }
+    .btn-wa:hover { background:rgba(0,208,132,0.2); transform:translateY(-1px); }
+
+    .empty-state { grid-column:1/-1; text-align:center; padding:80px 20px; }
+    .empty-icon { font-size:3.5rem; margin-bottom:16px; }
+    .empty-state p { color:var(--text2); font-size:0.95rem; }
+
+    .steps-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(220px,1fr)); gap:16px; }
+    .step-card { background:var(--bg3); border:1px solid var(--border); border-radius:20px; padding:28px 22px; position:relative; overflow:hidden; }
+    .step-card::before { content:''; position:absolute; top:0; left:0; right:0; height:3px; background:linear-gradient(90deg,var(--orange),var(--orange2)); }
+    .step-num { font-family:'Clash Display',sans-serif; font-size:3rem; font-weight:700; color:rgba(255,92,0,0.1); line-height:1; margin-bottom:14px; }
+    .step-title { font-family:'Clash Display',sans-serif; font-size:1rem; font-weight:600; margin-bottom:8px; }
+    .step-desc { font-size:0.85rem; color:var(--text2); line-height:1.7; }
+
+    .modal-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.85); backdrop-filter:blur(8px); z-index:300; align-items:center; justify-content:center; padding:16px; }
+    .modal-overlay.open { display:flex; }
+    .modal { background:var(--bg2); border:1px solid var(--border2); border-radius:24px; padding:28px; width:100%; max-width:520px; max-height:92vh; overflow-y:auto; position:relative; animation:modalIn 0.3s cubic-bezier(0.16,1,0.3,1); }
+    @keyframes modalIn { from{opacity:0;transform:translateY(24px) scale(0.97)} to{opacity:1;transform:translateY(0) scale(1)} }
+    .modal-close { position:absolute; top:16px; right:16px; background:var(--bg3); border:none; color:var(--text2); width:32px; height:32px; border-radius:8px; cursor:pointer; font-size:1rem; display:flex; align-items:center; justify-content:center; transition:all 0.15s; }
+    .modal-close:hover { background:var(--bg4); color:var(--text); }
+    .modal h2 { font-family:'Clash Display',sans-serif; font-size:1.4rem; font-weight:700; margin-bottom:4px; }
+    .modal-sub { color:var(--text2); font-size:0.85rem; margin-bottom:22px; }
+
+    .form-group { margin-bottom:14px; }
+    .form-label { display:block; font-size:0.78rem; font-weight:600; margin-bottom:6px; color:var(--text2); letter-spacing:0.3px; }
+    .form-input,.form-select,.form-textarea { width:100%; background:var(--bg3); border:1px solid var(--border); border-radius:12px; padding:12px 14px; color:var(--text); font-family:'Plus Jakarta Sans',sans-serif; font-size:0.9rem; outline:none; transition:all 0.2s; }
+    .form-input:focus,.form-select:focus,.form-textarea:focus { border-color:var(--orange); background:var(--bg2); box-shadow:0 0 0 3px rgba(255,92,0,0.1); }
+    .form-input::placeholder { color:var(--text3); }
+    .form-select option { background:var(--bg3); }
+    .form-textarea { resize:vertical; min-height:80px; }
+    .form-row { display:flex; gap:12px; }
+    .form-row .form-group { flex:1; }
+    .form-submit { width:100%; padding:13px; margin-top:8px; background:linear-gradient(135deg,var(--orange),var(--orange2)); color:#fff; border:none; border-radius:12px; font-family:'Clash Display',sans-serif; font-size:0.98rem; font-weight:700; cursor:pointer; transition:all 0.2s; box-shadow:0 8px 20px rgba(255,92,0,0.25); }
+    .form-submit:hover { transform:translateY(-1px); box-shadow:0 12px 28px rgba(255,92,0,0.35); }
+    .form-submit:disabled { opacity:0.5; cursor:not-allowed; transform:none; }
+
+    .success-msg { text-align:center; padding:20px 0; }
+    .success-icon { font-size:3rem; margin-bottom:12px; }
+    .success-msg h3 { font-family:'Clash Display',sans-serif; font-size:1.25rem; margin-bottom:8px; }
+    .success-msg p { color:var(--text2); font-size:0.88rem; line-height:1.7; }
+
+    .admin-stat-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(110px,1fr)); gap:10px; margin-bottom:20px; }
+    .admin-stat-card { background:var(--bg3); border:1px solid var(--border); border-radius:14px; padding:14px; text-align:center; }
+    .admin-stat-val { font-family:'Clash Display',sans-serif; font-size:1.7rem; font-weight:700; }
+    .admin-stat-label { font-size:0.65rem; color:var(--text2); margin-top:2px; text-transform:uppercase; letter-spacing:0.5px; }
+    .admin-worker-row { background:var(--bg3); border:1px solid var(--border); border-radius:14px; padding:14px 16px; display:flex; align-items:center; gap:12px; flex-wrap:wrap; transition:border-color 0.2s; }
+    .admin-worker-row:hover { border-color:var(--border2); }
+    .admin-worker-avatar { width:38px; height:38px; border-radius:10px; flex-shrink:0; background:linear-gradient(135deg,var(--orange),var(--orange2)); display:flex; align-items:center; justify-content:center; font-family:'Clash Display',sans-serif; font-weight:700; color:#fff; font-size:0.9rem; }
+    .admin-actions { display:flex; gap:6px; flex-wrap:wrap; margin-left:auto; }
+    .admin-btn { padding:5px 12px; border-radius:8px; font-size:0.72rem; font-weight:700; font-family:'Plus Jakarta Sans',sans-serif; cursor:pointer; border:1px solid; transition:all 0.2s; }
+    .admin-btn.approve { background:rgba(0,208,132,0.1); color:var(--green); border-color:rgba(0,208,132,0.3); }
+    .admin-btn.approve:hover { background:var(--green); color:#000; }
+    .admin-btn.reject { background:rgba(255,184,0,0.1); color:var(--yellow); border-color:rgba(255,184,0,0.3); }
+    .admin-btn.reject:hover { background:var(--yellow); color:#000; }
+    .admin-btn.delete { background:rgba(255,68,68,0.1); color:var(--red); border-color:rgba(255,68,68,0.3); }
+    .admin-btn.delete:hover { background:var(--red); color:#fff; }
+
+    .chart-wrap { background:var(--bg3); border:1px solid var(--border); border-radius:16px; padding:20px; margin-bottom:18px; }
+    .chart-title { font-family:'Clash Display',sans-serif; font-size:0.9rem; font-weight:600; margin-bottom:14px; color:var(--text2); }
+    .bar-chart { display:flex; align-items:flex-end; gap:6px; height:80px; }
+    .bar-wrap { flex:1; display:flex; flex-direction:column; align-items:center; gap:4px; }
+    .bar { width:100%; background:linear-gradient(180deg,var(--orange),var(--orange2)); border-radius:4px 4px 0 0; min-height:3px; }
+    .bar-label { font-size:0.58rem; color:var(--text3); text-align:center; }
+
+    .wd-info-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:18px; }
+    .wd-info-item { background:var(--bg3); border:1px solid var(--border); border-radius:12px; padding:12px 14px; }
+    .wd-info-label { font-size:0.65rem; color:var(--text3); text-transform:uppercase; letter-spacing:0.5px; margin-bottom:4px; }
+    .wd-info-val { font-size:0.88rem; font-weight:600; }
+    .review-card { background:var(--bg3); border:1px solid var(--border); border-radius:12px; padding:14px; margin-top:10px; }
+    .review-header { display:flex; justify-content:space-between; margin-bottom:6px; align-items:center; }
+    .review-name { font-weight:700; font-size:0.88rem; }
+    .review-stars { color:var(--gold); font-size:0.8rem; letter-spacing:1px; }
+    .review-text { color:var(--text2); font-size:0.82rem; line-height:1.6; }
+    .star-picker { display:flex; gap:8px; margin-bottom:10px; }
+    .star-pick { font-size:1.6rem; cursor:pointer; color:var(--text3); transition:all 0.15s; }
+    .star-pick.on { color:var(--gold); transform:scale(1.1); }
+
+    .toast { position:fixed; bottom:24px; right:24px; background:var(--bg2); border:1px solid var(--border2); border-radius:14px; padding:14px 18px; font-size:0.85rem; z-index:999; transform:translateY(80px); opacity:0; transition:all 0.35s cubic-bezier(0.16,1,0.3,1); display:flex; align-items:center; gap:10px; max-width:320px; box-shadow:0 12px 40px rgba(0,0,0,0.4); }
+    .toast.show { transform:translateY(0); opacity:1; }
+    .toast.success { border-color:rgba(0,208,132,0.3); }
+    .toast.error { border-color:rgba(255,68,68,0.3); }
+    .loading { display:flex; align-items:center; justify-content:center; padding:60px; grid-column:1/-1; }
+    .spinner { width:36px; height:36px; border:3px solid var(--bg4); border-top-color:var(--orange); border-radius:50%; animation:spin 0.7s linear infinite; }
+    @keyframes spin { to{transform:rotate(360deg)} }
+
+    footer { background:var(--bg2); border-top:1px solid var(--border); padding:40px 5%; text-align:center; }
+    .footer-logo { font-family:'Clash Display',sans-serif; font-size:1.4rem; font-weight:700; margin-bottom:8px; }
+    .footer-logo span { color:var(--orange); }
+
+    @media(max-width:600px) {
+      nav { padding:0 4%; }
+      .logo { font-size:1.25rem; }
+      .hero { padding:90px 4% 50px; }
+      .hero h1 { letter-spacing:-0.5px; }
+      .search-wrap { padding:10px; }
+      .search-wrap select,.search-wrap input { min-width:100%; }
+      section { padding:50px 4%; }
+      .workers-grid { grid-template-columns:1fr; }
+      .form-row { flex-direction:column; }
+      .modal { padding:20px 16px; border-radius:18px; }
+      .admin-actions { width:100%; }
+      .wd-info-grid { grid-template-columns:1fr; }
+      .hero-stats { gap:24px; }
+    }
+
+    /* Voice button */
+    .voice-btn { background:var(--bg4); border:1px solid var(--border2); border-radius:12px; padding:13px 16px; cursor:pointer; font-size:1.2rem; transition:all 0.2s; color:var(--text2); }
+    .voice-btn:hover { border-color:var(--orange); color:var(--orange); }
+    .voice-btn.listening { background:rgba(255,92,0,0.15); border-color:var(--orange); color:var(--orange); animation:voicePulse 1s infinite; }
+    @keyframes voicePulse { 0%,100%{box-shadow:0 0 0 0 rgba(255,92,0,0.4)} 50%{box-shadow:0 0 0 8px rgba(255,92,0,0)} }
+    .nearby-btn { background:var(--bg4); border:1px solid var(--border2); border-radius:12px; padding:10px 18px; cursor:pointer; font-size:0.85rem; font-weight:600; color:var(--text2); transition:all 0.2s; display:inline-flex; align-items:center; gap:6px; }
+    .nearby-btn:hover { border-color:var(--blue); color:var(--blue); }
+    #voiceStatus { display:none; background:rgba(255,92,0,0.1); border:1px solid rgba(255,92,0,0.3); border-radius:12px; padding:10px 16px; margin:0 auto 16px; max-width:720px; font-size:0.88rem; color:var(--orange); text-align:center; }
+    .dist-badge { font-size:0.68rem; font-weight:700; background:rgba(74,158,255,0.1); color:var(--blue); border:1px solid rgba(74,158,255,0.2); padding:2px 8px; border-radius:5px; }
+    .btn-book { padding:11px 14px; border-radius:12px; background:rgba(74,158,255,0.1); color:var(--blue); border:1px solid rgba(74,158,255,0.25); cursor:pointer; font-size:0.8rem; font-weight:700; transition:all 0.2s; }
+    .btn-book:hover { background:rgba(74,158,255,0.2); transform:translateY(-1px); }
+    #mapContainer { height:400px; border-radius:16px; overflow:hidden; border:1px solid var(--border); }
+    .leaflet-popup-content-wrapper { background:var(--bg3) !important; color:var(--text) !important; border:1px solid var(--border2) !important; border-radius:12px !important; }
+    .leaflet-popup-tip { background:var(--bg3) !important; }
+    .booking-badge { display:inline-block; padding:3px 10px; border-radius:6px; font-size:0.72rem; font-weight:700; }
+    .booking-badge.pending { background:rgba(255,184,0,0.15); color:var(--yellow); }
+    .booking-badge.accepted { background:rgba(0,208,132,0.15); color:var(--green); }
+    .booking-badge.rejected { background:rgba(255,68,68,0.15); color:var(--red); }
+    .booking-badge.completed { background:rgba(74,158,255,0.15); color:var(--blue); }
+  </style>
+</head>
+<body>
+
+<div class="admin-bar" id="adminBar" style="display:none">
+  <span class="admin-tag">&#9881; ADMIN MODE</span>
+  <div style="display:flex;gap:8px;flex-wrap:wrap">
+    <button class="nav-btn ghost" style="font-size:0.78rem;padding:6px 14px" onclick="openModal('adminDashModal');loadAdminDash()">&#128202; Dashboard</button>
+    <button class="nav-btn ghost" style="font-size:0.78rem;padding:6px 14px;color:var(--red);border-color:rgba(255,68,68,0.3)" onclick="adminLogout()">Logout</button>
+  </div>
+</div>
+
+<nav id="mainNav">
+  <div class="logo">Local<span>Fix</span><span class="logo-badge">BETA</span></div>
+  <div class="nav-right" id="navLinks">
+    <button class="nav-btn ghost" onclick="openModal('userLoginModal')">Sign In</button>
+    <button class="nav-btn ghost" onclick="openModal('loginModal')">Worker Login</button>
+    <button class="nav-btn primary" onclick="openModal('registerModal')">Join as Worker</button>
+    <button class="nav-btn ghost sm" onclick="openModal('adminLoginModal')">Admin</button>
+  </div>
+</nav>
+
+<section class="hero">
+  <div class="hero-bg"></div>
+  <div class="hero-lines"></div>
+  <div class="hero-content">
+    <div class="hero-eyebrow"><span class="live-dot"></span>Verified professionals near you</div>
+    <h1>Find Trusted <span class="hl">Local Workers</span><br>In Minutes</h1>
+    <p class="hero-sub">Plumbers, electricians, carpenters &amp; more — verified, rated, and ready to help right now.</p>
+    <div id="voiceStatus"></div>
+    <div class="search-wrap">
+      <select id="searchCategory">
+        <option value="">All Categories</option>
+        <option>Plumber</option><option>Electrician</option><option>Carpenter</option>
+        <option>Painter</option><option>AC Technician</option><option>Mason</option>
+        <option>Welder</option><option>Cleaner</option>
+      </select>
+      <input type="text" id="searchCity" placeholder="City or area..."/>
+      <button class="search-btn" onclick="doSearch()">Search &#8594;</button>
+      <button class="voice-btn" id="voiceBtn" onclick="toggleVoice()" title="Speak your problem">&#127908;</button>
+    </div>
+    <div style="display:flex;justify-content:center;gap:10px;margin-bottom:24px;flex-wrap:wrap">
+      <button class="nearby-btn" onclick="findNearby()">&#128205; Workers Near Me</button>
+      <button class="nearby-btn" onclick="openModal('mapModal')" style="border-color:rgba(0,208,132,0.3);color:var(--green)">&#128507; View Map</button>
+    </div>
+    <div class="hero-stats">
+      <div class="hero-stat"><span class="hero-stat-num" id="sTotal">&#8212;</span><span class="hero-stat-label">Workers</span></div>
+      <div class="hero-stat"><span class="hero-stat-num" id="sAvail">&#8212;</span><span class="hero-stat-label">Available Now</span></div>
+      <div class="hero-stat"><span class="hero-stat-num" id="sCities">&#8212;</span><span class="hero-stat-label">Cities</span></div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="sec-label">Browse by type</div>
+  <div class="sec-title">What do you need?</div>
+  <p class="sec-sub">Tap a category to instantly filter workers in your area.</p>
+  <div class="cats-grid" id="categoriesGrid"><div class="loading" style="grid-column:1/-1"><div class="spinner"></div></div></div>
+</section>
+
+<section id="workers-section">
+  <div class="workers-top">
+    <div>
+      <div class="sec-label">Verified Professionals</div>
+      <div class="sec-title" style="margin-bottom:0">Available Workers</div>
+    </div>
+    <div class="filter-row">
+      <button class="ftab active" onclick="setFilter('all',this)">All</button>
+      <button class="ftab" onclick="setFilter('available',this)">&#128994; Available</button>
+      <button class="ftab" onclick="setFilter('busy',this)">&#128993; Busy</button>
+      <button class="ftab" onclick="setFilter('offline',this)">&#9899; Offline</button>
+    </div>
+  </div>
+  <div class="workers-grid" id="workersGrid"><div class="loading"><div class="spinner"></div></div></div>
+</section>
+
+<section style="background:var(--bg)">
+  <div class="sec-label">Simple Process</div>
+  <div class="sec-title">How LocalFix Works</div>
+  <p class="sec-sub">Right worker at your door in minutes, not hours.</p>
+  <div class="steps-grid">
+    <div class="step-card"><div class="step-num">01</div><div class="step-title">Search Your Need</div><div class="step-desc">Choose service, enter city or area to find verified workers instantly.</div></div>
+    <div class="step-card"><div class="step-num">02</div><div class="step-title">See Verified Profiles</div><div class="step-desc">Browse workers with skills, experience, ratings, and verified badges.</div></div>
+    <div class="step-card"><div class="step-num">03</div><div class="step-title">Call or WhatsApp</div><div class="step-desc">Contact directly — no middleman, no commission. One tap away.</div></div>
+    <div class="step-card"><div class="step-num">04</div><div class="step-title">Job Done &#10003;</div><div class="step-desc">Worker arrives, fixes the problem. Leave a review to help others.</div></div>
+  </div>
+</section>
+
+<footer>
+  <div class="footer-logo">Local<span>Fix</span></div>
+  <p style="color:var(--text2);font-size:0.85rem;margin-top:6px">Connecting people with trusted local professionals.</p>
+  <p style="color:var(--text3);font-size:0.78rem;margin-top:14px">&#169; 2025 LocalFix &#183; Designed by <span style="color:var(--orange);font-weight:600">Rajan Vishwakarma</span></p>
+</footer>
+
+<div class="toast" id="toast"></div>
+
+
+<!-- USER SIGN IN -->
+<div class="modal-overlay" id="userLoginModal">
+  <div class="modal" style="max-width:400px">
+    <button class="modal-close" onclick="closeModal('userLoginModal')">&#10005;</button>
+    <h2>Sign In</h2>
+    <p class="modal-sub">Sign in to book workers and leave verified reviews.</p>
+    <div class="form-group"><label class="form-label">Email</label><input class="form-input" id="ul_email" placeholder="you@email.com"/></div>
+    <div class="form-group"><label class="form-label">Password</label><input class="form-input" id="ul_pass" type="password" placeholder="Your password"/></div>
+    <button class="form-submit" onclick="doUserLogin()">Sign In &#8594;</button>
+    <p style="text-align:center;margin-top:12px;font-size:0.82rem;color:var(--text2)">New here? <a href="#" style="color:var(--orange);font-weight:600" onclick="switchModal('userLoginModal','userRegModal')">Create account</a></p>
+  </div>
+</div>
+
+<!-- USER REGISTER -->
+<div class="modal-overlay" id="userRegModal">
+  <div class="modal" style="max-width:400px">
+    <button class="modal-close" onclick="closeModal('userRegModal')">&#10005;</button>
+    <h2>Create Account</h2>
+    <p class="modal-sub">Sign up to book services and leave reviews.</p>
+    <div class="form-group"><label class="form-label">Full Name</label><input class="form-input" id="ur_name" placeholder="Your name"/></div>
+    <div class="form-group"><label class="form-label">Email</label><input class="form-input" id="ur_email" placeholder="you@email.com"/></div>
+    <div class="form-group"><label class="form-label">Password</label><input class="form-input" id="ur_pass" type="password" placeholder="Min 6 characters"/></div>
+    <button class="form-submit" onclick="doUserRegister()">Create Account &#8594;</button>
+    <p style="text-align:center;margin-top:12px;font-size:0.82rem;color:var(--text2)">Already have account? <a href="#" style="color:var(--orange);font-weight:600" onclick="switchModal('userRegModal','userLoginModal')">Sign in</a></p>
+  </div>
+</div>
+
+<!-- BOOKING -->
+<div class="modal-overlay" id="bookingModal">
+  <div class="modal" style="max-width:420px">
+    <button class="modal-close" onclick="closeModal('bookingModal')">&#10005;</button>
+    <h2>&#128197; Book Service</h2>
+    <p class="modal-sub" id="booking_worker_name">Choose date and time</p>
+    <input type="hidden" id="booking_worker_id"/>
+    <div class="form-group"><label class="form-label">Date *</label><input class="form-input" id="b_date" type="date"/></div>
+    <div class="form-group"><label class="form-label">Time *</label><input class="form-input" id="b_time" type="time"/></div>
+    <div class="form-group"><label class="form-label">Note (optional)</label><textarea class="form-textarea" id="b_note" placeholder="Describe your problem briefly..."></textarea></div>
+    <button class="form-submit" onclick="doBooking()">Confirm Booking &#8594;</button>
+  </div>
+</div>
+
+<!-- MY BOOKINGS -->
+<div class="modal-overlay" id="myBookingsModal">
+  <div class="modal" style="max-width:560px">
+    <button class="modal-close" onclick="closeModal('myBookingsModal')">&#10005;</button>
+    <h2>My Bookings</h2>
+    <p class="modal-sub">Track all your service bookings.</p>
+    <div id="myBookingsContent"><div class="loading"><div class="spinner"></div></div></div>
+  </div>
+</div>
+
+<!-- WORKER BOOKINGS -->
+<div class="modal-overlay" id="workerBookingsModal">
+  <div class="modal" style="max-width:580px">
+    <button class="modal-close" onclick="closeModal('workerBookingsModal')">&#10005;</button>
+    <h2>Booking Requests</h2>
+    <p class="modal-sub">Accept or reject customer bookings.</p>
+    <div id="workerBookingsContent"><div class="loading"><div class="spinner"></div></div></div>
+  </div>
+</div>
+
+<!-- MAP -->
+<div class="modal-overlay" id="mapModal">
+  <div class="modal" style="max-width:720px">
+    <button class="modal-close" onclick="closeModal('mapModal')">&#10005;</button>
+    <h2>&#128507; Workers Near You</h2>
+    <p class="modal-sub">Click a marker to see worker details.</p>
+    <div id="mapContainer"></div>
+  </div>
+</div>
+
+<!-- REGISTER -->
+<div class="modal-overlay" id="registerModal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('registerModal')">&#10005;</button>
+    <h2>Join as Worker</h2>
+    <p class="modal-sub">Create your profile — customers will find you directly.</p>
+    <div id="registerFormWrap">
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">Full Name *</label><input class="form-input" id="r_name" placeholder="Ramesh Kumar"/></div>
+        <div class="form-group"><label class="form-label">Mobile Number *</label><input class="form-input" id="r_phone" placeholder="9XXXXXXXXX" maxlength="10"/></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Your Skill *</label>
+          <select class="form-select" id="r_skill">
+            <option value="">Select skill</option>
+            <option>Plumber</option><option>Electrician</option><option>Carpenter</option>
+            <option>Painter</option><option>AC Technician</option><option>Mason</option>
+            <option>Welder</option><option>Cleaner</option><option>Other</option>
+          </select>
+        </div>
+        <div class="form-group"><label class="form-label">Experience (years) *</label><input class="form-input" id="r_exp" type="number" placeholder="5" min="0" max="50"/></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">City *</label><input class="form-input" id="r_city" placeholder="Gorakhpur"/></div>
+        <div class="form-group"><label class="form-label">Area / Mohalla *</label><input class="form-input" id="r_area" placeholder="Civil Lines"/></div>
+      </div>
+      <div class="form-group"><label class="form-label">About Yourself</label><textarea class="form-textarea" id="r_about" placeholder="Describe your services..."></textarea></div>
+      <div class="form-group"><label class="form-label">Password *</label><input class="form-input" id="r_pass" type="password" placeholder="Min 6 characters"/></div>
+      <button class="form-submit" id="regBtn" onclick="doRegister()">Create Profile &#8594;</button>
+      <p style="text-align:center;margin-top:12px;font-size:0.82rem;color:var(--text2)">Already registered? <a href="#" style="color:var(--orange);font-weight:600" onclick="switchModal('registerModal','loginModal')">Login here</a></p>
+    </div>
+  </div>
+</div>
+
+<!-- LOGIN -->
+<div class="modal-overlay" id="loginModal">
+  <div class="modal" style="max-width:400px">
+    <button class="modal-close" onclick="closeModal('loginModal')">&#10005;</button>
+    <h2>Worker Login</h2>
+    <p class="modal-sub">Manage your availability and profile.</p>
+    <div class="form-group"><label class="form-label">Mobile Number</label><input class="form-input" id="l_phone" placeholder="9XXXXXXXXX" maxlength="10"/></div>
+    <div class="form-group"><label class="form-label">Password</label><input class="form-input" id="l_pass" type="password" placeholder="Your password"/></div>
+    <button class="form-submit" onclick="doLogin()">Login &#8594;</button>
+    <p style="text-align:center;margin-top:12px;font-size:0.82rem;color:var(--text2)">New here? <a href="#" style="color:var(--orange);font-weight:600" onclick="switchModal('loginModal','registerModal')">Register as worker</a></p>
+  </div>
+</div>
+
+<!-- WORKER DASHBOARD -->
+<div class="modal-overlay" id="wDashModal">
+  <div class="modal" style="max-width:540px">
+    <button class="modal-close" onclick="closeModal('wDashModal')">&#10005;</button>
+    <h2 id="wd_name">My Profile</h2>
+    <p class="modal-sub" id="wd_sub">&#8212;</p>
+    <div style="background:var(--bg3);border-radius:14px;padding:16px;margin-bottom:16px">
+      <div style="font-size:0.65rem;color:var(--text3);margin-bottom:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase">My Availability</div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <button class="ftab" id="sBtnAvail" onclick="setStatus('available')">&#128994; Available</button>
+        <button class="ftab" id="sBtnBusy" onclick="setStatus('busy')">&#128993; Busy</button>
+        <button class="ftab" id="sBtnOffline" onclick="setStatus('offline')">&#9899; Offline</button>
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:16px">
+      <div style="background:var(--bg3);border:1px solid var(--border);border-radius:12px;padding:12px;text-align:center"><div style="font-family:'Clash Display',sans-serif;font-size:1.5rem;font-weight:700;color:var(--orange)" id="wd_views">&#8212;</div><div style="font-size:0.65rem;color:var(--text3);margin-top:2px;text-transform:uppercase;letter-spacing:0.5px">Views</div></div>
+      <div style="background:var(--bg3);border:1px solid var(--border);border-radius:12px;padding:12px;text-align:center"><div style="font-family:'Clash Display',sans-serif;font-size:1.5rem;font-weight:700;color:var(--orange)" id="wd_calls">&#8212;</div><div style="font-size:0.65rem;color:var(--text3);margin-top:2px;text-transform:uppercase;letter-spacing:0.5px">Calls</div></div>
+      <div style="background:var(--bg3);border:1px solid var(--border);border-radius:12px;padding:12px;text-align:center"><div style="font-family:'Clash Display',sans-serif;font-size:1.5rem;font-weight:700;color:var(--orange)" id="wd_wa">&#8212;</div><div style="font-size:0.65rem;color:var(--text3);margin-top:2px;text-transform:uppercase;letter-spacing:0.5px">WhatsApp</div></div>
+    </div>
+    <button class="nav-btn ghost" style="width:100%;margin-bottom:12px;padding:11px" onclick="openWorkerBookings()">&#128197; My Booking Requests</button>
+    <div class="form-group"><label class="form-label">About</label><textarea class="form-textarea" id="wd_about"></textarea></div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">City</label><input class="form-input" id="wd_city"/></div>
+      <div class="form-group"><label class="form-label">Area</label><input class="form-input" id="wd_area"/></div>
+    </div>
+    <button class="form-submit" onclick="updateProfile()">Save Changes &#8594;</button>
+    <button style="width:100%;padding:12px;margin-top:10px;background:transparent;border:1px solid rgba(255,68,68,0.3);color:var(--red);border-radius:12px;cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif;font-size:0.88rem;font-weight:600" onclick="doLogout()">Logout</button>
+  </div>
+</div>
+
+<!-- WORKER DETAIL -->
+<div class="modal-overlay" id="workerDetailModal">
+  <div class="modal" style="max-width:460px">
+    <button class="modal-close" onclick="closeModal('workerDetailModal')">&#10005;</button>
+    <div id="workerDetailContent"></div>
+  </div>
+</div>
+
+<!-- ADMIN LOGIN -->
+<div class="modal-overlay" id="adminLoginModal">
+  <div class="modal" style="max-width:360px">
+    <button class="modal-close" onclick="closeModal('adminLoginModal')">&#10005;</button>
+    <h2>Admin Access</h2>
+    <p class="modal-sub">Enter your credentials to continue.</p>
+    <div class="form-group"><label class="form-label">Username</label><input class="form-input" id="a_user" placeholder="admin"/></div>
+    <div class="form-group"><label class="form-label">Password</label><input class="form-input" id="a_pass" type="password" placeholder="&#8226;&#8226;&#8226;&#8226;&#8226;&#8226;&#8226;&#8226;"/></div>
+    <button class="form-submit" onclick="doAdminLogin()">Access Dashboard &#8594;</button>
+  </div>
+</div>
+
+<!-- ADMIN DASHBOARD -->
+<div class="modal-overlay" id="adminDashModal">
+  <div class="modal" style="max-width:740px">
+    <button class="modal-close" onclick="closeModal('adminDashModal')">&#10005;</button>
+    <h2>Admin Dashboard</h2>
+    <p class="modal-sub">Manage all workers on LocalFix.</p>
+    <div id="adminDashContent"><div class="loading"><div class="spinner"></div></div></div>
+  </div>
+</div>
+
+<script>
+const API = window.location.origin;
+let workerToken = localStorage.getItem('lf_wtoken') || null;
+let workerData  = JSON.parse(localStorage.getItem('lf_wdata') || 'null');
+let adminToken  = localStorage.getItem('lf_atoken') || null;
+let currentFilter = 'all', currentCategory = '', currentCity = '';
+
+const CATS = [
+  {name:'Plumber',icon:'&#128295;'},{name:'Electrician',icon:'&#9889;'},
+  {name:'Carpenter',icon:'&#129578;'},{name:'Painter',icon:'&#127912;'},
+  {name:'AC Technician',icon:'&#10052;'},{name:'Mason',icon:'&#129521;'},
+  {name:'Welder',icon:'&#128297;'},{name:'Cleaner',icon:'&#129529;'}
+];
+
+document.addEventListener('DOMContentLoaded', () => {
+  loadStats(); loadCategories(); loadWorkers();
+  if (workerToken && workerData) showWorkerNav();
+  if (adminToken) showAdminBar();
+});
+
+async function api(method, path, body, token) {
+  const opts = {method, headers:{'Content-Type':'application/json'}};
+  if (token) opts.headers['Authorization'] = 'Bearer ' + token;
+  if (body) opts.body = JSON.stringify(body);
+  try { const res = await fetch(API + path, opts); return res.json(); }
+  catch(e) { return {success:false, message:'Network error'}; }
+}
+
+async function loadStats() {
+  const d = await api('GET','/api/workers/stats');
+  if(d.success){ animNum('sTotal',d.data.total); animNum('sAvail',d.data.available); animNum('sCities',d.data.cities); }
+}
+function animNum(id, target) {
+  const el = document.getElementById(id); if(!el) return;
+  let cur=0; const step=Math.ceil(target/30);
+  const t = setInterval(()=>{ cur=Math.min(cur+step,target); el.textContent=cur; if(cur>=target) clearInterval(t); },40);
+}
+
+async function loadCategories() {
+  const d = await api('GET','/api/workers/categories');
+  const counts = {}; if(d.success) d.data.forEach(r=>counts[r.skill]=r.count);
+  document.getElementById('categoriesGrid').innerHTML = CATS.map(c=>
+    '<div class="cat-card '+(currentCategory===c.name?'active':'')+'" onclick="selectCat(\''+c.name+'\')">'
+    +'<div class="cat-icon">'+c.icon+'</div>'
+    +'<div class="cat-name">'+c.name+'</div>'
+    +'<div class="cat-count">'+(counts[c.name]||0)+' worker'+(counts[c.name]!==1?'s':'')+'</div>'
+    +'</div>'
+  ).join('');
+}
+function selectCat(name) {
+  currentCategory = currentCategory===name ? '' : name;
+  document.getElementById('searchCategory').value = currentCategory;
+  loadCategories(); loadWorkers();
+  document.getElementById('workers-section').scrollIntoView({behavior:'smooth'});
+}
+
+async function loadWorkers() {
+  document.getElementById('workersGrid').innerHTML = '<div class="loading"><div class="spinner"></div></div>';
+  const p = new URLSearchParams();
+  if(currentCategory) p.set('skill',currentCategory);
+  if(currentCity) p.set('city',currentCity);
+  if(currentFilter!=='all') p.set('status',currentFilter);
+  const d = await api('GET','/api/workers?'+p);
+  const grid = document.getElementById('workersGrid');
+  if(!d.success||!d.data.length){ grid.innerHTML='<div class="empty-state"><div class="empty-icon">&#128269;</div><p>No workers found.<br>Try a different category or area.</p></div>'; return; }
+  grid.innerHTML = d.data.map(workerCard).join('');
+}
+
+function starsHTML(rating) {
+  let h='';
+  for(let i=1;i<=5;i++){
+    if(rating>=i) h+='<span class="star filled">&#9733;</span>';
+    else if(rating>=i-0.5) h+='<span class="star half">&#9733;</span>';
+    else h+='<span class="star">&#9733;</span>';
+  }
+  return h;
+}
+
+function workerCard(w) {
+  const initials=(w.name||'?').split(' ').map(n=>n[0]||'').join('').slice(0,2).toUpperCase();
+  const scol={available:'var(--green)',busy:'var(--yellow)',offline:'var(--text3)'};
+  const slabel={available:'Available Now',busy:'Busy',offline:'Offline'};
+  const rating=parseFloat(w.rating)||0;
+  return '<div class="worker-card" onclick="openWorkerDetail('+w.id+')">'
+    +'<div class="wc-top"><div class="wc-avatar">'+initials+'<div class="verified-badge">&#10003;</div></div>'
+    +'<div class="wc-info"><div class="wc-name">'+esc(w.name)+'</div>'
+    +'<div class="wc-tags"><span class="skill-tag">'+esc(w.skill)+'</span>'
+    +'<span class="status-tag"><span class="sdot '+w.status+'"></span><span style="color:'+(scol[w.status]||'#555')+'">'+(slabel[w.status]||'Offline')+'</span></span>'
+    +'</div></div></div>'
+    +'<div class="wc-meta">'
+    +'<div class="wc-meta-row"><span class="ic">&#128205;</span>'+esc(w.area)+', '+esc(w.city)+'</div>'
+    +'<div class="wc-meta-row"><span class="ic">&#128336;</span>'+w.experience+' years experience</div>'
+    +'</div>'
+    +'<div class="wc-rating"><div class="stars-row">'+starsHTML(rating)+'<span class="rating-num">'+rating.toFixed(1)+'</span><span class="rating-count">('+( w.total_reviews||0)+')</span></div>'
+    +'<span class="exp-badge">'+w.experience+'y exp</span></div>'
+    +'<div class="wc-actions" onclick="event.stopPropagation()">'
+    +'<button class="btn-call" onclick="trackAndCall('+w.id+')">&#128222; Call Now</button>'
+    +'<button class="btn-wa" onclick="trackAndWa('+w.id+')">&#128172;</button>'
+    +'<button class="btn-book" onclick="event.stopPropagation();openBooking('+w.id+',\''+esc(w.name)+'\')">&#128197;</button>'
+    +'</div></div>';
+}
+
+function setFilter(f,btn) {
+  currentFilter=f;
+  document.querySelectorAll('.ftab').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active'); loadWorkers();
+}
+function doSearch() {
+  currentCategory=document.getElementById('searchCategory').value;
+  currentCity=document.getElementById('searchCity').value.trim();
+  loadCategories(); loadWorkers();
+  document.getElementById('workers-section').scrollIntoView({behavior:'smooth'});
+}
+
+async function openWorkerDetail(id) {
+  openModal('workerDetailModal');
+  document.getElementById('workerDetailContent').innerHTML='<div class="loading"><div class="spinner"></div></div>';
+  const d = await api('GET','/api/workers/'+id);
+  if(!d.success){ document.getElementById('workerDetailContent').innerHTML='<p style="color:var(--text2)">Could not load details.</p>'; return; }
+  const w=d.data, initials=(w.name||'?').split(' ').map(n=>n[0]||'').join('').slice(0,2).toUpperCase();
+  const rating=parseFloat(w.rating)||0;
+  const revHTML=(w.reviews||[]).map(r=>
+    '<div class="review-card"><div class="review-header"><span class="review-name">'+esc(r.reviewer_name)+'</span><span class="review-stars">'+'&#9733;'.repeat(r.rating)+'</span></div>'
+    +(r.comment?'<div class="review-text">'+esc(r.comment)+'</div>':'')+' </div>'
+  ).join('');
+  document.getElementById('workerDetailContent').innerHTML=
+    '<div style="display:flex;gap:16px;align-items:center;margin-bottom:20px">'
+    +'<div style="width:72px;height:72px;border-radius:18px;flex-shrink:0;background:linear-gradient(135deg,var(--orange),#FF9A00);display:flex;align-items:center;justify-content:center;font-family:\'Clash Display\',sans-serif;font-size:1.8rem;font-weight:700;color:#fff;position:relative">'
+    +initials+'<div style="position:absolute;bottom:-4px;right:-4px;background:var(--blue);border-radius:50%;width:22px;height:22px;display:flex;align-items:center;justify-content:center;border:2px solid var(--bg2);font-size:0.65rem;color:#fff;font-weight:700">&#10003;</div></div>'
+    +'<div><div style="font-family:\'Clash Display\',sans-serif;font-size:1.25rem;font-weight:700;margin-bottom:6px">'+esc(w.name)+'</div>'
+    +'<div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap"><span class="skill-tag">'+esc(w.skill)+'</span>'
+    +'<div style="display:flex;align-items:center;gap:2px">'+starsHTML(rating)+'<span style="font-size:0.8rem;font-weight:700;margin-left:4px">'+rating.toFixed(1)+'</span></div>'
+    +'</div></div></div>'
+    +'<div class="wd-info-grid">'
+    +'<div class="wd-info-item"><div class="wd-info-label">Location</div><div class="wd-info-val">&#128205; '+esc(w.area)+', '+esc(w.city)+'</div></div>'
+    +'<div class="wd-info-item"><div class="wd-info-label">Experience</div><div class="wd-info-val">&#128336; '+w.experience+' years</div></div>'
+    +'<div class="wd-info-item"><div class="wd-info-label">Reviews</div><div class="wd-info-val">&#11088; '+(w.total_reviews||0)+' reviews</div></div>'
+    +'<div class="wd-info-item"><div class="wd-info-label">Joined</div><div class="wd-info-val">&#128197; '+new Date(w.created_at).toLocaleDateString('en-IN',{month:'short',year:'numeric'})+'</div></div>'
+    +'</div>'
+    +(w.about?'<p style="color:var(--text2);font-size:0.88rem;line-height:1.75;margin-bottom:18px;padding:14px;background:var(--bg3);border-radius:12px;border:1px solid var(--border)">'+esc(w.about)+'</p>':'')
+    +'<div style="display:flex;gap:8px;margin-bottom:20px">'
+    +'<button class="btn-call" onclick="trackAndCall('+w.id+')">&#128222; Call Now</button>'
+    +'<button class="btn-wa" style="flex:0;padding:11px 18px" onclick="trackAndWa('+w.id+')">&#128172; WhatsApp</button>'
+    +'</div>'
+    +(revHTML?'<div style="margin-bottom:18px"><div style="font-family:\'Clash Display\',sans-serif;font-size:0.95rem;font-weight:600;margin-bottom:8px">Reviews</div>'+revHTML+'</div>':'')
+    +'<div style="border-top:1px solid var(--border);padding-top:18px">'
+    +'<div style="font-family:\'Clash Display\',sans-serif;font-size:0.95rem;font-weight:600;margin-bottom:10px">Leave a Review</div>'
+    +'<input class="form-input" id="rv_name" placeholder="Your name" style="margin-bottom:10px"/>'
+    +'<div class="star-picker" id="starPicker">'+[1,2,3,4,5].map(n=>'<span class="star-pick" onclick="pickStar('+n+')" data-s="'+n+'">&#9733;</span>').join('')+'</div>'
+    +'<textarea class="form-textarea" id="rv_comment" placeholder="Share your experience..." style="min-height:70px;margin-bottom:10px"></textarea>'
+    +'<button class="form-submit" style="padding:11px" onclick="submitReview('+w.id+')">Submit Review &#8594;</button>'
+    +'</div>';
+}
+
+let pickedStar=0;
+function pickStar(n) {
+  pickedStar=n;
+  document.querySelectorAll('.star-pick').forEach(s=>s.classList.toggle('on',parseInt(s.dataset.s)<=n));
+}
+async function submitReview(workerId) {
+  const name=document.getElementById('rv_name').value.trim();
+  const comment=document.getElementById('rv_comment').value.trim();
+  if(!name||!pickedStar){ showToast('Name and rating required','error'); return; }
+  const d=await api('POST','/api/workers/'+workerId+'/review',{reviewer_name:name,rating:pickedStar,comment});
+  if(d.success){ showToast('Review submitted!','success'); openWorkerDetail(workerId); }
+  else showToast(d.message||'Error','error');
+}
+
+// ── CALL & WHATSAPP FIX — phone fetched from API ──
+async function trackAndCall(id) {
+  await api('POST','/api/workers/'+id+'/track',{type:'call'});
+  const d = await api('GET','/api/workers/'+id);
+  if(d.success && d.data && d.data.phone) window.location.href='tel:'+d.data.phone;
+  else showToast('Could not get phone number','error');
+}
+async function trackAndWa(id) {
+  const d = await api('GET', '/api/workers/' + id);
+  if (d.success && d.data && d.data.phone) {
+    const msg = 'Hi ' + encodeURIComponent(d.data.name) + ', I found you on LocalFix. I need your ' + encodeURIComponent(d.data.skill) + ' service. Are you available?';
+    await api('POST', '/api/workers/' + id + '/track', {type:'whatsapp'});
+    window.location.href = 'https://wa.me/91' + d.data.phone + '?text=' + msg;
+  } else {
+    showToast('Could not get WhatsApp number', 'error');
+  }
+}
+
+async function doRegister() {
+  const btn=document.getElementById('regBtn');
+  const body={name:document.getElementById('r_name').value.trim(),phone:document.getElementById('r_phone').value.trim(),skill:document.getElementById('r_skill').value,experience:document.getElementById('r_exp').value,city:document.getElementById('r_city').value.trim(),area:document.getElementById('r_area').value.trim(),about:document.getElementById('r_about').value.trim(),password:document.getElementById('r_pass').value};
+  if(!body.name||!body.phone||!body.skill||!body.experience||!body.city||!body.area||!body.password){ showToast('Please fill all required fields','error'); return; }
+  btn.disabled=true; btn.textContent='Creating...';
+  const d=await api('POST','/api/workers/register',body);
+  btn.disabled=false; btn.textContent='Create Profile \u2192';
+  if(d.success){ document.getElementById('registerFormWrap').innerHTML='<div class="success-msg"><div class="success-icon">&#127881;</div><h3>Profile Created!</h3><p>Your registration is submitted.<br>You\'ll appear on the site once admin approves your profile.</p><p style="margin-top:10px;font-size:0.75rem;color:var(--text3)">Worker ID: #'+d.workerId+'</p></div>'; loadStats(); loadCategories(); }
+  else showToast(d.message||'Registration failed','error');
+}
+
+async function doLogin() {
+  const phone=document.getElementById('l_phone').value.trim(), password=document.getElementById('l_pass').value;
+  if(!phone||!password){ showToast('Phone and password required','error'); return; }
+  const d=await api('POST','/api/auth/login',{phone,password});
+  if(d.success){ workerToken=d.token; workerData=d.worker; localStorage.setItem('lf_wtoken',workerToken); localStorage.setItem('lf_wdata',JSON.stringify(workerData)); closeModal('loginModal'); showWorkerNav(); openWorkerDash(); showToast('Welcome back, '+workerData.name.split(' ')[0]+'!','success'); }
+  else showToast(d.message||'Login failed','error');
+}
+
+function showWorkerNav() {
+  document.getElementById('navLinks').innerHTML='<span style="font-size:0.82rem;color:var(--text2)">Hi, '+esc(workerData.name.split(' ')[0])+'</span><button class="nav-btn ghost" onclick="openWorkerDash()">My Profile</button><button class="nav-btn ghost" style="color:var(--red);border-color:rgba(255,68,68,0.3);font-size:0.8rem" onclick="doLogout()">Logout</button>';
+}
+
+async function openWorkerDash() {
+  openModal('wDashModal');
+  const d=await api('GET','/api/auth/me',null,workerToken);
+  if(!d.success){ doLogout(); return; }
+  const w=d.data; workerData=w; localStorage.setItem('lf_wdata',JSON.stringify(w));
+  document.getElementById('wd_name').textContent=w.name;
+  document.getElementById('wd_sub').textContent=w.skill+' \u2022 '+w.area+', '+w.city;
+  document.getElementById('wd_about').value=w.about||'';
+  document.getElementById('wd_city').value=w.city;
+  document.getElementById('wd_area').value=w.area;
+  document.getElementById('wd_views').textContent=w.profile_views||0;
+  document.getElementById('wd_calls').textContent=w.call_clicks||0;
+  document.getElementById('wd_wa').textContent=w.whatsapp_clicks||0;
+  ['Avail','Busy','Offline'].forEach(k=>document.getElementById('sBtn'+k).classList.remove('active'));
+  const map={available:'Avail',busy:'Busy',offline:'Offline'};
+  if(map[w.status]) document.getElementById('sBtn'+map[w.status]).classList.add('active');
+}
+
+async function setStatus(s) {
+  const d=await api('PUT','/api/workers/profile',{status:s},workerToken);
+  if(d.success){ workerData.status=s; localStorage.setItem('lf_wdata',JSON.stringify(workerData)); ['Avail','Busy','Offline'].forEach(k=>document.getElementById('sBtn'+k).classList.remove('active')); const map={available:'Avail',busy:'Busy',offline:'Offline'}; if(map[s]) document.getElementById('sBtn'+map[s]).classList.add('active'); loadWorkers(); loadStats(); showToast('Status updated!','success'); }
+  else showToast(d.message||'Error','error');
+}
+
+async function updateProfile() {
+  const about=document.getElementById('wd_about').value.trim(), city=document.getElementById('wd_city').value.trim(), area=document.getElementById('wd_area').value.trim();
+  if(!city||!area){ showToast('City and area required','error'); return; }
+  const d=await api('PUT','/api/workers/profile',{about,city,area},workerToken);
+  if(d.success){ workerData=Object.assign({},workerData,{about,city,area}); localStorage.setItem('lf_wdata',JSON.stringify(workerData)); document.getElementById('wd_sub').textContent=workerData.skill+' \u2022 '+area+', '+city; loadWorkers(); loadCategories(); showToast('Profile updated!','success'); closeModal('wDashModal'); }
+  else showToast(d.message||'Error','error');
+}
+
+function doLogout() {
+  workerToken=null; workerData=null;
+  localStorage.removeItem('lf_wtoken'); localStorage.removeItem('lf_wdata');
+  closeModal('wDashModal');
+  document.getElementById('navLinks').innerHTML='<button class="nav-btn ghost" onclick="openModal(\'loginModal\')">Login</button><button class="nav-btn primary" onclick="openModal(\'registerModal\')">Join as Worker</button><button class="nav-btn ghost sm" onclick="openModal(\'adminLoginModal\')">Admin</button>';
+  showToast('Logged out','success');
+}
+
+async function doAdminLogin() {
+  const username=document.getElementById('a_user').value.trim(), password=document.getElementById('a_pass').value;
+  const d=await api('POST','/api/admin/login',{username,password});
+  if(d.success){ adminToken=d.token; localStorage.setItem('lf_atoken',adminToken); closeModal('adminLoginModal'); showAdminBar(); loadAdminDash(); openModal('adminDashModal'); showToast('Welcome, Admin!','success'); }
+  else showToast(d.message||'Invalid credentials','error');
+}
+function showAdminBar(){ document.getElementById('adminBar').style.display='flex'; }
+function adminLogout(){ adminToken=null; localStorage.removeItem('lf_atoken'); document.getElementById('adminBar').style.display='none'; showToast('Admin logged out','success'); }
+
+async function loadAdminDash() {
+  document.getElementById('adminDashContent').innerHTML='<div class="loading"><div class="spinner"></div></div>';
+  const dash=await api('GET','/api/admin/dashboard',null,adminToken);
+  const analytics=await api('GET','/api/admin/analytics?days=7',null,adminToken);
+  const workersData=await api('GET','/api/admin/workers?limit=50',null,adminToken);
+  if(!dash.success){ document.getElementById('adminDashContent').innerHTML='<p style="color:var(--red)">Failed to load. Please re-login.</p>'; return; }
+  const d=dash.data, ev=d.eventTotals||{};
+  let barsHtml='';
+  if(analytics.success && analytics.data.dailyEvents.length){
+    const maxVal=Math.max(...analytics.data.dailyEvents.map(e=>(e.views||0)+(e.calls||0)+(e.whatsapp||0)),1);
+    barsHtml='<div class="chart-wrap"><div class="chart-title">Activity Last 7 Days</div><div class="bar-chart">'
+      +analytics.data.dailyEvents.map(e=>{const total=(e.views||0)+(e.calls||0)+(e.whatsapp||0);const h=Math.max(3,Math.round((total/maxVal)*70));const date=new Date(e.date).toLocaleDateString('en-IN',{day:'numeric',month:'short'});return '<div class="bar-wrap"><div class="bar" style="height:'+h+'px"></div><div class="bar-label">'+date+'</div></div>';}).join('')
+      +'</div></div>';
+  }
+  const workers=workersData.data||[];
+  const pendingFirst=workers.filter(w=>w.status==='pending').concat(workers.filter(w=>w.status!=='pending'));
+  const scol={available:'var(--green)',busy:'var(--yellow)',offline:'var(--text3)',pending:'var(--orange)'};
+  const rowsHtml=pendingFirst.map(w=>{
+    const initials=(w.name||'?').split(' ').map(n=>n[0]||'').join('').slice(0,2).toUpperCase()||'??';
+    const actionBtns=w.status==='pending'
+      ?'<button class="admin-btn approve" onclick="adminApprove('+w.id+')">&#10003; Approve</button><button class="admin-btn reject" onclick="adminReject('+w.id+')">&#10005; Reject</button>'
+      :'<button class="admin-btn reject" onclick="adminReject('+w.id+')">&#128683; Remove</button>';
+    return '<div class="admin-worker-row" id="awr_'+w.id+'"><div class="admin-worker-avatar">'+initials+'</div>'
+      +'<div style="flex:1;min-width:0"><div style="font-weight:700;font-size:0.9rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+esc(w.name||'')+'</div>'
+      +'<div style="font-size:0.72rem;color:var(--text2)">'+esc(w.skill||'')+' &bull; '+esc(w.city||'')+' &bull; &#128222; '+esc(w.phone||'')+'</div></div>'
+      +'<div style="display:flex;align-items:center;gap:5px;flex-shrink:0"><div style="width:6px;height:6px;border-radius:50%;background:'+(scol[w.status]||'#555')+'"></div>'
+      +'<span style="font-size:0.7rem;color:'+(scol[w.status]||'#555')+';font-weight:700">'+(w.status||'').toUpperCase()+'</span></div>'
+      +'<div class="admin-actions">'+actionBtns+'<button class="admin-btn delete" onclick="adminDelete('+w.id+')">&#128465;</button></div></div>';
+  }).join('');
+
+  document.getElementById('adminDashContent').innerHTML=
+    '<div class="admin-stat-grid">'
+    +'<div class="admin-stat-card"><div class="admin-stat-val" style="color:var(--orange)">'+(d.totals.total||0)+'</div><div class="admin-stat-label">Total</div></div>'
+    +'<div class="admin-stat-card"><div class="admin-stat-val" style="color:var(--yellow)">'+(d.totals.pending||0)+'</div><div class="admin-stat-label">Pending</div></div>'
+    +'<div class="admin-stat-card"><div class="admin-stat-val" style="color:var(--green)">'+(d.totals.available||0)+'</div><div class="admin-stat-label">Available</div></div>'
+    +'<div class="admin-stat-card"><div class="admin-stat-val" style="color:var(--blue)">'+(ev.total_views||0)+'</div><div class="admin-stat-label">Views</div></div>'
+    +'<div class="admin-stat-card"><div class="admin-stat-val" style="color:var(--orange)">'+(ev.total_calls||0)+'</div><div class="admin-stat-label">Calls</div></div>'
+    +'<div class="admin-stat-card"><div class="admin-stat-val" style="color:var(--green)">'+(ev.total_wa||0)+'</div><div class="admin-stat-label">WhatsApp</div></div>'
+    +'</div>'+barsHtml
+    +'<div style="margin-bottom:10px"><input class="form-input" placeholder="Search workers..." oninput="filterAdminList(this.value)"/></div>'
+    +'<div id="adminWorkerRows" style="display:flex;flex-direction:column;gap:8px;max-height:45vh;overflow-y:auto">'
+    +(rowsHtml||'<p style="color:var(--text2);text-align:center;padding:20px">No workers found</p>')+'</div>';
+}
+
+function filterAdminList(q){ q=q.toLowerCase(); document.querySelectorAll('#adminWorkerRows .admin-worker-row').forEach(row=>{row.style.display=row.textContent.toLowerCase().includes(q)?'flex':'none';}); }
+
+async function adminApprove(id){ const d=await api('PUT','/api/admin/workers/'+id+'/approve',null,adminToken); if(d.success){showToast('Worker approved!','success');loadAdminDash();loadWorkers();loadStats();loadCategories();}else showToast(d.message||'Error','error'); }
+async function adminReject(id){ if(!confirm('Remove this worker from the site?')) return; const d=await api('PUT','/api/admin/workers/'+id+'/reject',null,adminToken); if(d.success){showToast('Worker removed','success');loadAdminDash();loadWorkers();loadStats();loadCategories();}else showToast(d.message||'Error','error'); }
+async function adminDelete(id){ if(!confirm('Permanently delete? Cannot be undone.')) return; const d=await api('DELETE','/api/admin/workers/'+id,null,adminToken); if(d.success){showToast('Worker deleted','success');loadAdminDash();loadWorkers();loadStats();loadCategories();}else showToast(d.message||'Error','error'); }
+
+// openModal is overridden in new JS below
+function closeModal(id){ document.getElementById(id).classList.remove('open'); }
+function switchModal(c,o){ closeModal(c); openModal(o); }
+document.querySelectorAll('.modal-overlay').forEach(m=>{ m.addEventListener('click',e=>{if(e.target===m) m.classList.remove('open');}); });
+
+let toastT;
+function showToast(msg,type){ type=type||'success'; const t=document.getElementById('toast'); t.innerHTML=(type==='success'?'<span style="color:var(--green);font-size:1rem">&#10003;</span>':'<span style="color:var(--red);font-size:1rem">&#10005;</span>')+' '+msg; t.className='toast '+type+' show'; clearTimeout(toastT); toastT=setTimeout(()=>t.classList.remove('show'),3200); }
+
+function esc(str){ if(!str) return ''; return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+// ══ VOICE ASSISTANT ══
+const SKILL_KEYWORDS = {
+  'Plumber':['pipe','water','leak','tap','flush','toilet','bathroom','plumb'],
+  'Electrician':['electric','fan','light','wire','switch','power','current','bulb','socket','fuse'],
+  'Carpenter':['wood','door','window','furniture','cabinet','carpent'],
+  'Painter':['paint','wall','colour','color','brush'],
+  'AC Technician':['ac','air condition','cool','compressor','refriger','fridge'],
+  'Mason':['cement','brick','wall','plaster','construct'],
+  'Welder':['weld','iron','metal','gate','grill'],
+  'Cleaner':['clean','sweep','mop','wash','dust','dirt']
+};
+let recognition=null, isListening=false;
+function toggleVoice(){
+  if(!('webkitSpeechRecognition' in window)&&!('SpeechRecognition' in window)){showToast('Voice not supported in this browser','error');return;}
+  if(isListening){stopVoice();return;}startVoice();
+}
+function startVoice(){
+  const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+  recognition=new SR(); recognition.lang='en-IN'; recognition.continuous=false; recognition.interimResults=false;
+  recognition.onstart=()=>{isListening=true;document.getElementById('voiceBtn').classList.add('listening');showVoiceStatus('&#127908; Listening... Speak your problem');};
+  recognition.onresult=(e)=>{const t=e.results[0][0].transcript.toLowerCase();showVoiceStatus('You said: "'+t+'"');processVoice(t);};
+  recognition.onerror=()=>{stopVoice();showToast('Could not hear. Try again.','error');};
+  recognition.onend=()=>stopVoice();
+  recognition.start();
+}
+function stopVoice(){isListening=false;document.getElementById('voiceBtn').classList.remove('listening');if(recognition)recognition.stop();}
+function processVoice(text){
+  let detected='';
+  for(const[skill,keywords]of Object.entries(SKILL_KEYWORDS)){if(keywords.some(k=>text.includes(k))){detected=skill;break;}}
+  if(detected){
+    currentCategory=detected; document.getElementById('searchCategory').value=detected;
+    speak('I found '+detected+'s near you. Showing results now.');
+    showVoiceStatus('&#10003; Detected: '+detected+' — searching...');
+    loadCategories(); loadWorkers();
+    setTimeout(()=>{document.getElementById('workers-section').scrollIntoView({behavior:'smooth'});hideVoiceStatus();},2500);
+  } else {
+    speak('Sorry, could not detect service. Try again.');
+    showVoiceStatus('&#10005; Could not detect. Try "pipe leak" or "fan not working"');
+    setTimeout(hideVoiceStatus,3000);
+  }
+}
+function speak(text){if(!('speechSynthesis' in window))return;window.speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(text);u.lang='en-IN';u.rate=0.95;window.speechSynthesis.speak(u);}
+function showVoiceStatus(msg){const el=document.getElementById('voiceStatus');el.innerHTML=msg;el.style.display='block';}
+function hideVoiceStatus(){document.getElementById('voiceStatus').style.display='none';}
+
+// ══ NEARBY WORKERS ══
+let userToken=localStorage.getItem('lf_utoken')||null;
+let userData=JSON.parse(localStorage.getItem('lf_udata')||'null');
+
+function findNearby(){
+  if(!navigator.geolocation){showToast('Geolocation not supported','error');return;}
+  showToast('Getting your location...','success');
+  navigator.geolocation.getCurrentPosition(async pos=>{
+    const{latitude,longitude}=pos.coords;
+    const skill=document.getElementById('searchCategory').value;
+    let url='/api/nearby?lat='+latitude+'&lng='+longitude+'&radius=20';
+    if(skill) url+='&skill='+encodeURIComponent(skill);
+    const d=await api('GET',url);
+    if(d.success){
+      showToast('Found '+d.data.length+' workers near you','success');
+      renderNearbyWorkers(d.data);
+      document.getElementById('workers-section').scrollIntoView({behavior:'smooth'});
+    } else showToast('No nearby workers found','error');
+  },()=>showToast('Location access denied','error'));
+}
+
+function renderNearbyWorkers(workers){
+  const grid=document.getElementById('workersGrid');
+  if(!workers.length){grid.innerHTML='<div class="empty-state"><div class="empty-icon">&#128205;</div><p>No workers found within 20km.</p></div>';return;}
+  grid.innerHTML=workers.map(w=>{
+    const initials=(w.name||'?').split(' ').map(n=>n[0]||'').join('').slice(0,2).toUpperCase();
+    const scol={available:'var(--green)',busy:'var(--yellow)',offline:'var(--text3)'};
+    const slabel={available:'Available Now',busy:'Busy',offline:'Offline'};
+    const rating=parseFloat(w.rating)||0;
+    return '<div class="worker-card" onclick="openWorkerDetail('+w.id+')">'+
+      '<div class="wc-top"><div class="wc-avatar">'+initials+'<div class="verified-badge">&#10003;</div></div>'+
+      '<div class="wc-info"><div class="wc-name">'+esc(w.name)+'</div>'+
+      '<div class="wc-tags"><span class="skill-tag">'+esc(w.skill)+'</span>'+
+      '<span class="status-tag"><span class="sdot '+w.status+'"></span><span style="color:'+(scol[w.status]||'#555')+'">'+(slabel[w.status]||'Offline')+'</span></span>'+
+      '<span class="dist-badge">&#128205; '+w.distance.toFixed(1)+' km</span>'+
+      '</div></div></div>'+
+      '<div class="wc-meta">'+
+      '<div class="wc-meta-row"><span class="ic">&#128205;</span>'+esc(w.area)+', '+esc(w.city)+'</div>'+
+      '<div class="wc-meta-row"><span class="ic">&#128336;</span>'+w.experience+' years experience</div>'+
+      '</div>'+
+      '<div class="wc-rating"><div class="stars-row">'+starsHTML(rating)+'<span class="rating-num">'+rating.toFixed(1)+'</span><span class="rating-count">('+( w.total_reviews||0)+')</span></div>'+
+      '<span class="exp-badge">'+w.experience+'y exp</span></div>'+
+      '<div class="wc-actions" onclick="event.stopPropagation()">'+
+      '<button class="btn-call" onclick="trackAndCall('+w.id+')">&#128222; Call Now</button>'+
+      '<button class="btn-wa" onclick="trackAndWa('+w.id+')">&#128172;</button>'+
+      '<button class="btn-book" onclick="openBooking('+w.id+',''+esc(w.name)+'')">&#128197;</button>'+
+      '</div></div>';
+  }).join('');
+}
+
+// ══ MAP ══
+let mapInstance=null;
+function openModal(id){
+  document.getElementById(id).classList.add('open');
+  if(id==='mapModal') setTimeout(initMap,200);
+}
+function initMap(){
+  if(mapInstance){mapInstance.remove();mapInstance=null;}
+  if(typeof L==='undefined'){showToast('Map loading...','success');return;}
+  mapInstance=L.map('mapContainer').setView([26.7606,83.3732],12);
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:'&copy; OpenStreetMap contributors',maxZoom:18}).addTo(mapInstance);
+  if(navigator.geolocation){
+    navigator.geolocation.getCurrentPosition(pos=>{
+      const{latitude,longitude}=pos.coords;
+      mapInstance.setView([latitude,longitude],13);
+      L.circleMarker([latitude,longitude],{radius:10,fillColor:'#FF5C00',color:'#fff',weight:3,fillOpacity:1}).addTo(mapInstance).bindPopup('<b>&#128205; You are here</b>');
+      api('GET','/api/nearby?lat='+latitude+'&lng='+longitude+'&radius=30').then(d=>{
+        if(d.success) d.data.forEach(w=>{
+          if(!w.lat||!w.lng)return;
+          const popup='<b>'+esc(w.name)+'</b><br><span style="color:#FF5C00">'+esc(w.skill)+'</span> &bull; '+esc(w.city)+'<br>&#11088; '+parseFloat(w.rating||0).toFixed(1)+' &bull; '+w.distance.toFixed(1)+' km<br><button onclick="openWorkerDetail('+w.id+');closeModal('mapModal')" style="margin-top:6px;background:#FF5C00;color:#fff;border:none;padding:4px 10px;border-radius:6px;cursor:pointer;font-size:0.8rem">View Profile</button>';
+          L.marker([parseFloat(w.lat),parseFloat(w.lng)]).addTo(mapInstance).bindPopup(popup);
+        });
+      });
+    });
+  }
+}
+
+// ══ BOOKING ══
+function openBooking(workerId,workerName){
+  if(!userToken){showToast('Please sign in to book','error');openModal('userLoginModal');return;}
+  document.getElementById('booking_worker_id').value=workerId;
+  document.getElementById('booking_worker_name').textContent='Booking for: '+workerName;
+  const today=new Date().toISOString().split('T')[0];
+  document.getElementById('b_date').min=today;
+  openModal('bookingModal');
+}
+async function doBooking(){
+  const worker_id=document.getElementById('booking_worker_id').value;
+  const booking_date=document.getElementById('b_date').value;
+  const booking_time=document.getElementById('b_time').value;
+  const note=document.getElementById('b_note').value.trim();
+  if(!booking_date||!booking_time){showToast('Date and time required','error');return;}
+  const d=await api('POST','/api/bookings',{worker_id,booking_date,booking_time,note},userToken);
+  if(d.success){closeModal('bookingModal');showToast('Booking sent! Worker will confirm soon.','success');}
+  else showToast(d.message||'Booking failed','error');
+}
+async function loadMyBookings(){
+  openModal('myBookingsModal');
+  document.getElementById('myBookingsContent').innerHTML='<div class="loading"><div class="spinner"></div></div>';
+  const d=await api('GET','/api/bookings/my',null,userToken);
+  if(!d.success||!d.data.length){document.getElementById('myBookingsContent').innerHTML='<p style="color:var(--text2);text-align:center;padding:20px">No bookings yet.</p>';return;}
+  document.getElementById('myBookingsContent').innerHTML=d.data.map(b=>
+    '<div class="admin-worker-row" style="margin-bottom:10px">'+
+    '<div style="flex:1"><div style="font-weight:700">'+esc(b.worker_name)+' <span class="skill-tag">'+esc(b.skill)+'</span></div>'+
+    '<div style="font-size:0.78rem;color:var(--text2);margin-top:4px">'+b.booking_date+' at '+b.booking_time+'</div>'+
+    (b.note?'<div style="font-size:0.78rem;color:var(--text3);margin-top:2px">'+esc(b.note)+'</div>':'')+
+    '</div><span class="booking-badge '+b.status+'">'+b.status.toUpperCase()+'</span></div>'
+  ).join('');
+}
+async function openWorkerBookings(){
+  openModal('workerBookingsModal');
+  document.getElementById('workerBookingsContent').innerHTML='<div class="loading"><div class="spinner"></div></div>';
+  const d=await api('GET','/api/bookings/worker',null,workerToken);
+  if(!d.success||!d.data.length){document.getElementById('workerBookingsContent').innerHTML='<p style="color:var(--text2);text-align:center;padding:20px">No booking requests yet.</p>';return;}
+  document.getElementById('workerBookingsContent').innerHTML=d.data.map(b=>
+    '<div class="admin-worker-row" style="margin-bottom:10px">'+
+    '<div style="flex:1"><div style="font-weight:700">'+esc(b.user_name)+'</div>'+
+    '<div style="font-size:0.78rem;color:var(--text2);margin-top:4px">'+b.booking_date+' at '+b.booking_time+'</div>'+
+    (b.note?'<div style="font-size:0.78rem;color:var(--text3);margin-top:2px">'+esc(b.note)+'</div>':'')+
+    '</div><span class="booking-badge '+b.status+'">'+b.status.toUpperCase()+'</span>'+
+    (b.status==='pending'?'<div class="admin-actions"><button class="admin-btn approve" onclick="respondBooking('+b.id+','accepted')">&#10003; Accept</button><button class="admin-btn delete" onclick="respondBooking('+b.id+','rejected')">&#10005; Reject</button></div>':
+    (b.status==='accepted'?'<button class="admin-btn approve" onclick="respondBooking('+b.id+','completed')">&#9989; Done</button>':''))+
+    '</div>'
+  ).join('');
+}
+async function respondBooking(id,status){
+  const d=await api('PUT','/api/bookings/'+id+'/status',{status},workerToken);
+  if(d.success){showToast('Booking '+status,'success');openWorkerBookings();}else showToast(d.message||'Error','error');
+}
+
+// ══ USER AUTH ══
+async function doUserLogin(){
+  const email=document.getElementById('ul_email').value.trim(), password=document.getElementById('ul_pass').value;
+  if(!email||!password){showToast('Email and password required','error');return;}
+  const d=await api('POST','/api/users/login',{email,password});
+  if(d.success){userToken=d.token;userData=d.user;localStorage.setItem('lf_utoken',userToken);localStorage.setItem('lf_udata',JSON.stringify(userData));closeModal('userLoginModal');showUserNav();showToast('Welcome, '+userData.name.split(' ')[0]+'!','success');}
+  else showToast(d.message||'Login failed','error');
+}
+async function doUserRegister(){
+  const name=document.getElementById('ur_name').value.trim(), email=document.getElementById('ur_email').value.trim(), password=document.getElementById('ur_pass').value;
+  if(!name||!email||!password){showToast('All fields required','error');return;}
+  const d=await api('POST','/api/users/register',{name,email,password});
+  if(d.success){userToken=d.token;userData=d.user;localStorage.setItem('lf_utoken',userToken);localStorage.setItem('lf_udata',JSON.stringify(userData));closeModal('userRegModal');showUserNav();showToast('Account created! Welcome, '+userData.name.split(' ')[0]+'!','success');}
+  else showToast(d.message||'Registration failed','error');
+}
+function showUserNav(){
+  if(document.getElementById('userNavSpan'))return;
+  const nav=document.getElementById('navLinks');
+  const span=document.createElement('div');span.id='userNavSpan';span.style.cssText='display:flex;align-items:center;gap:8px';
+  span.innerHTML='<span style="font-size:0.8rem;color:var(--green)">&#128100; '+esc(userData.name.split(' ')[0])+'</span>'+
+    '<button class="nav-btn ghost" style="font-size:0.78rem;padding:6px 12px" onclick="loadMyBookings()">My Bookings</button>'+
+    '<button class="nav-btn ghost" style="font-size:0.72rem;padding:5px 10px;color:var(--red);border-color:rgba(255,68,68,0.3)" onclick="userLogout()">Sign Out</button>';
+  nav.insertBefore(span,nav.firstChild);
+}
+function userLogout(){
+  userToken=null;userData=null;
+  localStorage.removeItem('lf_utoken');localStorage.removeItem('lf_udata');
+  const s=document.getElementById('userNavSpan');if(s)s.remove();
+  showToast('Signed out','success');
+}
+
+// ══ SECURE REVIEW ══
+async function submitSecureReview(workerId){
+  if(!userToken){showToast('Please sign in to review','error');return;}
+  const comment=document.getElementById('rv_comment')?.value.trim();
+  if(!pickedStar){showToast('Please select a rating','error');return;}
+  const d=await api('POST','/api/ratings',{worker_id:workerId,rating:pickedStar,review:comment},userToken);
+  if(d.success){showToast('Review submitted!','success');openWorkerDetail(workerId);pickedStar=0;}
+  else showToast(d.message||'Error','error');
+}
+
+// Init user session on load
+document.addEventListener('DOMContentLoaded',()=>{
+  if(userToken&&userData) showUserNav();
+});
+
+</script>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+</body>
+</html>
