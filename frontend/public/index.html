@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>LocalFix — Find Verified Local Workers</title>
+  <title>LocalFix -- Find Verified Local Workers</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Clash+Display:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
@@ -281,7 +281,7 @@ footer { background:var(--bg2); border-top:1px solid var(--border); padding:40px
   <div class="hero-content">
     <div class="hero-eyebrow"><span class="live-dot"></span>Verified professionals near you</div>
     <h1>Find Trusted <span class="hl">Local Workers</span><br>In Minutes</h1>
-    <p class="hero-sub">Plumbers, electricians, carpenters &amp; more — verified, rated, and ready to help right now.</p>
+    <p class="hero-sub">Plumbers, electricians, carpenters &amp; more -- verified, rated, and ready to help right now.</p>
     <div id="voiceStatus"></div>
     <div class="search-wrap">
       <select id="searchCategory">
@@ -336,7 +336,7 @@ footer { background:var(--bg2); border-top:1px solid var(--border); padding:40px
   <div class="steps-grid">
     <div class="step-card"><div class="step-num">01</div><div class="step-title">Search Your Need</div><div class="step-desc">Choose service, enter city or area to find verified workers instantly.</div></div>
     <div class="step-card"><div class="step-num">02</div><div class="step-title">See Verified Profiles</div><div class="step-desc">Browse workers with skills, experience, ratings, and verified badges.</div></div>
-    <div class="step-card"><div class="step-num">03</div><div class="step-title">Call or WhatsApp</div><div class="step-desc">Contact directly — no middleman, no commission. One tap away.</div></div>
+    <div class="step-card"><div class="step-num">03</div><div class="step-title">Call or WhatsApp</div><div class="step-desc">Contact directly -- no middleman, no commission. One tap away.</div></div>
     <div class="step-card"><div class="step-num">04</div><div class="step-title">Job Done &#10003;</div><div class="step-desc">Worker arrives, fixes the problem. Leave a review to help others.</div></div>
   </div>
 </section>
@@ -432,7 +432,7 @@ footer { background:var(--bg2); border-top:1px solid var(--border); padding:40px
   <div class="modal">
     <button class="modal-close" onclick="closeModal('registerModal')">&#10005;</button>
     <h2>Join as Worker</h2>
-    <p class="modal-sub">Create your profile — customers will find you directly.</p>
+    <p class="modal-sub">Create your profile -- customers will find you directly.</p>
     <div id="registerFormWrap">
       <div class="form-row">
         <div class="form-group"><label class="form-label">Full Name *</label><input class="form-input" id="r_name" placeholder="Ramesh Kumar"/></div>
@@ -712,7 +712,7 @@ if(d.success){ showToast(‘Review submitted!’,‘success’); openWorkerDetai
 else showToast(d.message||‘Error’,‘error’);
 }
 
-// ── CALL & WHATSAPP FIX — phone fetched from API ──
+//  CALL & WHATSAPP FIX – phone fetched from API
 async function trackAndCall(id) {
 await api(‘POST’,’/api/workers/’+id+’/track’,{type:‘call’});
 const d = await api(‘GET’,’/api/workers/’+id);
@@ -865,9 +865,9 @@ function showToast(msg,type){ type=type||‘success’; const t=document.getElem
 
 function esc(str){ if(!str) return ‘’; return String(str).replace(/&/g,’&’).replace(/</g,’<’).replace(/>/g,’>’).replace(/”/g,’"’); }
 
-// ═══════════════════════════════
+// ===============================
 // USER AUTH
-// ═══════════════════════════════
+// ===============================
 let userToken = localStorage.getItem(‘lf_utoken’) || null;
 let userData  = JSON.parse(localStorage.getItem(‘lf_udata’) || ‘null’);
 
@@ -925,9 +925,9 @@ if(s) s.remove();
 showToast(‘Signed out’,‘success’);
 }
 
-// ═══════════════════════════════
+// ===============================
 // VOICE ASSISTANT
-// ═══════════════════════════════
+// ===============================
 const SKILL_KW = {
 ‘Plumber’:[‘pipe’,‘water’,‘leak’,‘tap’,‘flush’,‘toilet’,‘bathroom’,‘plumb’],
 ‘Electrician’:[‘electric’,‘fan’,‘light’,‘wire’,‘switch’,‘power’,‘bulb’,‘socket’,‘fuse’],
@@ -984,7 +984,7 @@ if(detected){
 currentCategory=detected;
 document.getElementById(‘searchCategory’).value=detected;
 speak(‘I found ‘+detected+‘s near you. Showing results now.’);
-showVoiceStatus(’✓ Detected: ‘+detected+’ — showing results…’);
+showVoiceStatus(’✓ Detected: ‘+detected+’ – showing results…’);
 loadCategories(); loadWorkers();
 setTimeout(()=>{
 document.getElementById(‘workers-section’).scrollIntoView({behavior:‘smooth’});
@@ -1014,9 +1014,9 @@ const el=document.getElementById(‘voiceStatus’);
 if(el) el.style.display=‘none’;
 }
 
-// ═══════════════════════════════
+// ===============================
 // NEARBY WORKERS
-// ═══════════════════════════════
+// ===============================
 function findNearby(){
 if(!navigator.geolocation){showToast(‘Geolocation not supported’,‘error’);return;}
 showToast(‘Getting your location…’,‘success’);
@@ -1062,9 +1062,9 @@ document.getElementById(‘workers-section’).scrollIntoView({behavior:‘smoot
 },()=>showToast(‘Location access denied. Please allow location.’,‘error’));
 }
 
-// ═══════════════════════════════
+// ===============================
 // MAP
-// ═══════════════════════════════
+// ===============================
 let mapInstance=null;
 
 function initMap(){
@@ -1097,9 +1097,9 @@ L.marker([parseFloat(w.lat),parseFloat(w.lng)]).addTo(mapInstance).bindPopup(pop
 }
 }
 
-// ═══════════════════════════════
+// ===============================
 // BOOKING
-// ═══════════════════════════════
+// ===============================
 function openBooking(workerId,workerName){
 if(!userToken){
 showToast(‘Please sign in to book’,‘error’);
@@ -1180,9 +1180,9 @@ if(d.success){showToast(’Booking ’+status,‘success’);openWorkerBookings(
 else showToast(d.message||‘Error’,‘error’);
 }
 
-// ═══════════════════════════════
+// ===============================
 // SECURE REVIEW
-// ═══════════════════════════════
+// ===============================
 async function submitSecureReview(workerId){
 if(!userToken){showToast(‘Please sign in to review’,‘error’);return;}
 const comment=document.getElementById(‘rv_comment’)?.value.trim()||’’;
