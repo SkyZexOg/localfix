@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>LocalFix â€” Find Verified Local Workers</title>
+  <title>LocalFix - Find Verified Local Workers</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Clash+Display:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
@@ -340,7 +340,7 @@
 <footer>
   <div class="footer-logo">Local<span>Fix</span></div>
   <p style="color:var(--text2);font-size:0.85rem;margin-top:6px">Connecting people with trusted local professionals.</p>
-  <p style="color:var(--text3);font-size:0.78rem;margin-top:14px">&#169; 2025 LocalFix &#183; Designed by <span style="color:var(--orange);font-weight:600">Rajan Vishwakarma</span></p>
+  <p style="color:var(--text3);font-size:0.78rem;margin-top:14px">&#169; 2026 LocalFix &#183; Designed by <span style="color:var(--orange);font-weight:600">Rajan Vishwakarma</span></p>
 </footer>
 
 <div class="toast" id="toast"></div>
@@ -532,7 +532,7 @@ let currentFilter = 'all', currentCategory = '', currentCity = '';
 
 const CATS = [
   {name:'Plumber',icon:'&#128295;'},{name:'Electrician',icon:'&#9889;'},
-  {name:'Carpenter',icon:'&#129578;'},{name:'Painter',icon:'&#127912;'},
+  {name:'Carpenter',icon:'&#128736;'},{name:'Painter',icon:'&#127912;'},
   {name:'AC Technician',icon:'&#10052;'},{name:'Mason',icon:'&#129521;'},
   {name:'Welder',icon:'&#128297;'},{name:'Cleaner',icon:'&#129529;'}
 ];
@@ -606,7 +606,7 @@ function workerCard(w) {
   const scol={available:'var(--green)',busy:'var(--yellow)',offline:'var(--text3)'};
   const slabel={available:'Available Now',busy:'Busy',offline:'Offline'};
   const rating=parseFloat(w.rating)||0;
-  return '<div class="worker-card" onclick="openWorkerDetail('+w.id+')">'
+  return 'onclick="event.stopPropagation();trackAndCall('+w.id+')"
     +'<div class="wc-top"><div class="wc-avatar">'+initials+'<div class="verified-badge">&#10003;</div></div>'
     +'<div class="wc-info"><div class="wc-name">'+esc(w.name)+'</div>'
     +'<div class="wc-tags"><span class="skill-tag">'+esc(w.skill)+'</span>'
@@ -619,7 +619,7 @@ function workerCard(w) {
     +'<div class="wc-rating"><div class="stars-row">'+starsHTML(rating)+'<span class="rating-num">'+rating.toFixed(1)+'</span><span class="rating-count">('+( w.total_reviews||0)+')</span></div>'
     +'<span class="exp-badge">'+w.experience+'y exp</span></div>'
     +'<div class="wc-actions" onclick="event.stopPropagation()">'
-    +'<button class="btn-call" onclick="trackAndCall('+w.id+')">&#128222; Call Now</button>'
+    +'onclick="event.stopPropagation();trackAndWa('+w.id+')"&#128222; Call Now</button>'
     +'<button class="btn-wa" onclick="trackAndWa('+w.id+')">&#128172;</button>'
     +'<button class="btn-book" onclick="event.stopPropagation();openBooking('+w.id+',\''+escJsSingle(w.name)+'\')">&#128197;</button>'
     +'</div></div>';
@@ -664,7 +664,7 @@ async function openWorkerDetail(id) {
     +'</div>'
     +(w.about?'<p style="color:var(--text2);font-size:0.88rem;line-height:1.75;margin-bottom:18px;padding:14px;background:var(--bg3);border-radius:12px;border:1px solid var(--border)">'+esc(w.about)+'</p>':'')
     +'<div style="display:flex;gap:8px;margin-bottom:20px">'
-    +'<button class="btn-call" onclick="trackAndCall('+w.id+')">&#128222; Call Now</button>'
+    +'onclick="event.stopPropagation();trackAndWa('+w.id+')"&#128222; Call Now</button>'
     +'<button class="btn-wa" style="flex:0;padding:11px 18px" onclick="trackAndWa('+w.id+')">&#128172; WhatsApp</button>'
     +'</div>'
     +(revHTML?'<div style="margin-bottom:18px"><div style="font-family:\'Clash Display\',sans-serif;font-size:0.95rem;font-weight:600;margin-bottom:8px">Reviews</div>'+revHTML+'</div>':'')
@@ -682,7 +682,7 @@ function pickStar(n) {
   pickedStar=n;
   document.querySelectorAll('.star-pick').forEach(s=>s.classList.toggle('on',parseInt(s.dataset.s)<=n));
 }
-async function submitReview(workerId) {
+async function onclick="submitReview( {
   const name=document.getElementById('rv_name').value.trim();
   const comment=document.getElementById('rv_comment').value.trim();
   if(!name||!pickedStar){ showToast('Name and rating required','error'); return; }
@@ -711,7 +711,7 @@ async function trackAndWa(id) {
 
 async function doRegister() {
   const btn=document.getElementById('regBtn');
-  const body={name:document.getElementById('r_name').value.trim(),phone:document.getElementById('r_phone').value.trim(),skill:document.getElementById('r_skill').value,experience:document.getElementById('r_exp').value,city:document.getElementById('r_city').value.trim(),area:document.getElementById('r_area').value.trim(),about:document.getElementById('r_about').value.trim(),password:document.getElementById('r_pass').value};
+  const body={name:document.getElementById('r_name').value.trim(),if(!/^[6-9]\d{9}$/.test(body.phone)){   showToast('Enter valid mobile number','error');   return; },skill:document.getElementById('r_skill').value,experience:document.getElementById('r_exp').value,city:document.getElementById('r_city').value.trim(),area:document.getElementById('r_area').value.trim(),about:document.getElementById('r_about').value.trim(),password:document.getElementById('r_pass').value};
   if(!body.name||!body.phone||!body.skill||!body.experience||!body.city||!body.area||!body.password){ showToast('Please fill all required fields','error'); return; }
   btn.disabled=true; btn.textContent='Creating...';
   const d=await api('POST','/api/workers/register',body);
@@ -930,7 +930,7 @@ function renderNearbyWorkers(workers){
       '<div class="wc-rating"><div class="stars-row">'+starsHTML(rating)+'<span class="rating-num">'+rating.toFixed(1)+'</span><span class="rating-count">('+( w.total_reviews||0)+')</span></div>'+
       '<span class="exp-badge">'+w.experience+'y exp</span></div>'+
       '<div class="wc-actions" onclick="event.stopPropagation()">'+
-      '<button class="btn-call" onclick="trackAndCall('+w.id+')">&#128222; Call Now</button>'+
+      'onclick="event.stopPropagation();trackAndWa('+w.id+')"&#128222; Call Now</button>'+
       '<button class="btn-wa" onclick="trackAndWa('+w.id+')">&#128172;</button>'+
       '<button class="btn-book" onclick="openBooking('+w.id+',\''+escJsSingle(w.name)+'\')">&#128197;</button>'+
       '</div></div>';
@@ -1052,7 +1052,7 @@ function userLogout(){
 }
 
 // Secure review
-async function submitSecureReview(workerId){
+async function onclick="submitSecureReview({
   if(!userToken){showToast('Please sign in to review','error');return;}
   const comment=document.getElementById('rv_comment')?.value.trim();
   if(!pickedStar){showToast('Please select a rating','error');return;}
