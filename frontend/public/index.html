@@ -231,26 +231,22 @@
       .hero-stats { gap:24px; }
     }
 
-    /* Voice button */
-    .voice-btn { background:var(--bg4); border:1px solid var(--border2); border-radius:12px; padding:13px 16px; cursor:pointer; font-size:1.2rem; transition:all 0.2s; color:var(--text2); }
-    .voice-btn:hover { border-color:var(--orange); color:var(--orange); }
-    .voice-btn.listening { background:rgba(255,92,0,0.15); border-color:var(--orange); color:var(--orange); animation:voicePulse 1s infinite; }
-    @keyframes voicePulse { 0%,100%{box-shadow:0 0 0 0 rgba(255,92,0,0.4)} 50%{box-shadow:0 0 0 8px rgba(255,92,0,0)} }
-    .nearby-btn { background:var(--bg4); border:1px solid var(--border2); border-radius:12px; padding:10px 18px; cursor:pointer; font-size:0.85rem; font-weight:600; color:var(--text2); transition:all 0.2s; display:inline-flex; align-items:center; gap:6px; }
-    .nearby-btn:hover { border-color:var(--blue); color:var(--blue); }
-    #voiceStatus { display:none; background:rgba(255,92,0,0.1); border:1px solid rgba(255,92,0,0.3); border-radius:12px; padding:10px 16px; margin:0 auto 16px; max-width:720px; font-size:0.88rem; color:var(--orange); text-align:center; }
-    .dist-badge { font-size:0.68rem; font-weight:700; background:rgba(74,158,255,0.1); color:var(--blue); border:1px solid rgba(74,158,255,0.2); padding:2px 8px; border-radius:5px; }
-    .btn-book { padding:11px 14px; border-radius:12px; background:rgba(74,158,255,0.1); color:var(--blue); border:1px solid rgba(74,158,255,0.25); cursor:pointer; font-size:0.8rem; font-weight:700; transition:all 0.2s; }
-    .btn-book:hover { background:rgba(74,158,255,0.2); transform:translateY(-1px); }
-    #mapContainer { height:400px; border-radius:16px; overflow:hidden; border:1px solid var(--border); }
-    .leaflet-popup-content-wrapper { background:var(--bg3) !important; color:var(--text) !important; border:1px solid var(--border2) !important; border-radius:12px !important; }
-    .leaflet-popup-tip { background:var(--bg3) !important; }
-    .booking-badge { display:inline-block; padding:3px 10px; border-radius:6px; font-size:0.72rem; font-weight:700; }
-    .booking-badge.pending { background:rgba(255,184,0,0.15); color:var(--yellow); }
-    .booking-badge.accepted { background:rgba(0,208,132,0.15); color:var(--green); }
-    .booking-badge.rejected { background:rgba(255,68,68,0.15); color:var(--red); }
-    .booking-badge.completed { background:rgba(74,158,255,0.15); color:var(--blue); }
+    .voice-btn{background:var(--bg4);border:1px solid var(--border2);border-radius:12px;padding:13px 16px;cursor:pointer;font-size:1.2rem;transition:all 0.2s;color:var(--text2);}
+    .voice-btn:hover,.voice-btn.listening{border-color:var(--orange);color:var(--orange);}
+    .voice-btn.listening{background:rgba(255,92,0,0.15);}
+    .nearby-btn{background:var(--bg4);border:1px solid var(--border2);border-radius:12px;padding:10px 18px;cursor:pointer;font-size:0.85rem;font-weight:600;color:var(--text2);transition:all 0.2s;display:inline-flex;align-items:center;gap:6px;}
+    .nearby-btn:hover{border-color:var(--blue);color:var(--blue);}
+    #voiceStatus{display:none;background:rgba(255,92,0,0.1);border:1px solid rgba(255,92,0,0.3);border-radius:12px;padding:10px 16px;margin:0 auto 16px;max-width:720px;font-size:0.88rem;color:var(--orange);text-align:center;}
+    .dist-badge{font-size:0.68rem;font-weight:700;background:rgba(74,158,255,0.1);color:var(--blue);border:1px solid rgba(74,158,255,0.2);padding:2px 8px;border-radius:5px;}
+    .btn-book{padding:11px 14px;border-radius:12px;background:rgba(74,158,255,0.1);color:var(--blue);border:1px solid rgba(74,158,255,0.25);cursor:pointer;font-size:0.8rem;font-weight:700;transition:all 0.2s;}
+    #mapContainer{height:400px;border-radius:16px;overflow:hidden;border:1px solid var(--border);}
+    .booking-badge{display:inline-block;padding:3px 10px;border-radius:6px;font-size:0.72rem;font-weight:700;}
+    .booking-badge.pending{background:rgba(255,184,0,0.15);color:var(--yellow);}
+    .booking-badge.accepted{background:rgba(0,208,132,0.15);color:var(--green);}
+    .booking-badge.rejected{background:rgba(255,68,68,0.15);color:var(--red);}
+    .booking-badge.completed{background:rgba(74,158,255,0.15);color:var(--blue);}
 
+    /* ── AI Chat ── */
     .ai-fab { position:fixed; bottom:24px; right:24px; z-index:9999; width:52px; height:52px; border-radius:14px; background:var(--bg2); border:1px solid var(--border2); cursor:pointer; display:flex; align-items:center; justify-content:center; font-size:1.3rem; transition:all 0.25s; box-shadow:0 8px 32px rgba(0,0,0,0.4); }
     .ai-fab:hover { border-color:var(--orange); transform:translateY(-2px); box-shadow:0 12px 40px rgba(255,92,0,0.2); }
     .ai-fab.open { background:var(--bg3); border-color:var(--orange); }
@@ -288,6 +284,9 @@
     .ai-send-btn:hover { background:var(--orange2); }
     .ai-voice-btn { background:var(--bg3); border:1px solid var(--border); border-radius:10px; width:36px; height:36px; cursor:pointer; display:flex; align-items:center; justify-content:center; font-size:0.95rem; flex-shrink:0; transition:all 0.2s; color:var(--text2); }
     .ai-voice-btn.active { background:rgba(255,92,0,0.1); border-color:var(--orange); color:var(--orange); }
+
+
+
   </style>
 </head>
 <body>
@@ -306,7 +305,6 @@
     <button class="nav-btn ghost" onclick="openModal('userLoginModal')">Sign In</button>
     <button class="nav-btn ghost" onclick="openModal('loginModal')">Worker Login</button>
     <button class="nav-btn primary" onclick="openModal('registerModal')">Join as Worker</button>
-    <button class="nav-btn ghost sm" onclick="openModal('adminLoginModal')">Admin</button>
   </div>
 </nav>
 
@@ -327,7 +325,7 @@
       </select>
       <input type="text" id="searchCity" placeholder="City or area..."/>
       <button class="search-btn" onclick="doSearch()">Search &#8594;</button>
-      <button class="voice-btn" id="voiceBtn" onclick="toggleVoice()" title="Speak your problem">&#127908;</button>
+      <button class="voice-btn" id="voiceBtn" onclick="toggleVoice()">&#127908;</button>
     </div>
     <div style="display:flex;justify-content:center;gap:10px;margin-bottom:24px;flex-wrap:wrap">
       <button class="nearby-btn" onclick="findNearby()">&#128205; Workers Near Me</button>
@@ -379,62 +377,143 @@
 <footer>
   <div class="footer-logo">Local<span>Fix</span></div>
   <p style="color:var(--text2);font-size:0.85rem;margin-top:6px">Connecting people with trusted local professionals.</p>
-  <p style="color:var(--text3);font-size:0.78rem;margin-top:14px">&#169; 2026 LocalFix &#183; Designed by <span style="color:var(--orange);font-weight:600">Rajan Vishwakarma</span></p>
+  <p style="color:var(--text3);font-size:0.75rem;margin-top:16px;letter-spacing:0.3px">&#169; 2026 LocalFix &nbsp;&middot;&nbsp; Designed by <span style="color:var(--orange);font-weight:600">Rajan Vishwakarma</span></p>
   <button onclick="openModal('adminLoginModal')" style="margin-top:14px;background:transparent;border:1px solid var(--border);border-radius:8px;padding:6px 16px;color:var(--text3);font-size:0.72rem;cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif;letter-spacing:0.3px;transition:all 0.2s" onmouseover="this.style.borderColor='var(--border2)';this.style.color='var(--text2)'" onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--text3)'">&#9881; Admin Access</button>
 </footer>
 
 <div class="toast" id="toast"></div>
 
+<!-- SIGN IN MODAL -->
 <div class="modal-overlay" id="userLoginModal">
   <div class="modal" style="max-width:400px">
     <button class="modal-close" onclick="closeModal('userLoginModal')">&#10005;</button>
     <h2>Sign In</h2>
-    <p class="modal-sub">Sign in to book workers and leave verified reviews.</p>
-    <div class="form-group"><label class="form-label">Email</label><input class="form-input" id="ul_email" placeholder="you@email.com"/></div>
-    <div class="form-group"><label class="form-label">Password</label><input class="form-input" id="ul_pass" type="password" placeholder="Your password"/></div>
-    <button class="form-submit" onclick="doUserLogin()">Sign In &#8594;</button>
-    <p style="text-align:center;margin-top:12px;font-size:0.82rem;color:var(--text2)">New here? <a href="#" style="color:var(--orange);font-weight:600" onclick="switchModal('userLoginModal','userRegModal')">Create account</a></p>
+    <p class="modal-sub">Welcome back to LocalFix</p>
+    <div class="form-group">
+      <label class="form-label">Email Address</label>
+      <input class="form-input" id="li_email" type="email" placeholder="you@email.com"/>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Password</label>
+      <input class="form-input" id="li_pass" type="password" placeholder="Your password" onkeydown="if(event.key==='Enter')doUserLogin()"/>
+    </div>
+    <button class="form-submit" id="loginBtn" onclick="doUserLogin()">Sign In &#8594;</button>
+    <div style="display:flex;justify-content:space-between;margin-top:14px;font-size:0.82rem">
+      <a href="#" style="color:var(--text2)" onclick="switchModal('userLoginModal','forgotModal')">Forgot password?</a>
+      <a href="#" style="color:var(--orange);font-weight:600" onclick="switchModal('userLoginModal','userRegModal')">Create account</a>
+    </div>
   </div>
 </div>
 
+<!-- SIGN UP MODAL -->
 <div class="modal-overlay" id="userRegModal">
   <div class="modal" style="max-width:400px">
     <button class="modal-close" onclick="closeModal('userRegModal')">&#10005;</button>
-    <h2>Create Account</h2>
-    <p class="modal-sub">Sign up to book services and leave reviews.</p>
-    <div class="form-group"><label class="form-label">Full Name</label><input class="form-input" id="ur_name" placeholder="Your name"/></div>
-    <div class="form-group"><label class="form-label">Email</label><input class="form-input" id="ur_email" placeholder="you@email.com"/></div>
-    <div class="form-group"><label class="form-label">Password</label><input class="form-input" id="ur_pass" type="password" placeholder="Min 6 characters"/></div>
-    <button class="form-submit" onclick="doUserRegister()">Create Account &#8594;</button>
-    <p style="text-align:center;margin-top:12px;font-size:0.82rem;color:var(--text2)">Already have account? <a href="#" style="color:var(--orange);font-weight:600" onclick="switchModal('userRegModal','userLoginModal')">Sign in</a></p>
-  </div>
-</div>
+    <h2 id="regTitle">Create Account</h2>
+    <p class="modal-sub" id="regSub">Join LocalFix to book workers and leave reviews</p>
 
-<div class="modal-overlay" id="otpModal">
-  <div class="modal" style="max-width:400px">
-    <button class="modal-close" onclick="closeModal('otpModal')">&#10005;</button>
-    <h2>Verify OTP</h2>
-    <p class="modal-sub">Enter OTP sent to your email</p>
-    <div class="form-group">
-      <input class="form-input" id="otp_input" placeholder="Enter OTP"/>
+    <!-- Step 1: Name + Email + Send OTP -->
+    <div id="regStep1">
+      <div class="form-group"><label class="form-label">Full Name</label><input class="form-input" id="reg_name" placeholder="Your full name"/></div>
+      <div class="form-group"><label class="form-label">Email Address</label><input class="form-input" id="reg_email" type="email" placeholder="you@email.com"/></div>
+      <button class="form-submit" id="sendOtpBtn" onclick="regSendOTP()">Send Verification Code &#8594;</button>
+      <p style="text-align:center;margin-top:12px;font-size:0.82rem;color:var(--text2)">Already have account? <a href="#" style="color:var(--orange);font-weight:600" onclick="switchModal('userRegModal','userLoginModal')">Sign in</a></p>
     </div>
-    <button class="form-submit" id="otpVerifyBtn" onclick="verifySignupOtp()">Verify &#8594;</button>
+
+    <!-- Step 2: OTP Verify -->
+    <div id="regStep2" style="display:none">
+      <div style="text-align:center;padding:8px 0 20px">
+        <div style="width:52px;height:52px;border-radius:14px;background:var(--orange3);border:1px solid rgba(255,92,0,0.3);display:flex;align-items:center;justify-content:center;font-size:1.5rem;margin:0 auto 14px">&#128140;</div>
+        <p style="font-size:0.88rem;color:var(--text)">Code sent to <strong id="regEmailShow" style="color:var(--orange)"></strong></p>
+        <p style="font-size:0.78rem;color:var(--text2);margin-top:4px">Check inbox and spam folder &bull; Expires in 5 min</p>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Enter 6-digit Code</label>
+        <input class="form-input" id="reg_otp" placeholder="&#8226; &#8226; &#8226; &#8226; &#8226; &#8226;" maxlength="6" type="number" style="text-align:center;font-size:1.5rem;letter-spacing:10px;font-weight:700" onkeydown="if(event.key==='Enter')regVerifyOTP()"/>
+      </div>
+      <div id="regOtpErr" style="color:var(--red);font-size:0.8rem;margin-bottom:10px;display:none"></div>
+      <button class="form-submit" id="verifyOtpBtn" onclick="regVerifyOTP()">Verify Code &#8594;</button>
+      <p style="text-align:center;margin-top:10px;font-size:0.8rem;color:var(--text2)">
+        <a href="#" style="color:var(--orange)" id="resendOtpLink" onclick="regResendOTP()">Resend code</a>
+        &nbsp;&bull;&nbsp;
+        <a href="#" style="color:var(--text2)" onclick="regGoBack()">Change email</a>
+      </p>
+    </div>
+
+    <!-- Step 3: Set Password -->
+    <div id="regStep3" style="display:none">
+      <div style="background:var(--green2);border:1px solid rgba(0,208,132,0.2);border-radius:12px;padding:12px 14px;margin-bottom:18px;display:flex;align-items:center;gap:8px">
+        <span style="color:var(--green);font-size:1rem">&#10003;</span>
+        <span style="font-size:0.84rem;color:var(--green)">Email verified!</span>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Create Password</label>
+        <input class="form-input" id="reg_pass" type="password" placeholder="Minimum 6 characters" onkeydown="if(event.key==='Enter')regCreateAccount()"/>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Confirm Password</label>
+        <input class="form-input" id="reg_pass2" type="password" placeholder="Re-enter password" onkeydown="if(event.key==='Enter')regCreateAccount()"/>
+      </div>
+      <button class="form-submit" id="createAccBtn" onclick="regCreateAccount()">Create Account &#8594;</button>
+    </div>
   </div>
 </div>
 
+<!-- FORGOT PASSWORD MODAL -->
+<div class="modal-overlay" id="forgotModal">
+  <div class="modal" style="max-width:400px">
+    <button class="modal-close" onclick="closeModal('forgotModal')">&#10005;</button>
+    <h2 id="fpTitle">Forgot Password</h2>
+    <p class="modal-sub" id="fpSub">Enter your email to receive a reset code</p>
+
+    <!-- Step 1: Email -->
+    <div id="fpStep1">
+      <div class="form-group"><label class="form-label">Email Address</label><input class="form-input" id="fp_email" type="email" placeholder="you@email.com"/></div>
+      <button class="form-submit" id="fpSendBtn" onclick="fpSendOTP()">Send Reset Code &#8594;</button>
+      <p style="text-align:center;margin-top:12px;font-size:0.82rem;color:var(--text2)"><a href="#" style="color:var(--text2)" onclick="switchModal('forgotModal','userLoginModal')">&#8592; Back to Sign In</a></p>
+    </div>
+
+    <!-- Step 2: OTP -->
+    <div id="fpStep2" style="display:none">
+      <div style="text-align:center;padding:8px 0 20px">
+        <div style="width:52px;height:52px;border-radius:14px;background:var(--orange3);border:1px solid rgba(255,92,0,0.3);display:flex;align-items:center;justify-content:center;font-size:1.5rem;margin:0 auto 14px">&#128273;</div>
+        <p style="font-size:0.88rem;color:var(--text)">Reset code sent to <strong id="fpEmailShow" style="color:var(--orange)"></strong></p>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Enter 6-digit Code</label>
+        <input class="form-input" id="fp_otp" placeholder="&#8226; &#8226; &#8226; &#8226; &#8226; &#8226;" maxlength="6" type="number" style="text-align:center;font-size:1.5rem;letter-spacing:10px;font-weight:700" onkeydown="if(event.key==='Enter')fpVerifyOTP()"/>
+      </div>
+      <div id="fpOtpErr" style="color:var(--red);font-size:0.8rem;margin-bottom:10px;display:none"></div>
+      <button class="form-submit" onclick="fpVerifyOTP()">Verify Code &#8594;</button>
+      <p style="text-align:center;margin-top:10px;font-size:0.8rem"><a href="#" style="color:var(--orange)" onclick="fpSendOTP()">Resend code</a></p>
+    </div>
+
+    <!-- Step 3: New Password -->
+    <div id="fpStep3" style="display:none">
+      <div style="background:var(--green2);border:1px solid rgba(0,208,132,0.2);border-radius:12px;padding:12px 14px;margin-bottom:18px;display:flex;align-items:center;gap:8px">
+        <span style="color:var(--green)">&#10003;</span>
+        <span style="font-size:0.84rem;color:var(--green)">Identity verified. Set a new password.</span>
+      </div>
+      <div class="form-group"><label class="form-label">New Password</label><input class="form-input" id="fp_pass" type="password" placeholder="Minimum 6 characters"/></div>
+      <div class="form-group"><label class="form-label">Confirm Password</label><input class="form-input" id="fp_pass2" type="password" placeholder="Re-enter password" onkeydown="if(event.key==='Enter')fpResetPassword()"/></div>
+      <button class="form-submit" id="fpResetBtn" onclick="fpResetPassword()">Update Password &#8594;</button>
+    </div>
+  </div>
+</div>
+<!-- BOOKING -->
 <div class="modal-overlay" id="bookingModal">
   <div class="modal" style="max-width:420px">
     <button class="modal-close" onclick="closeModal('bookingModal')">&#10005;</button>
-    <h2>&#128197; Book Service</h2>
+    <h2>Book Service</h2>
     <p class="modal-sub" id="booking_worker_name">Choose date and time</p>
     <input type="hidden" id="booking_worker_id"/>
     <div class="form-group"><label class="form-label">Date *</label><input class="form-input" id="b_date" type="date"/></div>
     <div class="form-group"><label class="form-label">Time *</label><input class="form-input" id="b_time" type="time"/></div>
-    <div class="form-group"><label class="form-label">Note (optional)</label><textarea class="form-textarea" id="b_note" placeholder="Describe your problem briefly..."></textarea></div>
+    <div class="form-group"><label class="form-label">Note (optional)</label><textarea class="form-textarea" id="b_note" placeholder="Describe your problem..."></textarea></div>
     <button class="form-submit" onclick="doBooking()">Confirm Booking &#8594;</button>
   </div>
 </div>
-
+<!-- MY BOOKINGS -->
 <div class="modal-overlay" id="myBookingsModal">
   <div class="modal" style="max-width:560px">
     <button class="modal-close" onclick="closeModal('myBookingsModal')">&#10005;</button>
@@ -443,7 +522,7 @@
     <div id="myBookingsContent"><div class="loading"><div class="spinner"></div></div></div>
   </div>
 </div>
-
+<!-- WORKER BOOKINGS -->
 <div class="modal-overlay" id="workerBookingsModal">
   <div class="modal" style="max-width:580px">
     <button class="modal-close" onclick="closeModal('workerBookingsModal')">&#10005;</button>
@@ -452,16 +531,16 @@
     <div id="workerBookingsContent"><div class="loading"><div class="spinner"></div></div></div>
   </div>
 </div>
-
+<!-- MAP -->
 <div class="modal-overlay" id="mapModal">
   <div class="modal" style="max-width:720px">
     <button class="modal-close" onclick="closeModal('mapModal')">&#10005;</button>
-    <h2>&#128507; Workers Near You</h2>
+    <h2>Workers Near You</h2>
     <p class="modal-sub">Click a marker to see worker details.</p>
     <div id="mapContainer"></div>
   </div>
 </div>
-
+<!-- REGISTER -->
 <div class="modal-overlay" id="registerModal">
   <div class="modal">
     <button class="modal-close" onclick="closeModal('registerModal')">&#10005;</button>
@@ -496,6 +575,7 @@
   </div>
 </div>
 
+<!-- LOGIN -->
 <div class="modal-overlay" id="loginModal">
   <div class="modal" style="max-width:400px">
     <button class="modal-close" onclick="closeModal('loginModal')">&#10005;</button>
@@ -503,11 +583,12 @@
     <p class="modal-sub">Manage your availability and profile.</p>
     <div class="form-group"><label class="form-label">Mobile Number</label><input class="form-input" id="l_phone" placeholder="9XXXXXXXXX" maxlength="10"/></div>
     <div class="form-group"><label class="form-label">Password</label><input class="form-input" id="l_pass" type="password" placeholder="Your password"/></div>
-    <button class="form-submit" onclick="doWorkerLogin()">Login &#8594;</button>
+    <button class="form-submit" onclick="doLogin()">Login &#8594;</button>
     <p style="text-align:center;margin-top:12px;font-size:0.82rem;color:var(--text2)">New here? <a href="#" style="color:var(--orange);font-weight:600" onclick="switchModal('loginModal','registerModal')">Register as worker</a></p>
   </div>
 </div>
 
+<!-- WORKER DASHBOARD -->
 <div class="modal-overlay" id="wDashModal">
   <div class="modal" style="max-width:540px">
     <button class="modal-close" onclick="closeModal('wDashModal')">&#10005;</button>
@@ -537,6 +618,7 @@
   </div>
 </div>
 
+<!-- WORKER DETAIL -->
 <div class="modal-overlay" id="workerDetailModal">
   <div class="modal" style="max-width:460px">
     <button class="modal-close" onclick="closeModal('workerDetailModal')">&#10005;</button>
@@ -544,6 +626,7 @@
   </div>
 </div>
 
+<!-- ADMIN LOGIN -->
 <div class="modal-overlay" id="adminLoginModal">
   <div class="modal" style="max-width:360px">
     <button class="modal-close" onclick="closeModal('adminLoginModal')">&#10005;</button>
@@ -555,6 +638,7 @@
   </div>
 </div>
 
+<!-- ADMIN DASHBOARD -->
 <div class="modal-overlay" id="adminDashModal">
   <div class="modal" style="max-width:740px">
     <button class="modal-close" onclick="closeModal('adminDashModal')">&#10005;</button>
@@ -565,16 +649,10 @@
 </div>
 
 <script>
-// --- CONFIGURATION ---
-const API = "http://localhost:5000"; // FIX: Hardcoded to requested base URL
-
-// --- STATE MANAGEMENT ---
+const API = window.location.origin;
 let workerToken = localStorage.getItem('lf_wtoken') || null;
 let workerData  = JSON.parse(localStorage.getItem('lf_wdata') || 'null');
 let adminToken  = localStorage.getItem('lf_atoken') || null;
-let userToken   = localStorage.getItem('lf_utoken') || null;
-let userData    = JSON.parse(localStorage.getItem('lf_udata') || 'null');
-
 let currentFilter = 'all', currentCategory = '', currentCity = '';
 
 const CATS = [
@@ -584,203 +662,19 @@ const CATS = [
   {name:'Welder',icon:'&#128297;'},{name:'Cleaner',icon:'&#129529;'}
 ];
 
-// --- INITIALIZATION ---
 document.addEventListener('DOMContentLoaded', () => {
   loadStats(); loadCategories(); loadWorkers();
   if (workerToken && workerData) showWorkerNav();
-  if (userToken && userData) showUserNav(); // FIX: Checked both token and data to prevent crash
   if (adminToken) showAdminBar();
 });
 
-// --- API HELPER ---
 async function api(method, path, body, token) {
   const opts = {method, headers:{'Content-Type':'application/json'}};
   if (token) opts.headers['Authorization'] = 'Bearer ' + token;
   if (body) opts.body = JSON.stringify(body);
-  try { 
-    const res = await fetch(API + path, opts); 
-    return res.json(); 
-  }
-  catch(e) { 
-    return {success:false, message:'Network error'}; 
-  }
+  try { const res = await fetch(API + path, opts); return res.json(); }
+  catch(e) { return {success:false, message:'Network error'}; }
 }
-
-// --- MODAL UTILITIES ---
-function openModal(id){ 
-  document.getElementById(id).classList.add('open'); 
-  if(id==='mapModal') setTimeout(initMap,200); 
-}
-function closeModal(id){ document.getElementById(id).classList.remove('open'); }
-function switchModal(c,o){ closeModal(c); openModal(o); }
-
-document.querySelectorAll('.modal-overlay').forEach(m=>{ 
-  m.addEventListener('click',e=>{if(e.target===m) m.classList.remove('open');}); 
-});
-
-let toastT;
-function showToast(msg,type){ 
-  type=type||'success'; 
-  const t=document.getElementById('toast'); 
-  t.innerHTML=(type==='success'?'<span style="color:var(--green);font-size:1rem">&#10003;</span>':'<span style="color:var(--red);font-size:1rem">&#10005;</span>')+' '+msg; 
-  t.className='toast '+type+' show'; 
-  clearTimeout(toastT); 
-  toastT=setTimeout(()=>t.classList.remove('show'),3200); 
-}
-
-function esc(str){ if(!str) return ''; return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
-function escJsSingle(str){ return esc(str).replace(/'/g,'&#39;'); }
-
-
-// =========================================
-// --- USER AUTHENTICATION (OTP & LOGIN) ---
-// =========================================
-
-// STEP 1 & 2: User Enters Data & Send OTP
-async function doUserRegister() {
-  const btn = document.querySelector('#userRegModal .form-submit');
-  const name = document.getElementById('ur_name').value.trim();
-  const email = document.getElementById('ur_email').value.trim();
-  const password = document.getElementById('ur_pass').value;
-
-  if(!name || !email || !password || password.length < 6) {
-    showToast('Please fill all fields (Password min 6 chars)','error');
-    return;
-  }
-
-  // Disable button & show loading state
-  btn.disabled = true;
-  const originalText = btn.textContent;
-  btn.textContent = 'Sending OTP...';
-
-  // STEP 3: Store data securely in localStorage
-  localStorage.setItem('tempUserData', JSON.stringify({name, email, password}));
-
-  const d = await api('POST', '/api/users/send-otp', { email, type: "signup" });
-
-  // Reset button state
-  btn.disabled = false;
-  btn.textContent = originalText;
-
-  // STEP 4: Open OTP modal
-  if(d.success) {
-    switchModal('userRegModal', 'otpModal');
-    showToast('OTP sent to your email', 'success');
-  } else {
-    showToast(d.message || 'Error sending OTP', 'error');
-  }
-}
-
-// STEP 5 & 6: User Enters OTP & Verify
-async function verifySignupOtp() {
-  const btn = document.getElementById('otpVerifyBtn');
-  const otp = document.getElementById('otp_input').value.trim();
-  const tempDataStr = localStorage.getItem('tempUserData');
-
-  if(!otp) return showToast('Please enter OTP','error');
-  if(!tempDataStr) {
-    showToast('Session expired. Please register again.', 'error');
-    switchModal('otpModal', 'userRegModal');
-    return;
-  }
-
-  const tempData = JSON.parse(tempDataStr);
-
-  btn.disabled = true;
-  const originalText = btn.textContent;
-  btn.textContent = "Verifying...";
-
-  // Verify OTP via API
-  const v = await api('POST', '/api/users/verify-otp', { email: tempData.email, otp: otp });
-
-  // STEP 7: If OTP correct, register user
-  if(v.success) {
-    const r = await api('POST', '/api/users/register', tempData);
-    if(r.success) {
-      showToast('Account created successfully!', 'success');
-      localStorage.removeItem('tempUserData'); // Clear temp storage
-      
-      // STEP 8: Save token & user data
-      userToken = r.token;
-      userData = r.user;
-      localStorage.setItem('lf_utoken', userToken);
-      localStorage.setItem('lf_udata', JSON.stringify(userData));
-      
-      // STEP 9: Update UI
-      closeModal('otpModal');
-      showUserNav();
-    } else { 
-      showToast(r.message || 'Registration failed', 'error'); 
-    }
-  } else { 
-    showToast(v.message || 'Invalid OTP', 'error'); 
-  }
-  
-  btn.disabled = false;
-  btn.textContent = originalText;
-}
-
-// USER LOGIN
-async function doUserLogin() {
-  const btn = document.querySelector('#userLoginModal .form-submit');
-  const email = document.getElementById('ul_email').value.trim();
-  const password = document.getElementById('ul_pass').value;
-
-  if(!email || !password) { 
-    showToast('Email and password required', 'error'); 
-    return; 
-  }
-
-  btn.disabled = true;
-  const originalText = btn.textContent;
-  btn.textContent = 'Signing In...';
-
-  // Email/Password login (no OTP here)
-  const d = await api('POST', '/api/users/login', {email, password});
-  
-  btn.disabled = false;
-  btn.textContent = originalText;
-
-  if(d.success) {
-    userToken = d.token;
-    userData = d.user;
-    localStorage.setItem('lf_utoken', userToken);
-    localStorage.setItem('lf_udata', JSON.stringify(userData));
-    closeModal('userLoginModal');
-    showUserNav();
-    showToast('Welcome back, ' + userData.name.split(' ')[0] + '!', 'success');
-  } else {
-    showToast(d.message || 'Login failed', 'error');
-  }
-}
-
-// UPDATE NAVBAR UI
-function showUserNav() {
-  if(document.getElementById('userNavSpan')) return;
-  const nav = document.getElementById('navLinks');
-  const span = document.createElement('div');
-  span.id = 'userNavSpan';
-  span.style.cssText = 'display:flex;align-items:center;gap:8px';
-  span.innerHTML = '<span style="font-size:0.8rem;color:var(--green)">&#128100; ' + esc(userData.name.split(' ')[0]) + '</span>' +
-    '<button class="nav-btn ghost" style="font-size:0.78rem;padding:6px 12px" onclick="loadMyBookings()">My Bookings</button>' +
-    '<button class="nav-btn ghost" style="font-size:0.72rem;padding:5px 10px;color:var(--red);border-color:rgba(255,68,68,0.3)" onclick="userLogout()">Sign Out</button>';
-  nav.insertBefore(span, nav.firstChild);
-}
-
-function userLogout() {
-  userToken = null; 
-  userData = null;
-  localStorage.removeItem('lf_utoken'); 
-  localStorage.removeItem('lf_udata');
-  const s = document.getElementById('userNavSpan'); 
-  if(s) s.remove();
-  showToast('Signed out', 'success');
-}
-
-
-// ==========================================
-// --- WORKERS, STATS, MAP, AND ADMIN ---
-// ==========================================
 
 async function loadStats() {
   const d = await api('GET','/api/workers/stats');
@@ -852,12 +746,21 @@ function workerCard(w) {
     +'<div class="wc-actions" onclick="event.stopPropagation()">'
     +'<button class="btn-call" onclick="trackAndCall('+w.id+')">&#128222; Call Now</button>'
     +'<button class="btn-wa" onclick="trackAndWa('+w.id+')">&#128172;</button>'
-    +'<button class="btn-book" onclick="event.stopPropagation();openBooking('+w.id+',\''+escJsSingle(w.name)+'\')">&#128197;</button>'
+    +'<button class="btn-book" onclick="event.stopPropagation();openBooking('+w.id+',\''+esc(w.name)+'\')" >&#128197;</button>'
     +'</div></div>';
 }
 
-function setFilter(f,btn) { currentFilter=f; document.querySelectorAll('.ftab').forEach(b=>b.classList.remove('active')); btn.classList.add('active'); loadWorkers(); }
-function doSearch() { currentCategory=document.getElementById('searchCategory').value; currentCity=document.getElementById('searchCity').value.trim(); loadCategories(); loadWorkers(); document.getElementById('workers-section').scrollIntoView({behavior:'smooth'}); }
+function setFilter(f,btn) {
+  currentFilter=f;
+  document.querySelectorAll('.ftab').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active'); loadWorkers();
+}
+function doSearch() {
+  currentCategory=document.getElementById('searchCategory').value;
+  currentCity=document.getElementById('searchCity').value.trim();
+  loadCategories(); loadWorkers();
+  document.getElementById('workers-section').scrollIntoView({behavior:'smooth'});
+}
 
 async function openWorkerDetail(id) {
   openModal('workerDetailModal');
@@ -900,16 +803,26 @@ async function openWorkerDetail(id) {
 }
 
 let pickedStar=0;
-function pickStar(n) { pickedStar=n; document.querySelectorAll('.star-pick').forEach(s=>s.classList.toggle('on',parseInt(s.dataset.s)<=n)); }
+function pickStar(n) {
+  pickedStar=n;
+  document.querySelectorAll('.star-pick').forEach(s=>s.classList.toggle('on',parseInt(s.dataset.s)<=n));
+}
 async function submitReview(workerId) {
   const name=document.getElementById('rv_name').value.trim();
   const comment=document.getElementById('rv_comment').value.trim();
   if(!name||!pickedStar){ showToast('Name and rating required','error'); return; }
+  // Check if already rated this worker
+  const ratedKey = 'rated_'+workerId;
+  if(localStorage.getItem(ratedKey)){ showToast('You have already rated this worker','error'); return; }
   const d=await api('POST','/api/workers/'+workerId+'/review',{reviewer_name:name,rating:pickedStar,comment});
-  if(d.success){ showToast('Review submitted!','success'); openWorkerDetail(workerId); }
-  else showToast(d.message||'Error','error');
+  if(d.success){
+    localStorage.setItem(ratedKey,'1');
+    showToast('Review submitted!','success');
+    openWorkerDetail(workerId);
+  } else showToast(d.message||'Error','error');
 }
 
+// == CALL & WHATSAPP FIX - phone fetched from API ==
 async function trackAndCall(id) {
   await api('POST','/api/workers/'+id+'/track',{type:'call'});
   const d = await api('GET','/api/workers/'+id);
@@ -922,7 +835,9 @@ async function trackAndWa(id) {
     const msg = 'Hi ' + encodeURIComponent(d.data.name) + ', I found you on LocalFix. I need your ' + encodeURIComponent(d.data.skill) + ' service. Are you available?';
     await api('POST', '/api/workers/' + id + '/track', {type:'whatsapp'});
     window.location.href = 'https://wa.me/91' + d.data.phone + '?text=' + msg;
-  } else { showToast('Could not get WhatsApp number', 'error'); }
+  } else {
+    showToast('Could not get WhatsApp number', 'error');
+  }
 }
 
 async function doRegister() {
@@ -936,13 +851,10 @@ async function doRegister() {
   else showToast(d.message||'Registration failed','error');
 }
 
-async function doWorkerLogin() {
-  const btn = document.querySelector('#loginModal .form-submit');
+async function doLogin() {
   const phone=document.getElementById('l_phone').value.trim(), password=document.getElementById('l_pass').value;
   if(!phone||!password){ showToast('Phone and password required','error'); return; }
-  btn.disabled=true; btn.textContent='Logging In...';
   const d=await api('POST','/api/auth/login',{phone,password});
-  btn.disabled=false; btn.textContent='Login \u2192';
   if(d.success){ workerToken=d.token; workerData=d.worker; localStorage.setItem('lf_wtoken',workerToken); localStorage.setItem('lf_wdata',JSON.stringify(workerData)); closeModal('loginModal'); showWorkerNav(); openWorkerDash(); showToast('Welcome back, '+workerData.name.split(' ')[0]+'!','success'); }
   else showToast(d.message||'Login failed','error');
 }
@@ -987,7 +899,7 @@ function doLogout() {
   workerToken=null; workerData=null;
   localStorage.removeItem('lf_wtoken'); localStorage.removeItem('lf_wdata');
   closeModal('wDashModal');
-  document.getElementById('navLinks').innerHTML='<button class="nav-btn ghost" onclick="openModal(\'userLoginModal\')">Sign In</button><button class="nav-btn ghost" onclick="openModal(\'loginModal\')">Worker Login</button><button class="nav-btn primary" onclick="openModal(\'registerModal\')">Join as Worker</button><button class="nav-btn ghost sm" onclick="openModal(\'adminLoginModal\')">Admin</button>';
+  document.getElementById('navLinks').innerHTML='<button class="nav-btn ghost" onclick="openModal(\'loginModal\')">Login</button><button class="nav-btn primary" onclick="openModal(\'registerModal\')">Join as Worker</button><button class="nav-btn ghost sm" onclick="openModal(\'adminLoginModal\')">Admin</button>';
   showToast('Logged out','success');
 }
 
@@ -998,7 +910,11 @@ async function doAdminLogin() {
   else showToast(d.message||'Invalid credentials','error');
 }
 function showAdminBar(){ document.getElementById('adminBar').style.display='flex'; }
-function adminLogout(){ adminToken=null; localStorage.removeItem('lf_atoken'); document.getElementById('adminBar').style.display='none'; showToast('Admin logged out','success'); }
+function adminLogout(){
+  adminToken=null; localStorage.removeItem('lf_atoken');
+  document.getElementById('adminBar').style.display='none';
+  showToast('Admin logged out','success');
+}
 
 async function loadAdminDash() {
   document.getElementById('adminDashContent').innerHTML='<div class="loading"><div class="spinner"></div></div>';
@@ -1043,25 +959,390 @@ async function loadAdminDash() {
     +'<div id="adminWorkerRows" style="display:flex;flex-direction:column;gap:8px;max-height:45vh;overflow-y:auto">'
     +(rowsHtml||'<p style="color:var(--text2);text-align:center;padding:20px">No workers found</p>')+'</div>';
 }
+
 function filterAdminList(q){ q=q.toLowerCase(); document.querySelectorAll('#adminWorkerRows .admin-worker-row').forEach(row=>{row.style.display=row.textContent.toLowerCase().includes(q)?'flex':'none';}); }
+
 async function adminApprove(id){ const d=await api('PUT','/api/admin/workers/'+id+'/approve',null,adminToken); if(d.success){showToast('Worker approved!','success');loadAdminDash();loadWorkers();loadStats();loadCategories();}else showToast(d.message||'Error','error'); }
 async function adminReject(id){ if(!confirm('Remove this worker from the site?')) return; const d=await api('PUT','/api/admin/workers/'+id+'/reject',null,adminToken); if(d.success){showToast('Worker removed','success');loadAdminDash();loadWorkers();loadStats();loadCategories();}else showToast(d.message||'Error','error'); }
 async function adminDelete(id){ if(!confirm('Permanently delete? Cannot be undone.')) return; const d=await api('DELETE','/api/admin/workers/'+id,null,adminToken); if(d.success){showToast('Worker deleted','success');loadAdminDash();loadWorkers();loadStats();loadCategories();}else showToast(d.message||'Error','error'); }
+
+function openModal(id){ document.getElementById(id).classList.add('open'); if(id==='mapModal') setTimeout(initMap,200); }
+function closeModal(id){ document.getElementById(id).classList.remove('open'); }
+function switchModal(c,o){ closeModal(c); openModal(o); }
+document.querySelectorAll('.modal-overlay').forEach(m=>{ m.addEventListener('click',e=>{if(e.target===m) m.classList.remove('open');}); });
+
+let toastT;
+function showToast(msg,type){ type=type||'success'; const t=document.getElementById('toast'); t.innerHTML=(type==='success'?'<span style="color:var(--green);font-size:1rem">&#10003;</span>':'<span style="color:var(--red);font-size:1rem">&#10005;</span>')+' '+msg; t.className='toast '+type+' show'; clearTimeout(toastT); toastT=setTimeout(()=>t.classList.remove('show'),3200); }
+
+function esc(str){ if(!str) return ''; return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+var userToken = localStorage.getItem('lf_utoken') || null;
+var userData  = JSON.parse(localStorage.getItem('lf_udata') || 'null');
+if(userToken && userData){ document.addEventListener('DOMContentLoaded', function(){ showUserNav(); }); }
+
+// ══════════════════════════════════════════
+// AUTH SYSTEM
+// ══════════════════════════════════════════
+
+// ── SIGN IN ──────────────────────────────
+async function doUserLogin() {
+  var email = document.getElementById('li_email').value.trim();
+  var password = document.getElementById('li_pass').value;
+  if (!email || !password) { showToast('Email and password required', 'error'); return; }
+  var btn = document.getElementById('loginBtn');
+  btn.disabled = true; btn.textContent = 'Signing in...';
+  var d = await api('POST', '/api/users/login', { email: email, password: password });
+  btn.disabled = false; btn.textContent = 'Sign In →';
+  if (d.success) {
+    userToken = d.token; userData = d.user;
+    localStorage.setItem('lf_utoken', userToken);
+    localStorage.setItem('lf_udata', JSON.stringify(userData));
+    closeModal('userLoginModal');
+    showUserNav();
+    showToast('Welcome back, ' + userData.name.split(' ')[0] + '!', 'success');
+  } else {
+    showToast(d.message || 'Invalid email or password', 'error');
+  }
+}
+
+// ── SIGN UP STEP 1: Send OTP ──────────────
+async function regSendOTP() {
+  var name = document.getElementById('reg_name').value.trim();
+  var email = document.getElementById('reg_email').value.trim();
+  if (!name) { showToast('Please enter your name', 'error'); return; }
+  if (!email || !email.includes('@')) { showToast('Enter a valid email', 'error'); return; }
+  var btn = document.getElementById('sendOtpBtn');
+  btn.disabled = true; btn.textContent = 'Sending...';
+  var d = await api('POST', '/api/users/send-otp', { email: email, type: 'signup' });
+  btn.disabled = false; btn.textContent = 'Send Verification Code →';
+  if (d.success) {
+    document.getElementById('regStep1').style.display = 'none';
+    document.getElementById('regStep2').style.display = 'block';
+    document.getElementById('regEmailShow').textContent = email;
+    document.getElementById('reg_otp').focus();
+    showToast('Code sent to ' + email, 'success');
+    startResendTimer('resendOtpLink', 60);
+  } else {
+    showToast(d.message || 'Failed to send code', 'error');
+  }
+}
+
+// ── SIGN UP STEP 2: Verify OTP ────────────
+async function regVerifyOTP() {
+  var email = document.getElementById('reg_email').value.trim();
+  var code = document.getElementById('reg_otp').value.trim();
+  if (!code || code.length !== 6) { showRegOtpErr('Enter the 6-digit code'); return; }
+  var btn = document.getElementById('verifyOtpBtn');
+  btn.disabled = true; btn.textContent = 'Verifying...';
+  var d = await api('POST', '/api/users/verify-otp', { email: email, code: code, type: 'signup' });
+  btn.disabled = false; btn.textContent = 'Verify Code →';
+  if (d.success) {
+    document.getElementById('regStep2').style.display = 'none';
+    document.getElementById('regStep3').style.display = 'block';
+    document.getElementById('regTitle').textContent = 'Set Password';
+    document.getElementById('regSub').textContent = 'Almost done! Create a secure password.';
+    document.getElementById('reg_pass').focus();
+  } else { showRegOtpErr(d.message || 'Incorrect code'); }
+}
+function showRegOtpErr(msg) {
+  var el = document.getElementById('regOtpErr');
+  if (el) { el.textContent = msg; el.style.display = 'block'; }
+}
+function regGoBack() {
+  document.getElementById('regStep2').style.display = 'none';
+  document.getElementById('regStep1').style.display = 'block';
+  document.getElementById('reg_otp').value = '';
+}
+async function regResendOTP() {
+  var email = document.getElementById('reg_email').value.trim();
+  if (!email) return;
+  var d = await api('POST', '/api/users/send-otp', { email: email, type: 'signup' });
+  if (d.success) { showToast('New code sent!', 'success'); startResendTimer('resendOtpLink', 60); }
+  else showToast(d.message || 'Could not resend', 'error');
+}
+
+// ── SIGN UP STEP 3: Create Account ────────
+async function regCreateAccount() {
+  var name = document.getElementById('reg_name').value.trim();
+  var email = document.getElementById('reg_email').value.trim();
+  var pass = document.getElementById('reg_pass').value;
+  var pass2 = document.getElementById('reg_pass2').value;
+  if (pass.length < 6) { showToast('Password must be at least 6 characters', 'error'); return; }
+  if (pass !== pass2) { showToast('Passwords do not match', 'error'); return; }
+  var btn = document.getElementById('createAccBtn');
+  btn.disabled = true; btn.textContent = 'Creating account...';
+  var d = await api('POST', '/api/users/register', { name: name, email: email, password: pass });
+  btn.disabled = false; btn.textContent = 'Create Account →';
+  if (d.success) {
+    userToken = d.token; userData = d.user;
+    localStorage.setItem('lf_utoken', userToken);
+    localStorage.setItem('lf_udata', JSON.stringify(userData));
+    closeModal('userRegModal');
+    showUserNav();
+    showToast('Welcome, ' + userData.name.split(' ')[0] + '!', 'success');
+  } else { showToast(d.message || 'Registration failed', 'error'); }
+}
+
+// ── FORGOT PASSWORD STEP 1 ─────────────────
+async function fpSendOTP() {
+  var email = document.getElementById('fp_email').value.trim();
+  if (!email || !email.includes('@')) { showToast('Enter a valid email', 'error'); return; }
+  var btn = document.getElementById('fpSendBtn');
+  if (btn) { btn.disabled = true; btn.textContent = 'Sending...'; }
+  var d = await api('POST', '/api/users/send-otp', { email: email, type: 'reset' });
+  if (btn) { btn.disabled = false; btn.textContent = 'Send Reset Code →'; }
+  if (d.success) {
+    document.getElementById('fpStep1').style.display = 'none';
+    document.getElementById('fpStep2').style.display = 'block';
+    document.getElementById('fpEmailShow').textContent = email;
+    showToast('Reset code sent!', 'success');
+  } else { showToast(d.message || 'Failed to send code', 'error'); }
+}
+
+// ── FORGOT PASSWORD STEP 2 ─────────────────
+async function fpVerifyOTP() {
+  var email = document.getElementById('fp_email').value.trim();
+  var code = document.getElementById('fp_otp').value.trim();
+  if (!code || code.length !== 6) { showFpOtpErr('Enter the 6-digit code'); return; }
+  var d = await api('POST', '/api/users/verify-otp', { email: email, code: code, type: 'reset' });
+  if (d.success) {
+    document.getElementById('fpStep2').style.display = 'none';
+    document.getElementById('fpStep3').style.display = 'block';
+    document.getElementById('fpTitle').textContent = 'New Password';
+    document.getElementById('fp_pass').focus();
+  } else { showFpOtpErr(d.message || 'Incorrect code'); }
+}
+function showFpOtpErr(msg) {
+  var el = document.getElementById('fpOtpErr');
+  if (el) { el.textContent = msg; el.style.display = 'block'; }
+}
+
+// ── FORGOT PASSWORD STEP 3 ─────────────────
+async function fpResetPassword() {
+  var email = document.getElementById('fp_email').value.trim();
+  var pass = document.getElementById('fp_pass').value;
+  var pass2 = document.getElementById('fp_pass2').value;
+  if (pass.length < 6) { showToast('Password must be at least 6 characters', 'error'); return; }
+  if (pass !== pass2) { showToast('Passwords do not match', 'error'); return; }
+  var btn = document.getElementById('fpResetBtn');
+  btn.disabled = true; btn.textContent = 'Updating...';
+  var d = await api('POST', '/api/users/reset-password', { email: email, password: pass });
+  btn.disabled = false; btn.textContent = 'Update Password →';
+  if (d.success) {
+    showToast('Password updated! Please sign in.', 'success');
+    closeModal('forgotModal');
+    openModal('userLoginModal');
+  } else { showToast(d.message || 'Failed to update', 'error'); }
+}
+
+// ── RESEND TIMER ───────────────────────────
+function startResendTimer(linkId, seconds) {
+  var link = document.getElementById(linkId);
+  if (!link) return;
+  link.style.pointerEvents = 'none'; link.style.opacity = '0.5';
+  var remaining = seconds;
+  var interval = setInterval(function() {
+    remaining--;
+    link.textContent = 'Resend in ' + remaining + 's';
+    if (remaining <= 0) {
+      clearInterval(interval);
+      link.textContent = 'Resend code';
+      link.style.pointerEvents = ''; link.style.opacity = '';
+    }
+  }, 1000);
+}
+
+// ── LEGACY: kept for compatibility ─────────
+async function doUserRegister() { regSendOTP(); }
+async function sendOTP() { regSendOTP(); }
+async function verifyOTP() { regVerifyOTP(); }
+
+
+function showUserNav(){
+  if(document.getElementById('userNavSpan')) return;
+  var nav=document.getElementById('navLinks');
+  var span=document.createElement('div');
+  span.id='userNavSpan';
+  span.style.cssText='display:flex;align-items:center;gap:8px';
+  span.innerHTML='<span style="font-size:0.8rem;color:var(--green)">&#128100; '+esc(userData.name.split(' ')[0])+'</span>'
+    +'<button class="nav-btn ghost" style="font-size:0.78rem;padding:6px 12px" onclick="loadMyBookings()">My Bookings</button>'
+    +'<button class="nav-btn ghost" style="font-size:0.72rem;padding:5px 10px;color:var(--red)" onclick="userLogout()">Sign Out</button>';
+  nav.insertBefore(span, nav.firstChild);
+}
+
+function userLogout(){
+  userToken=null; userData=null;
+  localStorage.removeItem('lf_utoken');
+  localStorage.removeItem('lf_udata');
+  var s=document.getElementById('userNavSpan');
+  if(s) s.remove();
+  showToast('Signed out','success');
+}
+
+var SKILL_KW = {
+  Plumber:['pipe','water','leak','tap','flush','toilet','bathroom','plumb'],
+  Electrician:['electric','fan','light','wire','switch','power','bulb','socket','fuse'],
+  Carpenter:['wood','door','window','furniture','cabinet','carpent'],
+  Painter:['paint','wall','colour','color','brush'],
+  'AC Technician':['ac','air condition','cool','compressor','refriger','fridge'],
+  Mason:['cement','brick','plaster','construct'],
+  Welder:['weld','iron','metal','gate','grill'],
+  Cleaner:['clean','sweep','mop','wash','dust']
+};
+var recognition=null, isListening=false;
+
+function toggleVoice(){
+  if(!('webkitSpeechRecognition' in window)&&!('SpeechRecognition' in window)){
+    showToast('Voice not supported in this browser','error'); return;
+  }
+  if(isListening){stopVoice();return;}
+  startVoice();
+}
+
+function startVoice(){
+  var SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+  recognition=new SR();
+  recognition.lang='en-IN';
+  recognition.continuous=false;
+  recognition.interimResults=false;
+  recognition.onstart=function(){
+    isListening=true;
+    document.getElementById('voiceBtn').classList.add('listening');
+    showVoiceStatus('&#127908; Listening... Speak your problem');
+  };
+  recognition.onresult=function(e){
+    var t=e.results[0][0].transcript.toLowerCase();
+    showVoiceStatus('You said: "'+t+'"');
+    processVoice(t);
+  };
+  recognition.onerror=function(){stopVoice();showToast('Could not hear. Try again.','error');};
+  recognition.onend=function(){stopVoice();};
+  recognition.start();
+}
+
+function stopVoice(){
+  isListening=false;
+  document.getElementById('voiceBtn').classList.remove('listening');
+  if(recognition) recognition.stop();
+}
+
+function processVoice(text){
+  var detected='';
+  var skills=Object.keys(SKILL_KW);
+  for(var i=0;i<skills.length;i++){
+    var kws=SKILL_KW[skills[i]];
+    for(var j=0;j<kws.length;j++){
+      if(text.indexOf(kws[j])>=0){detected=skills[i];break;}
+    }
+    if(detected) break;
+  }
+  if(detected){
+    currentCategory=detected;
+    document.getElementById('searchCategory').value=detected;
+    speak('I found '+detected+'s near you. Showing results now.');
+    showVoiceStatus('Detected: '+detected+' -- showing results...');
+    loadCategories(); loadWorkers();
+    setTimeout(function(){
+      document.getElementById('workers-section').scrollIntoView({behavior:'smooth'});
+      hideVoiceStatus();
+    },2500);
+  } else {
+    speak('Could not detect service. Please try again.');
+    showVoiceStatus('Could not detect. Try saying pipe leak or fan not working');
+    setTimeout(hideVoiceStatus, 3000);
+  }
+}
+
+function speak(text){
+  if(!('speechSynthesis' in window)) return;
+  window.speechSynthesis.cancel();
+  var u=new SpeechSynthesisUtterance(text);
+  u.lang='en-IN'; u.rate=0.95;
+  window.speechSynthesis.speak(u);
+}
+
+function showVoiceStatus(msg){
+  var el=document.getElementById('voiceStatus');
+  if(el){el.innerHTML=msg; el.style.display='block';}
+}
+function hideVoiceStatus(){
+  var el=document.getElementById('voiceStatus');
+  if(el) el.style.display='none';
+}
+
+function findNearby(){
+  if(!navigator.geolocation){showToast('Geolocation not supported','error');return;}
+  showToast('Getting your location...','success');
+  navigator.geolocation.getCurrentPosition(function(pos){
+    var lat=pos.coords.latitude, lng=pos.coords.longitude;
+    var skill=document.getElementById('searchCategory').value;
+    var url='/api/nearby?lat='+lat+'&lng='+lng+'&radius=20';
+    if(skill) url+='&skill='+encodeURIComponent(skill);
+    api('GET',url).then(function(d){
+      if(d.success){
+        showToast('Found '+d.data.length+' workers nearby','success');
+        var grid=document.getElementById('workersGrid');
+        if(!d.data.length){
+          grid.innerHTML='<div class="empty-state"><div class="empty-icon">&#128205;</div><p>No workers found within 20km.</p></div>';
+          return;
+        }
+        grid.innerHTML=d.data.map(function(w){
+          var initials=(w.name||'?').split(' ').map(function(n){return n[0]||'';}).join('').slice(0,2).toUpperCase();
+          var scol={available:'var(--green)',busy:'var(--yellow)',offline:'var(--text3)'};
+          var slabel={available:'Available Now',busy:'Busy',offline:'Offline'};
+          var rating=parseFloat(w.rating)||0;
+          return '<div class="worker-card" onclick="openWorkerDetail('+w.id+')">'
+            +'<div class="wc-top"><div class="wc-avatar">'+initials+'<div class="verified-badge">&#10003;</div></div>'
+            +'<div class="wc-info"><div class="wc-name">'+esc(w.name)+'</div>'
+            +'<div class="wc-tags"><span class="skill-tag">'+esc(w.skill)+'</span>'
+            +'<span class="status-tag"><span class="sdot '+w.status+'"></span>'
+            +'<span style="color:'+(scol[w.status]||'#555')+'">'+(slabel[w.status]||'Offline')+'</span></span>'
+            +'<span class="dist-badge">&#128205; '+w.distance.toFixed(1)+' km</span>'
+            +'</div></div></div>'
+            +'<div class="wc-meta">'
+            +'<div class="wc-meta-row"><span class="ic">&#128205;</span>'+esc(w.area)+', '+esc(w.city)+'</div>'
+            +'<div class="wc-meta-row"><span class="ic">&#128336;</span>'+w.experience+' years</div>'
+            +'</div>'
+            +'<div class="wc-rating"><div class="stars-row">'+starsHTML(rating)
+            +'<span class="rating-num">'+rating.toFixed(1)+'</span>'
+            +'<span class="rating-count">('+( w.total_reviews||0)+')</span></div>'
+            +'<span class="exp-badge">'+w.experience+'y exp</span></div>'
+            +'<div class="wc-actions" onclick="event.stopPropagation()">'
+            +'<button class="btn-call" onclick="trackAndCall('+w.id+')">&#128222; Call Now</button>'
+            +'<button class="btn-wa" onclick="trackAndWa('+w.id+')">&#128172;</button>'
+            +'<button class="btn-book" onclick="openBooking('+w.id+',\''+esc(w.name)+'\')">&#128197;</button>'
+            +'</div></div>';
+        }).join('');
+        document.getElementById('workers-section').scrollIntoView({behavior:'smooth'});
+      } else showToast('No nearby workers found','error');
+    });
+  },function(){showToast('Location access denied','error');});
+}
+
+var mapInstance=null;
 
 function initMap(){
   if(mapInstance){mapInstance.remove();mapInstance=null;}
   if(typeof L==='undefined'){showToast('Map loading...','success');return;}
   mapInstance=L.map('mapContainer').setView([26.7606,83.3732],12);
-  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:'&copy; OpenStreetMap contributors',maxZoom:18}).addTo(mapInstance);
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{
+    attribution:'&copy; OpenStreetMap',maxZoom:18
+  }).addTo(mapInstance);
   if(navigator.geolocation){
-    navigator.geolocation.getCurrentPosition(pos=>{
-      const{latitude,longitude}=pos.coords;
-      mapInstance.setView([latitude,longitude],13);
-      L.circleMarker([latitude,longitude],{radius:10,fillColor:'#FF5C00',color:'#fff',weight:3,fillOpacity:1}).addTo(mapInstance).bindPopup('<b>&#128205; You are here</b>');
-      api('GET','/api/nearby?lat='+latitude+'&lng='+longitude+'&radius=30').then(d=>{
-        if(d.success) d.data.forEach(w=>{
-          if(!w.lat||!w.lng)return;
-          const popup='<b>'+esc(w.name)+'</b><br><span style="color:#FF5C00">'+esc(w.skill)+'</span> &bull; '+esc(w.city)+'<br>&#11088; '+parseFloat(w.rating||0).toFixed(1)+' &bull; '+w.distance.toFixed(1)+' km<br><button onclick="openWorkerDetail('+w.id+');closeModal(\'mapModal\')" style="margin-top:6px;background:#FF5C00;color:#fff;border:none;padding:4px 10px;border-radius:6px;cursor:pointer;font-size:0.8rem">View Profile</button>';
+    navigator.geolocation.getCurrentPosition(function(pos){
+      var lat=pos.coords.latitude, lng=pos.coords.longitude;
+      mapInstance.setView([lat,lng],13);
+      L.circleMarker([lat,lng],{radius:10,fillColor:'#FF5C00',color:'#fff',weight:3,fillOpacity:1})
+        .addTo(mapInstance).bindPopup('<b>You are here</b>');
+      api('GET','/api/nearby?lat='+lat+'&lng='+lng+'&radius=30').then(function(d){
+        if(!d.success) return;
+        d.data.forEach(function(w){
+          if(!w.lat||!w.lng) return;
+          var popup='<b>'+esc(w.name)+'</b><br>'
+            +'<span style="color:#FF5C00">'+esc(w.skill)+'</span> - '+esc(w.city)+'<br>'
+            +'Rating: '+parseFloat(w.rating||0).toFixed(1)+' - '+w.distance.toFixed(1)+' km<br>'
+            +'<button onclick="openWorkerDetail('+w.id+');closeModal(\'mapModal\')" '
+            +'style="margin-top:6px;background:#FF5C00;color:#fff;border:none;padding:4px 10px;border-radius:6px;cursor:pointer">View</button>';
           L.marker([parseFloat(w.lat),parseFloat(w.lng)]).addTo(mapInstance).bindPopup(popup);
         });
       });
@@ -1069,96 +1350,430 @@ function initMap(){
   }
 }
 
-const SKILL_KEYWORDS = { 'Plumber':['pipe','water','leak','tap'], 'Electrician':['electric','fan','light','wire'], 'Carpenter':['wood','door','window'], 'Painter':['paint','wall','colour'], 'AC Technician':['ac','cool','fridge'], 'Mason':['cement','brick','wall'], 'Welder':['weld','iron','metal'], 'Cleaner':['clean','sweep','mop'] };
-let recognition=null, isListening=false;
-function toggleVoice(){
-  if(!('webkitSpeechRecognition' in window)&&!('SpeechRecognition' in window)){showToast('Voice not supported','error');return;}
-  if(isListening){stopVoice();return;}startVoice();
-}
-function startVoice(){
-  const SR=window.SpeechRecognition||window.webkitSpeechRecognition; recognition=new SR(); recognition.lang='en-IN';
-  recognition.onstart=()=>{isListening=true;document.getElementById('voiceBtn').classList.add('listening');showVoiceStatus('&#127908; Listening...');};
-  recognition.onresult=(e)=>{const t=e.results[0][0].transcript.toLowerCase();showVoiceStatus('You said: "'+t+'"');processVoice(t);};
-  recognition.onerror=()=>{stopVoice();showToast('Could not hear. Try again.','error');}; recognition.onend=()=>stopVoice(); recognition.start();
-}
-function stopVoice(){isListening=false;document.getElementById('voiceBtn').classList.remove('listening');if(recognition)recognition.stop();}
-function processVoice(text){
-  let detected=''; for(const[skill,keywords]of Object.entries(SKILL_KEYWORDS)){if(keywords.some(k=>text.includes(k))){detected=skill;break;}}
-  if(detected){
-    currentCategory=detected; document.getElementById('searchCategory').value=detected; showVoiceStatus('&#10003; Detected: '+detected); loadCategories(); loadWorkers(); setTimeout(()=>{document.getElementById('workers-section').scrollIntoView({behavior:'smooth'});hideVoiceStatus();},2500);
-  } else { showVoiceStatus('&#10005; Could not detect service.'); setTimeout(hideVoiceStatus,3000); }
-}
-function showVoiceStatus(msg){const el=document.getElementById('voiceStatus');el.innerHTML=msg;el.style.display='block';}
-function hideVoiceStatus(){document.getElementById('voiceStatus').style.display='none';}
-
-function findNearby(){
-  if(!navigator.geolocation){showToast('Geolocation not supported','error');return;}
-  showToast('Getting location...','success');
-  navigator.geolocation.getCurrentPosition(async pos=>{
-    const{latitude,longitude}=pos.coords; const skill=document.getElementById('searchCategory').value;
-    let url='/api/nearby?lat='+latitude+'&lng='+longitude+'&radius=20'; if(skill) url+='&skill='+encodeURIComponent(skill);
-    const d=await api('GET',url);
-    if(d.success){ showToast('Found '+d.data.length+' workers','success'); renderNearbyWorkers(d.data); document.getElementById('workers-section').scrollIntoView({behavior:'smooth'}); }
-    else showToast('No nearby workers','error');
-  },()=>showToast('Location denied','error'));
-}
-
 function openBooking(workerId,workerName){
   if(!userToken){showToast('Please sign in to book','error');openModal('userLoginModal');return;}
-  document.getElementById('booking_worker_id').value=workerId; document.getElementById('booking_worker_name').textContent='Booking for: '+workerName;
-  const today=new Date().toISOString().split('T')[0]; document.getElementById('b_date').min=today; document.getElementById('b_date').value=''; document.getElementById('b_time').value=''; document.getElementById('b_note').value='';
+  document.getElementById('booking_worker_id').value=workerId;
+  document.getElementById('booking_worker_name').textContent='Booking for: '+workerName;
+  var today=new Date().toISOString().split('T')[0];
+  document.getElementById('b_date').min=today;
+  document.getElementById('b_date').value='';
+  document.getElementById('b_time').value='';
+  document.getElementById('b_note').value='';
   openModal('bookingModal');
 }
+
 async function doBooking(){
-  const worker_id=document.getElementById('booking_worker_id').value, booking_date=document.getElementById('b_date').value, booking_time=document.getElementById('b_time').value, note=document.getElementById('b_note').value.trim();
+  var worker_id=document.getElementById('booking_worker_id').value;
+  var booking_date=document.getElementById('b_date').value;
+  var booking_time=document.getElementById('b_time').value;
+  var note=document.getElementById('b_note').value.trim();
   if(!booking_date||!booking_time){showToast('Date and time required','error');return;}
-  const d=await api('POST','/api/bookings',{worker_id,booking_date,booking_time,note},userToken);
-  if(d.success){closeModal('bookingModal');showToast('Booking sent!','success');} else showToast(d.message||'Booking failed','error');
+  var d=await api('POST','/api/bookings',{worker_id:worker_id,booking_date:booking_date,booking_time:booking_time,note:note},userToken);
+  if(d.success){closeModal('bookingModal');showToast('Booking sent! Worker will confirm soon.','success');}
+  else showToast(d.message||'Booking failed','error');
 }
+
 async function loadMyBookings(){
-  openModal('myBookingsModal'); document.getElementById('myBookingsContent').innerHTML='<div class="loading"><div class="spinner"></div></div>';
-  const d=await api('GET','/api/bookings/my',null,userToken);
-  if(!d.success||!d.data.length){document.getElementById('myBookingsContent').innerHTML='<p style="color:var(--text2);text-align:center;padding:20px">No bookings yet.</p>';return;}
-  document.getElementById('myBookingsContent').innerHTML=d.data.map(b=>'<div class="admin-worker-row" style="margin-bottom:10px"><div style="flex:1"><div style="font-weight:700">'+esc(b.worker_name)+' <span class="skill-tag">'+esc(b.skill)+'</span></div><div style="font-size:0.78rem;color:var(--text2);margin-top:4px">'+b.booking_date+' at '+b.booking_time+'</div></div><span class="booking-badge '+b.status+'">'+b.status.toUpperCase()+'</span></div>').join('');
+  openModal('myBookingsModal');
+  document.getElementById('myBookingsContent').innerHTML='<div class="loading"><div class="spinner"></div></div>';
+  var d=await api('GET','/api/bookings/my',null,userToken);
+  if(!d.success||!d.data.length){
+    document.getElementById('myBookingsContent').innerHTML='<p style="color:var(--text2);text-align:center;padding:20px">No bookings yet.</p>';
+    return;
+  }
+  document.getElementById('myBookingsContent').innerHTML=d.data.map(function(b){
+    return '<div class="admin-worker-row" style="margin-bottom:10px">'
+      +'<div style="flex:1"><div style="font-weight:700">'+esc(b.worker_name)
+      +' <span class="skill-tag">'+esc(b.skill)+'</span></div>'
+      +'<div style="font-size:0.78rem;color:var(--text2);margin-top:4px">'+b.booking_date+' at '+b.booking_time+'</div>'
+      +(b.note?'<div style="font-size:0.78rem;color:var(--text3);margin-top:2px">'+esc(b.note)+'</div>':'')
+      +'</div><span class="booking-badge '+b.status+'">'+b.status.toUpperCase()+'</span>'
+      +'</div>';
+  }).join('');
 }
+
 async function openWorkerBookings(){
-  openModal('workerBookingsModal'); document.getElementById('workerBookingsContent').innerHTML='<div class="loading"><div class="spinner"></div></div>';
-  const d=await api('GET','/api/bookings/worker',null,workerToken);
-  if(!d.success||!d.data.length){document.getElementById('workerBookingsContent').innerHTML='<p style="color:var(--text2);text-align:center;padding:20px">No booking requests.</p>';return;}
-  document.getElementById('workerBookingsContent').innerHTML=d.data.map(b=>'<div class="admin-worker-row" style="margin-bottom:10px"><div style="flex:1"><div style="font-weight:700">'+esc(b.user_name)+'</div><div style="font-size:0.78rem;color:var(--text2);margin-top:4px">'+b.booking_date+' at '+b.booking_time+'</div></div><span class="booking-badge '+b.status+'">'+b.status.toUpperCase()+'</span>'+(b.status==='pending'?'<div class="admin-actions"><button class="admin-btn approve" onclick="respondBooking('+b.id+',\'accepted\')">&#10003; Accept</button><button class="admin-btn delete" onclick="respondBooking('+b.id+',\'rejected\')">&#10005; Reject</button></div>':(b.status==='accepted'?'<button class="admin-btn approve" onclick="respondBooking('+b.id+',\'completed\')">&#9989; Done</button>':''))+'</div>').join('');
+  openModal('workerBookingsModal');
+  document.getElementById('workerBookingsContent').innerHTML='<div class="loading"><div class="spinner"></div></div>';
+  var d=await api('GET','/api/bookings/worker',null,workerToken);
+  if(!d.success||!d.data.length){
+    document.getElementById('workerBookingsContent').innerHTML='<p style="color:var(--text2);text-align:center;padding:20px">No booking requests yet.</p>';
+    return;
+  }
+  document.getElementById('workerBookingsContent').innerHTML=d.data.map(function(b){
+    var actions='';
+    if(b.status==='pending'){
+      actions='<div class="admin-actions">'
+        +'<button class="admin-btn approve" onclick="respondBooking('+b.id+',\'accepted\')">Accept</button>'
+        +'<button class="admin-btn delete" onclick="respondBooking('+b.id+',\'rejected\')">Reject</button>'
+        +'</div>';
+    } else if(b.status==='accepted'){
+      actions='<button class="admin-btn approve" onclick="respondBooking('+b.id+',\'completed\')">Done</button>';
+    }
+    return '<div class="admin-worker-row" style="margin-bottom:10px">'
+      +'<div style="flex:1"><div style="font-weight:700">'+esc(b.user_name)+'</div>'
+      +'<div style="font-size:0.78rem;color:var(--text2);margin-top:4px">'+b.booking_date+' at '+b.booking_time+'</div>'
+      +(b.note?'<div style="font-size:0.78rem;color:var(--text3);margin-top:2px">'+esc(b.note)+'</div>':'')
+      +'</div>'
+      +'<span class="booking-badge '+b.status+'">'+b.status.toUpperCase()+'</span>'
+      +actions
+      +'</div>';
+  }).join('');
 }
-async function respondBooking(id,status){ const d=await api('PUT','/api/bookings/'+id+'/status',{status},workerToken); if(d.success){showToast('Booking '+status,'success');openWorkerBookings();}else showToast(d.message||'Error','error'); }
-</script>
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-<script>
-let aiOpen = false, aiGreeted = false;
+
+async function respondBooking(id,status){
+  var d=await api('PUT','/api/bookings/'+id+'/status',{status:status},workerToken);
+  if(d.success){showToast('Booking '+status,'success');openWorkerBookings();}
+  else showToast(d.message||'Error','error');
+}
+
+
+
+// =============================================
+// AI ASSISTANT - Powered by Claude API
+// =============================================
+var aiOpen = false;
+var aiVoiceOn = false;
+var aiRecog = null;
+var aiGreeted = false;
+var aiMessages_history = [];
+
 function toggleAIChat() {
   aiOpen = !aiOpen;
-  document.getElementById('aiChatWindow').classList.toggle('open', aiOpen);
-  if (aiOpen && !aiGreeted) {
-    aiGreeted = true;
-    setTimeout(() => addAIMsg("Hi there! I'm Lexa. Tell me what you need and I'll help you find the right worker.", 'bot'), 200);
+  var win = document.getElementById('aiChatWindow');
+  var btn = document.getElementById('aiChatBtn');
+  if (aiOpen) {
+    win.classList.add('open');
+    btn.classList.add('open');
+    btn.innerHTML = '&#10005;';
+    btn.style.background = '';
+    if (!aiGreeted) {
+      aiGreeted = true;
+      setTimeout(function() {
+        addAIMsg("Hi there! I'm Lexa, your LocalFix assistant. I can help you find trusted local workers in seconds. What do you need today?", 'bot');
+      }, 300);
+    }
+    setTimeout(function() {
+      var msgs = document.getElementById('aiMessages');
+      if (msgs) msgs.scrollTop = msgs.scrollHeight;
+    }, 100);
+  } else {
+    win.classList.remove('open');
+    btn.classList.remove('open');
+    btn.innerHTML = '&#129302;';
+    if (aiVoiceOn) stopAIVoice();
   }
 }
+
 function addAIMsg(text, type) {
-  const msgs = document.getElementById('aiMessages');
+  var msgs = document.getElementById('aiMessages');
   if (!msgs) return;
-  const div = document.createElement('div');
-  div.className = 'ai-msg ' + type; div.textContent = text;
-  msgs.appendChild(div); msgs.scrollTop = msgs.scrollHeight;
+  var div = document.createElement('div');
+  div.className = 'ai-msg ' + type;
+  div.textContent = text;
+  msgs.appendChild(div);
+  msgs.scrollTop = msgs.scrollHeight;
 }
-function aiQuick(text) { document.getElementById('aiInput').value = text; sendAIMsg(); }
-function sendAIMsg() {
-  const input = document.getElementById('aiInput'), text = input.value.trim();
+
+function showTypingIndicator() {
+  var msgs = document.getElementById('aiMessages');
+  if (!msgs) return;
+  var div = document.createElement('div');
+  div.className = 'ai-msg typing';
+  div.id = 'aiTyping';
+  div.innerHTML = '<div class="typing-dots"><span></span><span></span><span></span></div>';
+  msgs.appendChild(div);
+  msgs.scrollTop = msgs.scrollHeight;
+}
+
+function removeTypingIndicator() {
+  var t = document.getElementById('aiTyping');
+  if (t) t.remove();
+}
+
+async function sendAIMsg() {
+  var input = document.getElementById('aiInput');
+  var text = (input.value || '').trim();
   if (!text) return;
-  input.value = ''; addAIMsg(text, 'user'); document.getElementById('aiQuickBtns').style.display = 'none';
-  setTimeout(() => {
-    let reply = "I can help you find Plumbers, Electricians, and more. Try searching or asking for a specific service.";
-    if (text.toLowerCase().includes('plumber')) reply = "Showing Plumber workers now.";
-    else if (text.toLowerCase().includes('electrician')) reply = "Showing Electrician workers now.";
-    addAIMsg(reply, 'bot');
-  }, 500);
+  input.value = '';
+  addAIMsg(text, 'user');
+  // Hide quick buttons
+  var qb = document.getElementById('aiQuickBtns');
+  if (qb) qb.style.display = 'none';
+  await callClaudeAI(text);
 }
+
+function aiQuick(text) {
+  var input = document.getElementById('aiInput');
+  if (input) input.value = text;
+  sendAIMsg();
+}
+
+async function callClaudeAI(userMsg) {
+  showTypingIndicator();
+
+  // Build conversation history
+  aiMessages_history.push({ role: 'user', content: userMsg });
+
+  // Keep only last 6 messages to save tokens
+  if (aiMessages_history.length > 6) {
+    aiMessages_history = aiMessages_history.slice(-6);
+  }
+
+  var systemPrompt = 'You are Lexa, a friendly AI assistant for LocalFix, a local service marketplace in Gorakhpur. Reply in fluent English only, max 1-2 sentences. Services offered: Plumber, Electrician, Carpenter, Painter, AC Technician, Mason, Welder, Cleaner. Rules: 1) For our services, confirm searching enthusiastically. 2) For other services like doctor/cook/driver, say sorry we do not offer that and list our 8 services. 3) For ok/show/yes/find - say Showing results now. 4) Booking: sign in then click calendar on worker card. 5) Contact: use Call or WhatsApp button on card.'
+
+  try {
+    var response = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-haiku-4-5-20251001',
+        max_tokens: 120,
+        system: systemPrompt,
+        messages: aiMessages_history
+      })
+    });
+
+    var data = await response.json();
+    removeTypingIndicator();
+
+    var reply = '';
+    if (data.content && data.content[0] && data.content[0].text) {
+      reply = data.content[0].text.trim();
+    } else {
+      reply = "I'm here to help! Tell me what service you need - plumber, electrician, or any other worker.";
+    }
+
+    aiMessages_history.push({ role: 'assistant', content: reply });
+    addAIMsg(reply, 'bot');
+    speak_ai(reply);
+
+    // Auto search: detect skill OR follow-up confirmations
+    var lower = userMsg.toLowerCase();
+    var skillMap = {
+      'Plumber': ['plumber','plumbing','pipe','pipes','leak','leaking','tap','toilet','bathroom','water','drain','drainage','sewage','flush','blockage','blocked','overflow','tank','motor pump','pump','bore','borewell','geyser','hot water','cold water','dripping','burst pipe'],
+      'Electrician': ['electrician','electric','electrical','fan','fans','ceiling fan','light','lights','bulb','bulbs','wire','wiring','switch','switches','power','current','socket','fuse','short circuit','mcb','tripping','meter','inverter','generator','ac wiring','panel','board','fitting','installation','tube light','led','repair'],
+      'Carpenter': ['carpenter','carpentry','wood','wooden','door','doors','window','windows','furniture','cabinet','almirah','wardrobe','table','chair','bed','shelf','shelves','cupboard','sofa','repair wood','wood work','ply','plywood','fitting','hinge','lock','sliding'],
+      'Painter': ['painter','painting','paint','painted','wall','walls','ceiling','colour','color','whitewash','distemper','emulsion','texture','waterproof','exterior','interior','touch up','polish','varnish','wood paint','spray'],
+      'AC Technician': ['ac','air condition','aircon','air conditioner','cooling','cool','compressor','refrigerator','fridge','freezer','gas refill','ac service','ac repair','ac not working','ac installation','split ac','window ac','inverter ac','ac cleaning','ac gas','pcb','thermostat'],
+      'Mason': ['mason','masonry','cement','brick','bricks','plaster','plastering','construction','tile','tiles','tiling','flooring','slab','concrete','rcc','demolition','wall crack','repair wall','marble','granite','bathroom tiles','kitchen tiles','waterproofing','roof leak','terrace'],
+      'Welder': ['welder','welding','iron','iron work','gate','grill','grills','metal','steel','fabrication','railing','staircase','shed','tin shed','aluminium','window grill','door frame','iron door','cutting','grinding'],
+      'Cleaner': ['cleaner','cleaning','clean','sweep','mop','sanitize','sanitisation','deep clean','house clean','office clean','sofa clean','carpet clean','pest control','termite','cockroach','rats','mosquito','fumigation','tank clean','water tank','drainage clean','garbage']
+    };
+
+    // Check follow-up confirmations — use last searched skill
+    var confirmWords = ['ok show','show me','yes show','find them','search now','go ahead','show','yes please','show results','ok search','yep','sure','okay show','display','list them','get them','bring','fetch','load','ok','okay','alright','done','proceed','continue','next'];
+    var isConfirm = confirmWords.some(function(w){ return lower === w || lower.indexOf(w) >= 0; });
+
+    var foundSkill = '';
+    for (var skill in skillMap) {
+      var kws = skillMap[skill];
+      for (var i = 0; i < kws.length; i++) {
+        if (lower.indexOf(kws[i]) >= 0) { foundSkill = skill; break; }
+      }
+      if (foundSkill) break;
+    }
+
+    // If confirmation + previous context had a skill, use that skill
+    if (!foundSkill && isConfirm && aiMessages_history.length > 1) {
+      var prevMsgs = aiMessages_history.map(function(m){ return m.content.toLowerCase(); }).join(' ');
+      for (var skill in skillMap) {
+        var kws = skillMap[skill];
+        for (var i = 0; i < kws.length; i++) {
+          if (prevMsgs.indexOf(kws[i]) >= 0) { foundSkill = skill; break; }
+        }
+        if (foundSkill) break;
+      }
+    }
+
+    if (foundSkill) {
+      setTimeout(function() {
+        currentCategory = foundSkill;
+        document.getElementById('searchCategory').value = foundSkill;
+        loadCategories();
+        loadWorkers();
+        document.getElementById('workers-section').scrollIntoView({ behavior: 'smooth' });
+      }, 800);
+    } else if (isConfirm && !foundSkill) {
+      // Generic confirm — just scroll to workers
+      setTimeout(function() {
+        loadWorkers();
+        document.getElementById('workers-section').scrollIntoView({ behavior: 'smooth' });
+      }, 800);
+    }
+
+  } catch(err) {
+    removeTypingIndicator();
+    var fallback = getFallbackReply(userMsg);
+    addAIMsg(fallback, 'bot');
+    speak_ai(fallback);
+  }
+}
+
+function getFallbackReply(msg) {
+  var lower = msg.toLowerCase();
+  var ourServices = 'We provide: Plumber, Electrician, Carpenter, Painter, AC Technician, Mason, Welder, Cleaner.';
+
+  if (lower.indexOf('plumber') >= 0 || lower.indexOf('pipe') >= 0 || lower.indexOf('leak') >= 0 || lower.indexOf('water') >= 0 || lower.indexOf('drain') >= 0 || lower.indexOf('tap') >= 0 || lower.indexOf('toilet') >= 0)
+    return "Looking for a plumber! Showing you verified plumbers right now.";
+  if (lower.indexOf('electric') >= 0 || lower.indexOf('fan') >= 0 || lower.indexOf('light') >= 0 || lower.indexOf('bulb') >= 0 || lower.indexOf('wiring') >= 0 || lower.indexOf('switch') >= 0)
+    return "Finding electricians near you right now!";
+  if (lower.indexOf('carpenter') >= 0 || lower.indexOf('wood') >= 0 || lower.indexOf('door') >= 0 || lower.indexOf('furniture') >= 0)
+    return "Searching for skilled carpenters near you!";
+  if (lower.indexOf('paint') >= 0 || lower.indexOf('colour') >= 0 || lower.indexOf('color') >= 0 || lower.indexOf('wall') >= 0)
+    return "Finding painters near you!";
+  if (lower.indexOf('ac') >= 0 || lower.indexOf('air con') >= 0 || lower.indexOf('cool') >= 0 || lower.indexOf('fridge') >= 0)
+    return "Looking for an AC technician for you!";
+  if (lower.indexOf('mason') >= 0 || lower.indexOf('cement') >= 0 || lower.indexOf('tile') >= 0 || lower.indexOf('brick') >= 0)
+    return "Searching for skilled masons near you!";
+  if (lower.indexOf('weld') >= 0 || lower.indexOf('iron') >= 0 || lower.indexOf('gate') >= 0 || lower.indexOf('grill') >= 0)
+    return "Finding welders near you!";
+  if (lower.indexOf('clean') >= 0 || lower.indexOf('sweep') >= 0 || lower.indexOf('pest') >= 0 || lower.indexOf('sanitize') >= 0)
+    return "Looking for cleaners near you!";
+  if (lower.indexOf('book') >= 0)
+    return "Sign In first, then tap the calendar icon on any worker card to book a time slot.";
+  if (lower.indexOf('price') >= 0 || lower.indexOf('cost') >= 0 || lower.indexOf('free') >= 0 || lower.indexOf('charge') >= 0)
+    return "LocalFix is completely free for customers. Zero commission!";
+  if (lower.indexOf('ok') >= 0 || lower.indexOf('show') >= 0 || lower.indexOf('yes') >= 0 || lower.indexOf('find') >= 0 || lower.indexOf('go') >= 0)
+    return "Showing results now! Scroll down to see workers.";
+  // Unknown service
+  return "Sorry, we don't offer that service. " + ourServices;
+}
+
+function speak_ai(text) {
+  if (!('speechSynthesis' in window)) return;
+  window.speechSynthesis.cancel();
+  function doSpeak() {
+    var u = new SpeechSynthesisUtterance(text);
+    u.rate = 0.88;
+    u.pitch = 1.15;
+    u.volume = 1.0;
+    var voices = window.speechSynthesis.getVoices();
+    var best = null;
+    // Priority list - female English voices
+    var femaleNames = [
+      'Google UK English Female',
+      'Microsoft Zira',
+      'Microsoft Libby',
+      'Samantha',
+      'Karen',
+      'Moira',
+      'Tessa',
+      'Veena',
+      'Google US English',
+      'Microsoft Eva'
+    ];
+    // Try female voices by name first
+    for (var f = 0; f < femaleNames.length; f++) {
+      for (var i = 0; i < voices.length; i++) {
+        if (voices[i].name.indexOf(femaleNames[f]) >= 0) {
+          best = voices[i]; break;
+        }
+      }
+      if (best) break;
+    }
+    // Fallback: any en-IN or en-GB voice
+    if (!best) {
+      for (var i = 0; i < voices.length; i++) {
+        if (voices[i].lang === 'en-IN' || voices[i].lang === 'en-GB') {
+          best = voices[i]; break;
+        }
+      }
+    }
+    // Final fallback: any English voice
+    if (!best) {
+      for (var i = 0; i < voices.length; i++) {
+        if (voices[i].lang && voices[i].lang.indexOf('en') === 0) {
+          best = voices[i]; break;
+        }
+      }
+    }
+    if (best) { u.voice = best; u.lang = best.lang; }
+    window.speechSynthesis.speak(u);
+  }
+  if (window.speechSynthesis.getVoices().length > 0) {
+    doSpeak();
+  } else {
+    window.speechSynthesis.addEventListener('voiceschanged', function onVC() {
+      window.speechSynthesis.removeEventListener('voiceschanged', onVC);
+      doSpeak();
+    });
+    setTimeout(doSpeak, 400);
+  }
+}
+
+function toggleAIVoice() {
+  if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
+    showToast('Voice not supported in this browser', 'error'); return;
+  }
+  if (aiVoiceOn) { stopAIVoice(); return; }
+  startAIVoice();
+}
+
+function startAIVoice() {
+  var SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  aiRecog = new SR();
+  aiRecog.lang = 'en-IN';
+  aiRecog.continuous = false;
+  aiRecog.interimResults = false;
+  aiRecog.onstart = function() {
+    aiVoiceOn = true;
+    var vb = document.getElementById('aiVoiceBtn');
+    if (vb) vb.classList.add('active');
+    var inp = document.getElementById('aiInput');
+    if (inp) inp.placeholder = 'Listening...';
+  };
+  aiRecog.onresult = function(e) {
+    var t = e.results[0][0].transcript;
+    var inp = document.getElementById('aiInput');
+    if (inp) inp.value = t;
+    stopAIVoice();
+    sendAIMsg();
+  };
+  aiRecog.onerror = function() { stopAIVoice(); };
+  aiRecog.onend = function() { stopAIVoice(); };
+  aiRecog.start();
+}
+
+function stopAIVoice() {
+  aiVoiceOn = false;
+  var btn = document.getElementById('aiVoiceBtn');
+  if (btn) btn.classList.remove('active');
+  var inp = document.getElementById('aiInput');
+  if (inp) inp.placeholder = 'Ask me anything...';
+  if (aiRecog) { try { aiRecog.stop(); } catch(e) {} }
+}
+
+
+
 </script>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+
+<!-- AI ASSISTANT -->
+<button class="ai-fab" id="aiChatBtn" onclick="toggleAIChat()">&#129302;</button>
+<div class="ai-chat-window" id="aiChatWindow">
+  <div class="ai-chat-header">
+    <div class="ai-avatar-ring">&#129302;</div>
+    <div class="ai-chat-info">
+      <div class="ai-chat-name">Lexa &mdash; AI Assistant</div>
+      <div class="ai-chat-status"><span class="ai-status-dot"></span>Online now</div>
+    </div>
+    <button class="ai-close-btn" onclick="toggleAIChat()">&#10005;</button>
+  </div>
+  <div class="ai-messages" id="aiMessages"></div>
+  <div class="ai-quick-btns" id="aiQuickBtns">
+    <button class="ai-quick-btn" onclick="aiQuick('I need a plumber')">Plumber</button>
+    <button class="ai-quick-btn" onclick="aiQuick('I need an electrician')">Electrician</button>
+    <button class="ai-quick-btn" onclick="aiQuick('How do I book a worker?')">Booking</button>
+    <button class="ai-quick-btn" onclick="aiQuick('Is this service free?')">Pricing</button>
+  </div>
+  <div class="ai-input-area">
+    <input class="ai-input" id="aiInput" placeholder="Ask anything..." onkeydown="if(event.key==='Enter') sendAIMsg()"/>
+    <button class="ai-voice-btn" id="aiVoiceBtn" onclick="toggleAIVoice()">&#127908;</button>
+    <button class="ai-send-btn" onclick="sendAIMsg()">&#9658;</button>
+  </div>
+</div>
+
 </body>
 </html>
