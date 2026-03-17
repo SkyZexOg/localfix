@@ -198,6 +198,40 @@
     .review-header { display:flex; justify-content:space-between; margin-bottom:6px; align-items:center; }
     .review-name { font-weight:700; font-size:0.88rem; }
     .review-stars { color:var(--gold); font-size:0.8rem; letter-spacing:1px; }
+}
+    .success-msg p { color:var(--text2); font-size:0.88rem; line-height:1.7; }
+
+    .admin-stat-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(110px,1fr)); gap:10px; margin-bottom:20px; }
+    .admin-stat-card { background:var(--bg3); border:1px solid var(--border); border-radius:14px; padding:14px; text-align:center; }
+    .admin-stat-val { font-family:'Clash Display',sans-serif; font-size:1.7rem; font-weight:700; }
+    .admin-stat-label { font-size:0.65rem; color:var(--text2); margin-top:2px; text-transform:uppercase; letter-spacing:0.5px; }
+    .admin-worker-row { background:var(--bg3); border:1px solid var(--border); border-radius:14px; padding:14px 16px; display:flex; align-items:center; gap:12px; flex-wrap:wrap; transition:border-color 0.2s; }
+    .admin-worker-row:hover { border-color:var(--border2); }
+    .admin-worker-avatar { width:38px; height:38px; border-radius:10px; flex-shrink:0; background:linear-gradient(135deg,var(--orange),var(--orange2)); display:flex; align-items:center; justify-content:center; font-family:'Clash Display',sans-serif; font-weight:700; color:#fff; font-size:0.9rem; }
+    .admin-actions { display:flex; gap:6px; flex-wrap:wrap; margin-left:auto; }
+    .admin-btn { padding:5px 12px; border-radius:8px; font-size:0.72rem; font-weight:700; font-family:'Plus Jakarta Sans',sans-serif; cursor:pointer; border:1px solid; transition:all 0.2s; }
+    .admin-btn.approve { background:rgba(0,208,132,0.1); color:var(--green); border-color:rgba(0,208,132,0.3); }
+    .admin-btn.approve:hover { background:var(--green); color:#000; }
+    .admin-btn.reject { background:rgba(255,184,0,0.1); color:var(--yellow); border-color:rgba(255,184,0,0.3); }
+    .admin-btn.reject:hover { background:var(--yellow); color:#000; }
+    .admin-btn.delete { background:rgba(255,68,68,0.1); color:var(--red); border-color:rgba(255,68,68,0.3); }
+    .admin-btn.delete:hover { background:var(--red); color:#fff; }
+
+    .chart-wrap { background:var(--bg3); border:1px solid var(--border); border-radius:16px; padding:20px; margin-bottom:18px; }
+    .chart-title { font-family:'Clash Display',sans-serif; font-size:0.9rem; font-weight:600; margin-bottom:14px; color:var(--text2); }
+    .bar-chart { display:flex; align-items:flex-end; gap:6px; height:80px; }
+    .bar-wrap { flex:1; display:flex; flex-direction:column; align-items:center; gap:4px; }
+    .bar { width:100%; background:linear-gradient(180deg,var(--orange),var(--orange2)); border-radius:4px 4px 0 0; min-height:3px; }
+    .bar-label { font-size:0.58rem; color:var(--text3); text-align:center; }
+
+    .wd-info-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:18px; }
+    .wd-info-item { background:var(--bg3); border:1px solid var(--border); border-radius:12px; padding:12px 14px; }
+    .wd-info-label { font-size:0.65rem; color:var(--text3); text-transform:uppercase; letter-spacing:0.5px; margin-bottom:4px; }
+    .wd-info-val { font-size:0.88rem; font-weight:600; }
+    .review-card { background:var(--bg3); border:1px solid var(--border); border-radius:12px; padding:14px; margin-top:10px; }
+    .review-header { display:flex; justify-content:space-between; margin-bottom:6px; align-items:center; }
+    .review-name { font-weight:700; font-size:0.88rem; }
+    .review-stars { color:var(--gold); font-size:0.8rem; letter-spacing:1px; }
     .review-text { color:var(--text2); font-size:0.82rem; line-height:1.6; }
     .star-picker { display:flex; gap:8px; margin-bottom:10px; }
     .star-pick { font-size:1.6rem; cursor:pointer; color:var(--text3); transition:all 0.15s; }
@@ -360,7 +394,8 @@
 <section id="workers-section">
   <div class="workers-top">
     <div>
-      <div class="sec-label">Verified Professionals</div>
+      <div class="sec-label">Verified 
+Professionals</div>
       <div class="sec-title" style="margin-bottom:0">Available Workers</div>
     </div>
     <div class="filter-row">
@@ -408,6 +443,18 @@
   </div>
 </div>
 
+
+<!-- OTP MODAL -->
+<div class="modal-overlay" id="otpModal">
+  <div class="modal" style="max-width:400px">
+    <button class="modal-close" onclick="closeModal('otpModal')">&#10005;</button>
+    <h2>Verify OTP</h2>
+    <p class="modal-sub">Enter the 6-digit code sent to your email.</p>
+    <div class="form-group"><label class="form-label">OTP Code</label><input class="form-input" id="otp_code" placeholder="------" maxlength="6" style="text-align:center; font-size:1.5rem; letter-spacing:4px;" /></div>
+    <button class="form-submit" onclick="verifyOtp()">Verify &amp; Continue &#8594;</button>
+  </div>
+</div>
+
 <!-- USER REGISTER -->
 <div class="modal-overlay" id="userRegModal">
   <div class="modal" style="max-width:400px">
@@ -419,6 +466,17 @@
     <div class="form-group"><label class="form-label">Password</label><input class="form-input" id="ur_pass" type="password" placeholder="Min 6 characters"/></div>
     <button class="form-submit" onclick="doUserRegister()">Create Account &#8594;</button>
     <p style="text-align:center;margin-top:12px;font-size:0.82rem;color:var(--text2)">Already have account? <a href="#" style="color:var(--orange);font-weight:600" onclick="switchModal('userRegModal','userLoginModal')">Sign in</a></p>
+  </div>
+</div>
+
+<!-- OTP MODAL -->
+<div class="modal-overlay" id="otpModal">
+  <div class="modal" style="max-width:400px">
+    <button class="modal-close" onclick="closeModal('otpModal')">&#10005;</button>
+    <h2>Verify OTP</h2>
+    <p class="modal-sub">Enter the 6-digit code sent to your email.</p>
+    <div class="form-group"><label class="form-label">OTP Code</label><input class="form-input" id="otp_code" placeholder="123456" maxlength="6"/></div>
+    <button class="form-submit" onclick="verifyOtp()">Verify &amp; Continue &#8594;</button>
   </div>
 </div>
 
@@ -576,9 +634,14 @@
 
 <script>
 const API = window.location.origin;
+
+let tempAuthData = null;
+let otpFlowType = null; // 'login' or 'signup'
+
 let workerToken = localStorage.getItem('lf_wtoken') || null;
 let workerData  = JSON.parse(localStorage.getItem('lf_wdata') || 'null');
-let adminToken  = localStorage.getItem('lf_atoken') || null;
+let adminToken  = localStorage.getItem('lf_atoken') ||
+null;
 let currentFilter = 'all', currentCategory = '', currentCity = '';
 
 const CATS = [
@@ -819,7 +882,8 @@ function doLogout() {
   workerToken=null; workerData=null;
   localStorage.removeItem('lf_wtoken'); localStorage.removeItem('lf_wdata');
   closeModal('wDashModal');
-  document.getElementById('navLinks').innerHTML='<button class="nav-btn ghost" onclick="openModal(\'loginModal\')">Login</button><button class="nav-btn primary" onclick="openModal(\'registerModal\')">Join as Worker</button><button class="nav-btn ghost sm" onclick="openModal(\'adminLoginModal\')">Admin</button>';
+  document.getElementById('navLinks').innerHTML='<button class="nav-btn ghost" onclick="openModal(\'loginModal\')">Login</button><button class="nav-btn primary" onclick="openModal(\'
+registerModal')">Join as Worker</button><button class="nav-btn ghost sm" onclick="openModal('adminLoginModal')">Admin</button>';
   showToast('Logged out','success');
 }
 
@@ -1034,7 +1098,8 @@ async function doBooking(){
   const note=document.getElementById('b_note').value.trim();
   if(!booking_date||!booking_time){showToast('Date and time required','error');return;}
   const d=await api('POST','/api/bookings',{worker_id,booking_date,booking_time,note},userToken);
-  if(d.success){closeModal('bookingModal');showToast('Booking sent! Worker will confirm soon.','success');}
+  if(d.success){closeModal('bookingModal');showToast('Booking sent! Worker will confirm soon
+.','success');}
   else showToast(d.message||'Booking failed','error');
 }
 async function loadMyBookings(){
@@ -1072,19 +1137,69 @@ async function respondBooking(id,status){
 }
 
 // User auth
+let tempAuthData = null;
+let tempAuthType = null;
+
 async function doUserLogin(){
   const email=document.getElementById('ul_email').value.trim(), password=document.getElementById('ul_pass').value;
   if(!email||!password){showToast('Email and password required','error');return;}
-  const d=await api('POST','/api/users/login',{email,password});
-  if(d.success){userToken=d.token;userData=d.user;localStorage.setItem('lf_utoken',userToken);localStorage.setItem('lf_udata',JSON.stringify(userData));closeModal('userLoginModal');showUserNav();showToast('Welcome, '+userData.name.split(' ')[0]+'!','success');}
-  else showToast(d.message||'Login failed','error');
+  tempAuthData = {email, password};
+  tempAuthType = 'login';
+  const d=await api('POST','/api/users/send-otp',{email, type: 'login'});
+  if(d.success){
+    closeModal('userLoginModal');
+    document.getElementById('otp_code').value = '';
+    openModal('otpModal');
+    showToast('OTP sent to email','success');
+  } else {
+    showToast(d.message||'Failed to send OTP','error');
+  }
 }
 async function doUserRegister(){
   const name=document.getElementById('ur_name').value.trim(), email=document.getElementById('ur_email').value.trim(), password=document.getElementById('ur_pass').value;
   if(!name||!email||!password){showToast('All fields required','error');return;}
-  const d=await api('POST','/api/users/register',{name,email,password});
-  if(d.success){userToken=d.token;userData=d.user;localStorage.setItem('lf_utoken',userToken);localStorage.setItem('lf_udata',JSON.stringify(userData));closeModal('userRegModal');showUserNav();showToast('Account created! Welcome, '+userData.name.split(' ')[0]+'!','success');}
-  else showToast(d.message||'Registration failed','error');
+  tempAuthData = {name, email, password};
+  tempAuthType = 'signup';
+  const d=await api('POST','/api/users/send-otp',{email, type: 'signup'});
+  if(d.success){
+    closeModal('userRegModal');
+    document.getElementById('otp_code').value = '';
+    openModal('otpModal');
+    showToast('OTP sent to email','success');
+  } else {
+    showToast(d.message||'Failed to send OTP','error');
+  }
+}
+async function verifyOtp(){
+  const otp=document.getElementById('otp_code').value.trim();
+  if(!otp){showToast('Please enter OTP','error');return;}
+  
+  if(tempAuthType === 'login'){
+    const d=await api('POST','/api/users/login',{...tempAuthData, otp});
+    if(d.success){
+      completeUserAuth(d);
+    } else {
+      showToast(d.message||'Invalid OTP','error');
+    }
+  } else if(tempAuthType === 'signup'){
+    const d=await api('POST','/api/users/register',{...tempAuthData, otp});
+    if(d.success){
+      completeUserAuth(d);
+    } else {
+      showToast(d.message||'Invalid OTP','error');
+    }
+  }
+}
+function completeUserAuth(d){
+  userToken=d.token;
+  userData=d.user;
+  localStorage.setItem('lf_utoken',userToken);
+  localStorage.setItem('lf_udata',JSON.stringify(userData));
+  closeModal('otpModal');
+  showUserNav();
+  showToast('Welcome, '+userData.name.split(' ')[0]+'!','success');
+  tempAuthData = null;
+  tempAuthType = null;
 }
 function showUserNav(){
   if(document.getElementById('userNavSpan'))return;
@@ -1101,6 +1216,37 @@ function userLogout(){
   const s=document.getElementById('userNavSpan');if(s)s.remove();
   showToast('Signed out','success');
 }
+
+async function verifyOtp(){
+  const otp=document.getElementById('otp_code').value.trim();
+  if(!otp){showToast('Please enter OTP','error');return;}
+  if(!tempAuthData || !otpFlowType) return;
+  
+  if(otpFlowType === 'login') {
+    const d=await api('POST','/api/users/login',{email: tempAuthData.email, password: tempAuthData.password, otp});
+    if(d.success){
+      userToken=d.token; userData=d.user;
+      localStorage.setItem('lf_utoken',userToken);
+      localStorage.setItem('lf_udata',JSON.stringify(userData));
+      closeModal('otpModal');
+      showUserNav();
+      showToast('Welcome, '+userData.name.split(' ')[0]+'!','success');
+      tempAuthData = null; document.getElementById('otp_code').value = '';
+    } else { showToast(d.message||'Invalid OTP','error'); }
+  } else if(otpFlowType === 'signup') {
+    const d=await api('POST','/api/users/register',{name: tempAuthData.name, email: tempAuthData.email, password: tempAuthData.password, otp});
+    if(d.success){
+      userToken=d.token; userData=d.user;
+      localStorage.setItem('lf_utoken',userToken);
+      localStorage.setItem('lf_udata',JSON.stringify(userData));
+      closeModal('otpModal');
+      showUserNav();
+      showToast('Account created! Welcome, '+userData.name.split(' ')[0]+'!','success');
+      tempAuthData = null; document.getElementById('otp_code').value = '';
+    } else { showToast(d.message||'Invalid OTP','error'); }
+  }
+}
+
 
 // Secure review
 async function submitSecureReview(workerId){
@@ -1331,5 +1477,3 @@ function stopAIVoice() {
 </script>
 </body>
 </html>
-
-
