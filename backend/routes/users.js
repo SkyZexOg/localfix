@@ -1,14 +1,33 @@
 const router = require('express').Router();
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
-const nodemailer = require('nodemailer');
 const { pool } = require('../db');
 
 const otpStore = new Map();
 const resendThrottle = new Map();
 
-function createTransporter() {
-  return nodemailer.createTransport({
+function generateOTP() {
+  return Math.floor(100000 + Math.random() * 900000).toString();
+}
+
+function otpEmailHTML(code, type) {
+  var title = type === 'signup' ? 'Verify your email' : 'Reset your password';
+  var subtitle = type === 'signup' ? 'Complete your LocalFix registration' : 'Reset your LocalFix password';
+  return '<!DOCTYPE html><html><body style="margin:0;padding:20px;background:#f4f4f4;font-family:Arial,sans-serif">'
+    + '<div style="max-width:460px;margin:0 auto;background:#080A0E;border-radius:12px;overflow:hidden">'
+    + '<div style="background:#FF5C00;padding:20px 28px"><h2 style="margin:0;color:#fff">LocalFix</h2>'
+    + '<p style="margin:4px 0 0;color:rgba(255,255,255,0.85);font-size:14px">' + subtitle + '</p></div>'
+    + '<div style="padding:28px">'
+    + '<p style="color:#F0F2F5;font-weight:600;margin:0 0 16px">' + title + '</p>'
+    + '<div style="background:#141820;border-radius:10px;padding:20px;text-align:center;margin-bottom:20px">'
+    + '<span style="font-size:38px;font-weight:900;letter-spacing:14px;color:#FF5C00;font-family:monospace">' + code + '</span></div>'
+    + '<p style="color:#8B95A8;font-size:13px;margin:0">Expires in 5 minutes. Do not share this code.</p>'
+    + '</div></div></body></html>';
+}
+
+async function sendOTPEmail(to, code, type) {
+  var nodemailer = require('nodemailer');
+  var transporter = nodemailer.createTransport({
     host: 'smtp.gmail.com',
     port: 587,
     secure: false,
@@ -17,171 +36,124 @@ function createTransporter() {
       user: process.env.EMAIL_USER,
       pass: process.env.EMAIL_PASS
     },
-    tls: {
-      rejectUnauthorized: false
-    },
+    tls: { rejectUnauthorized: false },
     connectionTimeout: 10000,
     greetingTimeout: 10000,
     socketTimeout: 15000
   });
-}
 
-function generateOTP() {
-  return Math.floor(100000 + Math.random() * 900000).toString();
-}
-
-function otpEmailHTML(code, title, subtitle) {
-  return '<!DOCTYPE html><html><body style="margin:0;padding:0;background:#f4f4f4;font-family:sans-serif">'
-    + '<div style="max-width:480px;margin:40px auto;background:#080A0E;border-radius:16px;overflow:hidden">'
-    + '<div style="background:#FF5C00;padding:24px 32px">'
-    + '<h1 style="margin:0;color:#fff;font-size:1.6rem;font-weight:700">LocalFix</h1>'
-    + '<p style="margin:4px 0 0;color:rgba(255,255,255,0.8);font-size:0.85rem">' + subtitle + '</p>'
-    + '</div>'
-    + '<div style="padding:32px">'
-    + '<p style="color:#F0F2F5;font-size:1rem;font-weight:600;margin:0 0 20px">' + title + '</p>'
-    + '<div style="background:#141820;border-radius:12px;padding:24px;text-align:center;margin-bottom:24px">'
-    + '<span style="font-size:42px;font-weight:800;letter-spacing:16px;color:#FF5C00;font-family:monospace">' + code + '</span>'
-    + '</div>'
-    + '<p style="color:#8B95A8;font-size:0.85rem;margin:0 0 8px">This code expires in <strong style="color:#F0F2F5">5 minutes</strong>.</p>'
-    + '<p style="color:#4A5568;font-size:0.8rem;margin:0">If you did not request this, please ignore this email.</p>'
-    + '</div>'
-    + '<div style="padding:16px 32px;border-top:1px solid #1A2030">'
-    + '<p style="color:#4A5568;font-size:0.75rem;margin:0">(c) 2026 LocalFix</p>'
-    + '</div></div></body></html>';
-}
-
-async function sendOTPEmail(to, code, type) {
-  if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
-    throw new Error('EMAIL_USER and EMAIL_PASS are not configured in Railway environment variables.');
-  }
-
-  var isSignup = type === 'signup';
-  var subject = isSignup ? 'Your LocalFix verification code' : 'Reset your LocalFix password';
-  var title = isSignup ? 'Your email verification code' : 'Your password reset code';
-  var subtitle = isSignup
-    ? 'Use this code to verify your email and complete signup.'
-    : 'Use this code to reset your LocalFix password.';
-
-  var transporter = createTransporter();
+  var subject = type === 'signup' ? 'Your LocalFix verification code' : 'Reset your LocalFix password';
 
   await transporter.sendMail({
     from: '"LocalFix" <' + process.env.EMAIL_USER + '>',
     to: to,
     subject: subject,
-    html: otpEmailHTML(code, title, subtitle)
+    html: otpEmailHTML(code, type)
   });
-
-  console.log('OTP email sent to:', to);
+  console.log('OTP sent to:', to, '| type:', type, '| code:', code);
 }
 
+// POST /api/users/send-otp
 router.post('/send-otp', async function(req, res) {
   try {
-    var email = req.body.email;
+    var email = (req.body.email || '').toLowerCase().trim();
     var type = req.body.type;
 
-    if (!email || (type !== 'signup' && type !== 'reset')) {
-      return res.status(400).json({ success: false, message: 'Email and valid type required.' });
+    if (!email || !email.includes('@')) {
+      return res.status(400).json({ success: false, message: 'Valid email required.' });
     }
-
-    var normalEmail = email.toLowerCase().trim();
+    if (type !== 'signup' && type !== 'reset') {
+      return res.status(400).json({ success: false, message: 'Type must be signup or reset.' });
+    }
+    if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
+      console.error('EMAIL_USER or EMAIL_PASS not set in Railway variables');
+      return res.status(500).json({ success: false, message: 'Email service not configured. Contact admin.' });
+    }
 
     if (type === 'signup') {
-      var check = await pool.execute('SELECT id FROM users WHERE email = ?', [normalEmail]);
-      if (check[0].length) {
-        return res.status(409).json({ success: false, message: 'This email is already registered. Please sign in.' });
+      var rows1 = await pool.execute('SELECT id FROM users WHERE email = ?', [email]);
+      if (rows1[0].length) {
+        return res.status(409).json({ success: false, message: 'Email already registered. Please sign in.' });
       }
     }
-
     if (type === 'reset') {
-      var found = await pool.execute('SELECT id FROM users WHERE email = ?', [normalEmail]);
-      if (!found[0].length) {
+      var rows2 = await pool.execute('SELECT id FROM users WHERE email = ?', [email]);
+      if (!rows2[0].length) {
         return res.status(404).json({ success: false, message: 'No account found with this email.' });
       }
     }
 
-    var lastSent = resendThrottle.get(normalEmail);
-    if (lastSent && Date.now() - lastSent < 60000) {
-      var wait = Math.ceil((60000 - (Date.now() - lastSent)) / 1000);
-      return res.status(429).json({ success: false, message: 'Please wait ' + wait + ' seconds before requesting another code.' });
+    // Rate limit: 60 seconds between sends
+    var last = resendThrottle.get(email);
+    if (last && Date.now() - last < 60000) {
+      var secs = Math.ceil((60000 - (Date.now() - last)) / 1000);
+      return res.status(429).json({ success: false, message: 'Wait ' + secs + ' seconds before requesting another code.' });
     }
 
     var code = generateOTP();
-    otpStore.set(normalEmail, {
-      code: code,
-      expires: Date.now() + 5 * 60 * 1000,
-      attempts: 0,
-      type: type,
-      verified: false
-    });
-    resendThrottle.set(normalEmail, Date.now());
+    otpStore.set(email, { code: code, expires: Date.now() + 300000, attempts: 0, type: type, verified: false });
+    resendThrottle.set(email, Date.now());
 
-    await sendOTPEmail(normalEmail, code, type);
-
-    res.json({ success: true, message: 'Verification code sent to ' + normalEmail + '. Please check your inbox.' });
+    await sendOTPEmail(email, code, type);
+    return res.json({ success: true, message: 'Code sent to ' + email + '. Check your inbox.' });
 
   } catch (err) {
     console.error('send-otp error:', err.message);
-    if (err.message.includes('EMAIL_USER') || err.message.includes('EMAIL_PASS')) {
-      return res.status(500).json({ success: false, message: 'Email not configured on server. Contact admin.' });
+    if (err.code === 'ETIMEDOUT' || err.code === 'ECONNECTION' || (err.message && err.message.includes('timeout'))) {
+      return res.status(500).json({ success: false, message: 'Email timeout. Check EMAIL_USER and EMAIL_PASS in Railway variables.' });
     }
-    if (err.code === 'ETIMEDOUT' || err.code === 'ECONNREFUSED' || err.message.includes('timeout')) {
-      return res.status(500).json({ success: false, message: 'Email service timeout. Please try again in a moment.' });
+    if (err.message && err.message.includes('Invalid login')) {
+      return res.status(500).json({ success: false, message: 'Gmail authentication failed. Check your App Password.' });
     }
-    res.status(500).json({ success: false, message: 'Failed to send code. Please try again.' });
+    return res.status(500).json({ success: false, message: 'Failed to send code. Please try again.' });
   }
 });
 
+// POST /api/users/verify-otp
 router.post('/verify-otp', async function(req, res) {
   try {
-    var email = req.body.email;
-    var code = req.body.code;
+    var email = (req.body.email || '').toLowerCase().trim();
+    var code = (req.body.code || '').toString().trim();
     var type = req.body.type;
 
     if (!email || !code || !type) {
-      return res.status(400).json({ success: false, message: 'Email, code and type are required.' });
+      return res.status(400).json({ success: false, message: 'Email, code and type required.' });
     }
 
-    var normalEmail = email.toLowerCase().trim();
-    var entry = otpStore.get(normalEmail);
-
+    var entry = otpStore.get(email);
     if (!entry || entry.type !== type) {
-      return res.status(400).json({ success: false, message: 'No code found. Please request a new one.' });
+      return res.status(400).json({ success: false, message: 'No code found. Request a new one.' });
     }
-
     if (Date.now() > entry.expires) {
-      otpStore.delete(normalEmail);
-      return res.status(400).json({ success: false, message: 'Code expired. Please request a new one.' });
+      otpStore.delete(email);
+      return res.status(400).json({ success: false, message: 'Code expired. Request a new one.' });
     }
-
     entry.attempts += 1;
     if (entry.attempts > 3) {
-      otpStore.delete(normalEmail);
-      return res.status(429).json({ success: false, message: 'Too many wrong attempts. Please request a new code.' });
+      otpStore.delete(email);
+      return res.status(429).json({ success: false, message: 'Too many attempts. Request a new code.' });
     }
-
-    if (entry.code !== code.toString().trim()) {
-      var remaining = 3 - entry.attempts;
-      return res.status(400).json({
-        success: false,
-        message: remaining > 0 ? 'Incorrect code. ' + remaining + ' attempt(s) remaining.' : 'Incorrect code.'
-      });
+    if (entry.code !== code) {
+      var left = 3 - entry.attempts;
+      return res.status(400).json({ success: false, message: 'Wrong code. ' + left + ' attempt(s) left.' });
     }
 
     entry.verified = true;
-    otpStore.set(normalEmail, entry);
-    res.json({ success: true, message: 'Code verified successfully.' });
+    otpStore.set(email, entry);
+    return res.json({ success: true, message: 'Code verified.' });
 
   } catch (err) {
     console.error('verify-otp error:', err.message);
-    res.status(500).json({ success: false, message: 'Server error.' });
+    return res.status(500).json({ success: false, message: 'Server error.' });
   }
 });
 
+// POST /api/users/register
 router.post('/register', async function(req, res) {
   try {
-    var name = req.body.name;
-    var email = req.body.email;
-    var password = req.body.password;
+    var name = (req.body.name || '').trim();
+    var email = (req.body.email || '').toLowerCase().trim();
+    var password = req.body.password || '';
 
     if (!name || !email || !password) {
       return res.status(400).json({ success: false, message: 'All fields required.' });
@@ -190,56 +162,43 @@ router.post('/register', async function(req, res) {
       return res.status(400).json({ success: false, message: 'Password must be at least 6 characters.' });
     }
 
-    var normalEmail = email.toLowerCase().trim();
-    var entry = otpStore.get(normalEmail);
-
+    var entry = otpStore.get(email);
     if (!entry || !entry.verified || entry.type !== 'signup') {
-      return res.status(403).json({ success: false, message: 'Email not verified. Please complete OTP verification first.' });
+      return res.status(403).json({ success: false, message: 'Email not verified. Complete OTP first.' });
     }
 
-    var existing = await pool.execute('SELECT id FROM users WHERE email = ?', [normalEmail]);
+    var existing = await pool.execute('SELECT id FROM users WHERE email = ?', [email]);
     if (existing[0].length) {
       return res.status(409).json({ success: false, message: 'Email already registered.' });
     }
 
     var hash = await bcrypt.hash(password, 10);
-    var result = await pool.execute(
-      'INSERT INTO users (name, email, password_hash) VALUES (?, ?, ?)',
-      [name.trim(), normalEmail, hash]
-    );
+    var result = await pool.execute('INSERT INTO users (name, email, password_hash) VALUES (?, ?, ?)', [name, email, hash]);
 
-    otpStore.delete(normalEmail);
-    resendThrottle.delete(normalEmail);
+    otpStore.delete(email);
+    resendThrottle.delete(email);
 
-    var token = jwt.sign(
-      { id: result[0].insertId, role: 'user', name: name.trim() },
-      process.env.JWT_SECRET,
-      { expiresIn: '7d' }
-    );
-
-    console.log('New user registered:', normalEmail);
-    res.status(201).json({
-      success: true,
-      token: token,
-      user: { id: result[0].insertId, name: name.trim(), email: normalEmail }
-    });
+    var token = jwt.sign({ id: result[0].insertId, role: 'user', name: name }, process.env.JWT_SECRET, { expiresIn: '7d' });
+    console.log('User registered:', email);
+    return res.status(201).json({ success: true, token: token, user: { id: result[0].insertId, name: name, email: email } });
 
   } catch (err) {
     console.error('register error:', err.message);
-    res.status(500).json({ success: false, message: 'Server error.' });
+    return res.status(500).json({ success: false, message: 'Server error.' });
   }
 });
 
+// POST /api/users/login
 router.post('/login', async function(req, res) {
   try {
-    var email = req.body.email;
-    var password = req.body.password;
+    var email = (req.body.email || '').toLowerCase().trim();
+    var password = req.body.password || '';
 
     if (!email || !password) {
       return res.status(400).json({ success: false, message: 'Email and password required.' });
     }
 
-    var rows = await pool.execute('SELECT * FROM users WHERE email = ?', [email.toLowerCase().trim()]);
+    var rows = await pool.execute('SELECT * FROM users WHERE email = ?', [email]);
     if (!rows[0].length) {
       return res.status(401).json({ success: false, message: 'Invalid email or password.' });
     }
@@ -250,24 +209,20 @@ router.post('/login', async function(req, res) {
       return res.status(401).json({ success: false, message: 'Invalid email or password.' });
     }
 
-    var token = jwt.sign(
-      { id: user.id, role: 'user', name: user.name },
-      process.env.JWT_SECRET,
-      { expiresIn: '7d' }
-    );
-
-    res.json({ success: true, token: token, user: { id: user.id, name: user.name, email: user.email } });
+    var token = jwt.sign({ id: user.id, role: 'user', name: user.name }, process.env.JWT_SECRET, { expiresIn: '7d' });
+    return res.json({ success: true, token: token, user: { id: user.id, name: user.name, email: user.email } });
 
   } catch (err) {
     console.error('login error:', err.message);
-    res.status(500).json({ success: false, message: 'Server error.' });
+    return res.status(500).json({ success: false, message: 'Server error.' });
   }
 });
 
+// POST /api/users/reset-password
 router.post('/reset-password', async function(req, res) {
   try {
-    var email = req.body.email;
-    var password = req.body.password;
+    var email = (req.body.email || '').toLowerCase().trim();
+    var password = req.body.password || '';
 
     if (!email || !password) {
       return res.status(400).json({ success: false, message: 'Email and password required.' });
@@ -276,41 +231,39 @@ router.post('/reset-password', async function(req, res) {
       return res.status(400).json({ success: false, message: 'Password must be at least 6 characters.' });
     }
 
-    var normalEmail = email.toLowerCase().trim();
-    var entry = otpStore.get(normalEmail);
-
+    var entry = otpStore.get(email);
     if (!entry || !entry.verified || entry.type !== 'reset') {
-      return res.status(403).json({ success: false, message: 'Email not verified. Please complete OTP first.' });
+      return res.status(403).json({ success: false, message: 'Email not verified. Complete OTP first.' });
     }
 
     var hash = await bcrypt.hash(password, 10);
-    var result = await pool.execute('UPDATE users SET password_hash = ? WHERE email = ?', [hash, normalEmail]);
+    var result = await pool.execute('UPDATE users SET password_hash = ? WHERE email = ?', [hash, email]);
 
     if (!result[0].affectedRows) {
       return res.status(404).json({ success: false, message: 'Account not found.' });
     }
 
-    otpStore.delete(normalEmail);
-    resendThrottle.delete(normalEmail);
-
-    console.log('Password reset for:', normalEmail);
-    res.json({ success: true, message: 'Password updated. Please sign in.' });
+    otpStore.delete(email);
+    resendThrottle.delete(email);
+    console.log('Password reset:', email);
+    return res.json({ success: true, message: 'Password updated. Please sign in.' });
 
   } catch (err) {
     console.error('reset-password error:', err.message);
-    res.status(500).json({ success: false, message: 'Server error.' });
+    return res.status(500).json({ success: false, message: 'Server error.' });
   }
 });
 
+// GET /api/users/me
 router.get('/me', require('../middleware/auth').verifyUser, async function(req, res) {
   try {
     var rows = await pool.execute('SELECT id, name, email, created_at FROM users WHERE id = ?', [req.user.id]);
     if (!rows[0].length) {
       return res.status(404).json({ success: false, message: 'User not found.' });
     }
-    res.json({ success: true, data: rows[0][0] });
+    return res.json({ success: true, data: rows[0][0] });
   } catch (err) {
-    res.status(500).json({ success: false, message: 'Server error.' });
+    return res.status(500).json({ success: false, message: 'Server error.' });
   }
 });
 
