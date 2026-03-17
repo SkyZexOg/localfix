@@ -1359,6 +1359,20 @@ function stopAIVoice() {
     try { aiRecog.stop(); } catch (e) {}
   }
 }
+  <!-- OTP VERIFY -->
+<div class="modal-overlay" id="otpModal">
+  <div class="modal" style="max-width:400px">
+    <button class="modal-close" onclick="closeModal('otpModal')">&#10005;</button>
+    <h2>Verify OTP</h2>
+    <p class="modal-sub">Enter OTP sent to your email</p>
+
+    <div class="form-group">
+      <input class="form-input" id="otp_input" placeholder="Enter OTP"/>
+    </div>
+
+    <button class="form-submit" onclick="verifySignupOtp()">Verify →</button>
+  </div>
+</div>
 </script>
 </body>
 </html>
