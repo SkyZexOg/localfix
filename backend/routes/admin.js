@@ -3,7 +3,7 @@ const jwt = require('jsonwebtoken');
 const { pool } = require('../db');
 const { verifyAdmin } = require('../middleware/auth');
 
-// ── POST /api/admin/login ──
+// -- POST /api/admin/login --
 router.post('/login', (req, res) => {
   const { username, password } = req.body;
   if (
@@ -16,7 +16,7 @@ router.post('/login', (req, res) => {
   res.status(401).json({ success: false, message: 'Invalid admin credentials' });
 });
 
-// ── GET /api/admin/dashboard ──
+// -- GET /api/admin/dashboard --
 router.get('/dashboard', verifyAdmin, async (req, res) => {
   try {
     const [[totals]] = await pool.execute(
@@ -47,7 +47,7 @@ router.get('/dashboard', verifyAdmin, async (req, res) => {
   }
 });
 
-// ── GET /api/admin/workers ──
+// -- GET /api/admin/workers --
 router.get('/workers', verifyAdmin, async (req, res) => {
   try {
     const { status, skill, city, search, page = 1, limit = 50 } = req.query;
@@ -64,7 +64,7 @@ router.get('/workers', verifyAdmin, async (req, res) => {
     }
     const [[{ total }]] = await pool.execute(countSql, countParams);
 
-    // Main query — LIMIT/OFFSET directly in string (no ? placeholder) to avoid ER_WRONG_ARGUMENTS
+    // Main query - LIMIT/OFFSET directly in string (no ? placeholder) to avoid ER_WRONG_ARGUMENTS
     const params = [];
     let sql = 'SELECT id, name, phone, skill, experience, city, area, status, rating, total_reviews, profile_views, call_clicks, whatsapp_clicks, is_active, created_at FROM workers WHERE 1=1';
     if (status) { sql += ' AND status = ?';  params.push(status); }
@@ -87,7 +87,7 @@ router.get('/workers', verifyAdmin, async (req, res) => {
   }
 });
 
-// ── PUT /api/admin/workers/:id/approve ──
+// -- PUT /api/admin/workers/:id/approve --
 router.put('/workers/:id/approve', verifyAdmin, async (req, res) => {
   try {
     const [result] = await pool.execute(
@@ -103,7 +103,7 @@ router.put('/workers/:id/approve', verifyAdmin, async (req, res) => {
   }
 });
 
-// ── PUT /api/admin/workers/:id/reject ──
+// -- PUT /api/admin/workers/:id/reject --
 router.put('/workers/:id/reject', verifyAdmin, async (req, res) => {
   try {
     const [result] = await pool.execute(
@@ -119,7 +119,7 @@ router.put('/workers/:id/reject', verifyAdmin, async (req, res) => {
   }
 });
 
-// ── DELETE /api/admin/workers/:id ──
+// -- DELETE /api/admin/workers/:id --
 router.delete('/workers/:id', verifyAdmin, async (req, res) => {
   try {
     const [result] = await pool.execute('DELETE FROM workers WHERE id = ?', [req.params.id]);
@@ -132,7 +132,7 @@ router.delete('/workers/:id', verifyAdmin, async (req, res) => {
   }
 });
 
-// ── PUT /api/admin/workers/:id/status ──
+// -- PUT /api/admin/workers/:id/status --
 router.put('/workers/:id/status', verifyAdmin, async (req, res) => {
   try {
     const { status } = req.body;
@@ -147,7 +147,7 @@ router.put('/workers/:id/status', verifyAdmin, async (req, res) => {
   }
 });
 
-// ── GET /api/admin/analytics ──
+// -- GET /api/admin/analytics --
 router.get('/analytics', verifyAdmin, async (req, res) => {
   try {
     const days = parseInt(req.query.days) || 7;
