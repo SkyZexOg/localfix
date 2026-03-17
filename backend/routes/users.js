@@ -4,13 +4,13 @@ const jwt = require('jsonwebtoken');
 const nodemailer = require('nodemailer');
 const { pool } = require('../db');
 
-// ── OTP Store (in-memory) ─────────────────────────────────
+// -- OTP Store (in-memory) ---------------------------------
 // { email -> { code, expires, attempts, type, verified } }
 const otpStore = new Map();
 // Resend throttle: { email -> lastSentAt timestamp }
 const resendThrottle = new Map();
 
-// ── Nodemailer transporter ────────────────────────────────
+// -- Nodemailer transporter --------------------------------
 const transporter = nodemailer.createTransport({
   service: 'gmail',
   auth: {
@@ -19,12 +19,12 @@ const transporter = nodemailer.createTransport({
   }
 });
 
-// ── Generate 6-digit OTP ──────────────────────────────────
+// -- Generate 6-digit OTP ----------------------------------
 function generateOTP() {
   return Math.floor(100000 + Math.random() * 900000).toString();
 }
 
-// ── OTP Email HTML Template ───────────────────────────────
+// -- OTP Email HTML Template -------------------------------
 function otpEmailHTML(code, title, subtitle) {
   return `
   <!DOCTYPE html>
@@ -51,7 +51,7 @@ function otpEmailHTML(code, title, subtitle) {
   </html>`;
 }
 
-// ── Send OTP Email ────────────────────────────────────────
+// -- Send OTP Email ----------------------------------------
 async function sendOTPEmail(to, code, type) {
   if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
     throw new Error('EMAIL_USER and EMAIL_PASS environment variables are not configured. Please add them in Railway.');
@@ -78,7 +78,7 @@ async function sendOTPEmail(to, code, type) {
   console.log(`OTP email sent to: ${to} [type: ${type}]`);
 }
 
-// ── POST /api/users/send-otp ──────────────────────────────
+// -- POST /api/users/send-otp ------------------------------
 router.post('/send-otp', async (req, res) => {
   try {
     const { email, type } = req.body;
@@ -138,7 +138,7 @@ router.post('/send-otp', async (req, res) => {
   }
 });
 
-// ── POST /api/users/verify-otp ────────────────────────────
+// -- POST /api/users/verify-otp ----------------------------
 router.post('/verify-otp', async (req, res) => {
   try {
     const { email, code, type } = req.body;
@@ -189,7 +189,7 @@ router.post('/verify-otp', async (req, res) => {
   }
 });
 
-// ── POST /api/users/register ──────────────────────────────
+// -- POST /api/users/register ------------------------------
 router.post('/register', async (req, res) => {
   try {
     const { name, email, password } = req.body;
@@ -243,7 +243,7 @@ router.post('/register', async (req, res) => {
   }
 });
 
-// ── POST /api/users/login ─────────────────────────────────
+// -- POST /api/users/login ---------------------------------
 router.post('/login', async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -280,7 +280,7 @@ router.post('/login', async (req, res) => {
   }
 });
 
-// ── POST /api/users/login-otp ───────────────────────────
+// -- POST /api/users/login-otp ---------------------------
 router.post('/login-otp', async (req, res) => {
   try {
     const { email } = req.body;
@@ -324,7 +324,7 @@ router.post('/login-otp', async (req, res) => {
   }
 });
 
-// ── POST /api/users/reset-password ───────────────────────
+// -- POST /api/users/reset-password -----------------------
 router.post('/reset-password', async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -366,7 +366,7 @@ router.post('/reset-password', async (req, res) => {
   }
 });
 
-// ── GET /api/users/me ─────────────────────────────────────
+// -- GET /api/users/me -------------------------------------
 router.get('/me', require('../middleware/auth').verifyUser, async (req, res) => {
   try {
     const [rows] = await pool.execute(
