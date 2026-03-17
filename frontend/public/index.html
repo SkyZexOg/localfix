@@ -421,20 +421,7 @@
     <p style="text-align:center;margin-top:12px;font-size:0.82rem;color:var(--text2)">Already have account? <a href="#" style="color:var(--orange);font-weight:600" onclick="switchModal('userRegModal','userLoginModal')">Sign in</a></p>
   </div>
 </div>
-<!-- OTP VERIFY -->
-<div class="modal-overlay" id="otpModal">
-  <div class="modal" style="max-width:400px">
-    <button class="modal-close" onclick="closeModal('otpModal')">&#10005;</button>
-    <h2>Verify OTP</h2>
-    <p class="modal-sub">Enter OTP sent to your email</p>
 
-    <div class="form-group">
-      <input class="form-input" id="otp_input" placeholder="Enter OTP"/>
-    </div>
-
-    <button class="form-submit" onclick="verifySignupOtp()">Verify →</button>
-  </div>
-</div>
 <!-- BOOKING -->
 <div class="modal-overlay" id="bookingModal">
   <div class="modal" style="max-width:420px">
@@ -1093,29 +1080,11 @@ async function doUserLogin(){
   else showToast(d.message||'Login failed','error');
 }
 async function doUserRegister(){
-  const name = document.getElementById('ur_name').value.trim();
-  const email = document.getElementById('ur_email').value.trim();
-  const password = document.getElementById('ur_pass').value;
-
-  if(!name || !email || !password){
-    showToast('All fields required','error');
-    return;
-  }
-
-  window.tempUserData = {name,email,password};
-
-  const d = await api('POST','/api/users/send-otp',{
-    email,
-    type:"signup"
-  });
-
-  if(d.success){
-    closeModal('userRegModal');
-    openModal('otpModal');
-    showToast('OTP sent to your email','success');
-  } else {
-    showToast(d.message || 'Error','error');
-  }
+  const name=document.getElementById('ur_name').value.trim(), email=document.getElementById('ur_email').value.trim(), password=document.getElementById('ur_pass').value;
+  if(!name||!email||!password){showToast('All fields required','error');return;}
+  const d=await api('POST','/api/users/register',{name,email,password});
+  if(d.success){userToken=d.token;userData=d.user;localStorage.setItem('lf_utoken',userToken);localStorage.setItem('lf_udata',JSON.stringify(userData));closeModal('userRegModal');showUserNav();showToast('Account created! Welcome, '+userData.name.split(' ')[0]+'!','success');}
+  else showToast(d.message||'Registration failed','error');
 }
 function showUserNav(){
   if(document.getElementById('userNavSpan'))return;
@@ -1359,20 +1328,6 @@ function stopAIVoice() {
     try { aiRecog.stop(); } catch (e) {}
   }
 }
-  <!-- OTP VERIFY -->
-<div class="modal-overlay" id="otpModal">
-  <div class="modal" style="max-width:400px">
-    <button class="modal-close" onclick="closeModal('otpModal')">&#10005;</button>
-    <h2>Verify OTP</h2>
-    <p class="modal-sub">Enter OTP sent to your email</p>
-
-    <div class="form-group">
-      <input class="form-input" id="otp_input" placeholder="Enter OTP"/>
-    </div>
-
-    <button class="form-submit" onclick="verifySignupOtp()">Verify →</button>
-  </div>
-</div>
 </script>
 </body>
 </html>
