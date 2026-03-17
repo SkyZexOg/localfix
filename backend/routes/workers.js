@@ -3,7 +3,7 @@ const bcrypt = require('bcryptjs');
 const { pool } = require('../db');
 const { verifyWorker } = require('../middleware/auth');
 
-// ── GET /api/workers ── Only approved workers
+// -- GET /api/workers -- Only approved workers
 router.get('/', async (req, res) => {
   try {
     const { skill, city, status } = req.query;
@@ -25,7 +25,7 @@ router.get('/', async (req, res) => {
   }
 });
 
-// ── GET /api/workers/stats ──
+// -- GET /api/workers/stats --
 router.get('/stats', async (req, res) => {
   try {
     const [[total]] = await pool.execute(
@@ -43,7 +43,7 @@ router.get('/stats', async (req, res) => {
   }
 });
 
-// ── GET /api/workers/categories ──
+// -- GET /api/workers/categories --
 router.get('/categories', async (req, res) => {
   try {
     const [rows] = await pool.execute(
@@ -55,7 +55,7 @@ router.get('/categories', async (req, res) => {
   }
 });
 
-// ── GET /api/workers/:id ── FIXED: comma added, phone included
+// -- GET /api/workers/:id -- FIXED: comma added, phone included
 router.get('/:id', async (req, res) => {
   try {
     const [rows] = await pool.execute(
@@ -83,7 +83,7 @@ router.get('/:id', async (req, res) => {
   }
 });
 
-// ── POST /api/workers/register ──
+// -- POST /api/workers/register --
 router.post('/register', async (req, res) => {
   try {
     const { name, phone, password, skill, experience, city, area, about } = req.body;
@@ -125,7 +125,7 @@ router.post('/register', async (req, res) => {
   }
 });
 
-// ── PUT /api/workers/profile ── Update own profile (auth required)
+// -- PUT /api/workers/profile -- Update own profile (auth required)
 router.put('/profile', verifyWorker, async (req, res) => {
   try {
     const { city, area, about, status } = req.body;
@@ -173,7 +173,7 @@ router.put('/profile', verifyWorker, async (req, res) => {
   }
 });
 
-// ── POST /api/workers/:id/track ──
+// -- POST /api/workers/:id/track --
 router.post('/:id/track', async (req, res) => {
   try {
     const { type } = req.body;
@@ -191,7 +191,7 @@ router.post('/:id/track', async (req, res) => {
   }
 });
 
-// ── POST /api/workers/:id/review ──
+// -- POST /api/workers/:id/review --
 router.post('/:id/review', async (req, res) => {
   try {
     const { reviewer_name, rating, comment } = req.body;
