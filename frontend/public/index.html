@@ -251,19 +251,10 @@
     .booking-badge.rejected { background:rgba(255,68,68,0.15); color:var(--red); }
     .booking-badge.completed { background:rgba(74,158,255,0.15); color:var(--blue); }
 
-    .ai-fab {
-      position:fixed; bottom:24px; right:24px; z-index:9999; width:52px; height:52px;
-      border-radius:14px; background:var(--bg2); border:1px solid var(--border2); cursor:pointer;
-      display:flex; align-items:center; justify-content:center; font-size:1.3rem; transition:all 0.25s;
-      box-shadow:0 8px 32px rgba(0,0,0,0.4);
-    }
+    .ai-fab { position:fixed; bottom:24px; right:24px; z-index:9999; width:52px; height:52px; border-radius:14px; background:var(--bg2); border:1px solid var(--border2); cursor:pointer; display:flex; align-items:center; justify-content:center; font-size:1.3rem; transition:all 0.25s; box-shadow:0 8px 32px rgba(0,0,0,0.4); }
     .ai-fab:hover { border-color:var(--orange); transform:translateY(-2px); box-shadow:0 12px 40px rgba(255,92,0,0.2); }
     .ai-fab.open { background:var(--bg3); border-color:var(--orange); }
-    .ai-chat-window {
-      position:fixed; bottom:88px; right:24px; z-index:9998; width:360px; max-width:calc(100vw - 40px);
-      background:var(--bg2); border:1px solid var(--border2); border-radius:20px;
-      box-shadow:0 32px 80px rgba(0,0,0,0.6); display:none; flex-direction:column; overflow:hidden;
-    }
+    .ai-chat-window { position:fixed; bottom:88px; right:24px; z-index:9998; width:360px; max-width:calc(100vw - 40px); background:var(--bg2); border:1px solid var(--border2); border-radius:20px; box-shadow:0 32px 80px rgba(0,0,0,0.6); display:none; flex-direction:column; overflow:hidden; }
     .ai-chat-window.open { display:flex; animation:slideUp 0.25s cubic-bezier(0.16,1,0.3,1); }
     @keyframes slideUp { from{opacity:0;transform:translateY(16px)} to{opacity:1;transform:translateY(0)} }
     .ai-chat-header { padding:16px 18px 14px; border-bottom:1px solid var(--border); display:flex; align-items:center; gap:12px; background:var(--bg3); }
@@ -542,7 +533,7 @@
       <div class="form-group"><label class="form-label">Area</label><input class="form-input" id="wd_area"/></div>
     </div>
     <button class="form-submit" onclick="updateProfile()">Save Changes &#8594;</button>
-    <button style="width:100%;padding:12px;margin-top:10px;background:transparent;border:1px solid rgba(255,68,68,0.3);color:var(--red);border-radius:12px;cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif;font-size:0.88rem;font-weight:600" onclick="doWorkerLogout()">Logout</button>
+    <button style="width:100%;padding:12px;margin-top:10px;background:transparent;border:1px solid rgba(255,68,68,0.3);color:var(--red);border-radius:12px;cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif;font-size:0.88rem;font-weight:600" onclick="doLogout()">Logout</button>
   </div>
 </div>
 
@@ -574,17 +565,16 @@
 </div>
 
 <script>
-// --- CORE SETUP ---
-// Dynamic API URL for correct local development and production routing
-const API = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') 
-  ? 'http://localhost:5000' 
-  : window.location.origin;
+// --- CONFIGURATION ---
+const API = "http://localhost:5000"; // FIX: Hardcoded to requested base URL
 
+// --- STATE MANAGEMENT ---
 let workerToken = localStorage.getItem('lf_wtoken') || null;
 let workerData  = JSON.parse(localStorage.getItem('lf_wdata') || 'null');
 let adminToken  = localStorage.getItem('lf_atoken') || null;
 let userToken   = localStorage.getItem('lf_utoken') || null;
 let userData    = JSON.parse(localStorage.getItem('lf_udata') || 'null');
+
 let currentFilter = 'all', currentCategory = '', currentCity = '';
 
 const CATS = [
@@ -594,33 +584,204 @@ const CATS = [
   {name:'Welder',icon:'&#128297;'},{name:'Cleaner',icon:'&#129529;'}
 ];
 
+// --- INITIALIZATION ---
 document.addEventListener('DOMContentLoaded', () => {
   loadStats(); loadCategories(); loadWorkers();
   if (workerToken && workerData) showWorkerNav();
-  if (userToken && userData) showUserNav();
+  if (userToken && userData) showUserNav(); // FIX: Checked both token and data to prevent crash
   if (adminToken) showAdminBar();
 });
 
+// --- API HELPER ---
 async function api(method, path, body, token) {
   const opts = {method, headers:{'Content-Type':'application/json'}};
   if (token) opts.headers['Authorization'] = 'Bearer ' + token;
   if (body) opts.body = JSON.stringify(body);
-  try { const res = await fetch(API + path, opts); return res.json(); }
-  catch(e) { return {success:false, message:'Network error'}; }
+  try { 
+    const res = await fetch(API + path, opts); 
+    return res.json(); 
+  }
+  catch(e) { 
+    return {success:false, message:'Network error'}; 
+  }
 }
 
 // --- MODAL UTILITIES ---
-function openModal(id){ document.getElementById(id).classList.add('open'); if(id==='mapModal') setTimeout(initMap,200); }
+function openModal(id){ 
+  document.getElementById(id).classList.add('open'); 
+  if(id==='mapModal') setTimeout(initMap,200); 
+}
 function closeModal(id){ document.getElementById(id).classList.remove('open'); }
 function switchModal(c,o){ closeModal(c); openModal(o); }
-document.querySelectorAll('.modal-overlay').forEach(m=>{ m.addEventListener('click',e=>{if(e.target===m) m.classList.remove('open');}); });
+
+document.querySelectorAll('.modal-overlay').forEach(m=>{ 
+  m.addEventListener('click',e=>{if(e.target===m) m.classList.remove('open');}); 
+});
 
 let toastT;
-function showToast(msg,type){ type=type||'success'; const t=document.getElementById('toast'); t.innerHTML=(type==='success'?'<span style="color:var(--green);font-size:1rem">&#10003;</span>':'<span style="color:var(--red);font-size:1rem">&#10005;</span>')+' '+msg; t.className='toast '+type+' show'; clearTimeout(toastT); toastT=setTimeout(()=>t.classList.remove('show'),3200); }
+function showToast(msg,type){ 
+  type=type||'success'; 
+  const t=document.getElementById('toast'); 
+  t.innerHTML=(type==='success'?'<span style="color:var(--green);font-size:1rem">&#10003;</span>':'<span style="color:var(--red);font-size:1rem">&#10005;</span>')+' '+msg; 
+  t.className='toast '+type+' show'; 
+  clearTimeout(toastT); 
+  toastT=setTimeout(()=>t.classList.remove('show'),3200); 
+}
+
 function esc(str){ if(!str) return ''; return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
 function escJsSingle(str){ return esc(str).replace(/'/g,'&#39;'); }
 
-// --- DASHBOARD / STATS / WORKERS ---
+
+// =========================================
+// --- USER AUTHENTICATION (OTP & LOGIN) ---
+// =========================================
+
+// STEP 1 & 2: User Enters Data & Send OTP
+async function doUserRegister() {
+  const btn = document.querySelector('#userRegModal .form-submit');
+  const name = document.getElementById('ur_name').value.trim();
+  const email = document.getElementById('ur_email').value.trim();
+  const password = document.getElementById('ur_pass').value;
+
+  if(!name || !email || !password || password.length < 6) {
+    showToast('Please fill all fields (Password min 6 chars)','error');
+    return;
+  }
+
+  // Disable button & show loading state
+  btn.disabled = true;
+  const originalText = btn.textContent;
+  btn.textContent = 'Sending OTP...';
+
+  // STEP 3: Store data securely in localStorage
+  localStorage.setItem('tempUserData', JSON.stringify({name, email, password}));
+
+  const d = await api('POST', '/api/users/send-otp', { email, type: "signup" });
+
+  // Reset button state
+  btn.disabled = false;
+  btn.textContent = originalText;
+
+  // STEP 4: Open OTP modal
+  if(d.success) {
+    switchModal('userRegModal', 'otpModal');
+    showToast('OTP sent to your email', 'success');
+  } else {
+    showToast(d.message || 'Error sending OTP', 'error');
+  }
+}
+
+// STEP 5 & 6: User Enters OTP & Verify
+async function verifySignupOtp() {
+  const btn = document.getElementById('otpVerifyBtn');
+  const otp = document.getElementById('otp_input').value.trim();
+  const tempDataStr = localStorage.getItem('tempUserData');
+
+  if(!otp) return showToast('Please enter OTP','error');
+  if(!tempDataStr) {
+    showToast('Session expired. Please register again.', 'error');
+    switchModal('otpModal', 'userRegModal');
+    return;
+  }
+
+  const tempData = JSON.parse(tempDataStr);
+
+  btn.disabled = true;
+  const originalText = btn.textContent;
+  btn.textContent = "Verifying...";
+
+  // Verify OTP via API
+  const v = await api('POST', '/api/users/verify-otp', { email: tempData.email, otp: otp });
+
+  // STEP 7: If OTP correct, register user
+  if(v.success) {
+    const r = await api('POST', '/api/users/register', tempData);
+    if(r.success) {
+      showToast('Account created successfully!', 'success');
+      localStorage.removeItem('tempUserData'); // Clear temp storage
+      
+      // STEP 8: Save token & user data
+      userToken = r.token;
+      userData = r.user;
+      localStorage.setItem('lf_utoken', userToken);
+      localStorage.setItem('lf_udata', JSON.stringify(userData));
+      
+      // STEP 9: Update UI
+      closeModal('otpModal');
+      showUserNav();
+    } else { 
+      showToast(r.message || 'Registration failed', 'error'); 
+    }
+  } else { 
+    showToast(v.message || 'Invalid OTP', 'error'); 
+  }
+  
+  btn.disabled = false;
+  btn.textContent = originalText;
+}
+
+// USER LOGIN
+async function doUserLogin() {
+  const btn = document.querySelector('#userLoginModal .form-submit');
+  const email = document.getElementById('ul_email').value.trim();
+  const password = document.getElementById('ul_pass').value;
+
+  if(!email || !password) { 
+    showToast('Email and password required', 'error'); 
+    return; 
+  }
+
+  btn.disabled = true;
+  const originalText = btn.textContent;
+  btn.textContent = 'Signing In...';
+
+  // Email/Password login (no OTP here)
+  const d = await api('POST', '/api/users/login', {email, password});
+  
+  btn.disabled = false;
+  btn.textContent = originalText;
+
+  if(d.success) {
+    userToken = d.token;
+    userData = d.user;
+    localStorage.setItem('lf_utoken', userToken);
+    localStorage.setItem('lf_udata', JSON.stringify(userData));
+    closeModal('userLoginModal');
+    showUserNav();
+    showToast('Welcome back, ' + userData.name.split(' ')[0] + '!', 'success');
+  } else {
+    showToast(d.message || 'Login failed', 'error');
+  }
+}
+
+// UPDATE NAVBAR UI
+function showUserNav() {
+  if(document.getElementById('userNavSpan')) return;
+  const nav = document.getElementById('navLinks');
+  const span = document.createElement('div');
+  span.id = 'userNavSpan';
+  span.style.cssText = 'display:flex;align-items:center;gap:8px';
+  span.innerHTML = '<span style="font-size:0.8rem;color:var(--green)">&#128100; ' + esc(userData.name.split(' ')[0]) + '</span>' +
+    '<button class="nav-btn ghost" style="font-size:0.78rem;padding:6px 12px" onclick="loadMyBookings()">My Bookings</button>' +
+    '<button class="nav-btn ghost" style="font-size:0.72rem;padding:5px 10px;color:var(--red);border-color:rgba(255,68,68,0.3)" onclick="userLogout()">Sign Out</button>';
+  nav.insertBefore(span, nav.firstChild);
+}
+
+function userLogout() {
+  userToken = null; 
+  userData = null;
+  localStorage.removeItem('lf_utoken'); 
+  localStorage.removeItem('lf_udata');
+  const s = document.getElementById('userNavSpan'); 
+  if(s) s.remove();
+  showToast('Signed out', 'success');
+}
+
+
+// ==========================================
+// --- WORKERS, STATS, MAP, AND ADMIN ---
+// ==========================================
+
 async function loadStats() {
   const d = await api('GET','/api/workers/stats');
   if(d.success){ animNum('sTotal',d.data.total); animNum('sAvail',d.data.available); animNum('sCities',d.data.cities); }
@@ -749,7 +910,6 @@ async function submitReview(workerId) {
   else showToast(d.message||'Error','error');
 }
 
-// --- CALL & WA TRACKING ---
 async function trackAndCall(id) {
   await api('POST','/api/workers/'+id+'/track',{type:'call'});
   const d = await api('GET','/api/workers/'+id);
@@ -765,128 +925,6 @@ async function trackAndWa(id) {
   } else { showToast('Could not get WhatsApp number', 'error'); }
 }
 
-
-// ==========================================
-// --- USER REGISTRATION, OTP, AND LOGIN ---
-// ==========================================
-
-async function doUserRegister() {
-  const btn = document.querySelector('#userRegModal .form-submit');
-  const name = document.getElementById('ur_name').value.trim();
-  const email = document.getElementById('ur_email').value.trim();
-  const password = document.getElementById('ur_pass').value;
-
-  if(!name || !email || !password || password.length < 6) {
-    showToast('Please fill all fields (Password min 6 chars)','error');
-    return;
-  }
-
-  btn.disabled = true;
-  btn.textContent = 'Sending OTP...';
-
-  // Store data persistently during OTP phase
-  localStorage.setItem('lf_tempUser', JSON.stringify({name, email, password}));
-
-  const d = await api('POST', '/api/users/send-otp', { email, type: "signup" });
-
-  btn.disabled = false;
-  btn.textContent = 'Create Account \u2192';
-
-  if(d.success) {
-    switchModal('userRegModal', 'otpModal');
-    showToast('OTP sent to your email', 'success');
-  } else {
-    showToast(d.message || 'Error sending OTP', 'error');
-  }
-}
-
-async function verifySignupOtp() {
-  const btn = document.getElementById('otpVerifyBtn');
-  const otp = document.getElementById('otp_input').value.trim();
-  const tempDataStr = localStorage.getItem('lf_tempUser');
-
-  if(!otp) return showToast('Please enter OTP','error');
-  if(!tempDataStr) return showToast('Session expired. Please register again.', 'error');
-
-  const tempData = JSON.parse(tempDataStr);
-
-  btn.disabled = true;
-  btn.textContent = "Verifying...";
-
-  // 1. Verify OTP
-  const v = await api('POST', '/api/users/verify-otp', { email: tempData.email, otp: otp });
-
-  if(v.success) {
-    // 2. Register the User
-    const r = await api('POST', '/api/users/register', tempData);
-    if(r.success) {
-      showToast('Account created successfully!', 'success');
-      localStorage.removeItem('lf_tempUser'); // Clear temp
-      
-      // Auto login
-      userToken = r.token;
-      userData = r.user;
-      localStorage.setItem('lf_utoken', userToken);
-      localStorage.setItem('lf_udata', JSON.stringify(userData));
-      
-      closeModal('otpModal');
-      showUserNav();
-    } else { showToast(r.message || 'Registration failed', 'error'); }
-  } else { showToast(v.message || 'Invalid OTP', 'error'); }
-  
-  btn.disabled = false;
-  btn.textContent = "Verify \u2192";
-}
-
-async function doUserLogin() {
-  const btn = document.querySelector('#userLoginModal .form-submit');
-  const email = document.getElementById('ul_email').value.trim();
-  const password = document.getElementById('ul_pass').value;
-
-  if(!email || !password) { showToast('Email and password required', 'error'); return; }
-
-  btn.disabled = true;
-  btn.textContent = 'Signing In...';
-
-  const d = await api('POST', '/api/users/login', {email, password});
-  
-  btn.disabled = false;
-  btn.textContent = 'Sign In \u2192';
-
-  if(d.success) {
-    userToken = d.token;
-    userData = d.user;
-    localStorage.setItem('lf_utoken', userToken);
-    localStorage.setItem('lf_udata', JSON.stringify(userData));
-    closeModal('userLoginModal');
-    showUserNav();
-    showToast('Welcome back, ' + userData.name.split(' ')[0] + '!', 'success');
-  } else {
-    showToast(d.message || 'Login failed', 'error');
-  }
-}
-
-function showUserNav() {
-  if(document.getElementById('userNavSpan')) return;
-  const nav = document.getElementById('navLinks');
-  const span = document.createElement('div');
-  span.id = 'userNavSpan';
-  span.style.cssText = 'display:flex;align-items:center;gap:8px';
-  span.innerHTML = '<span style="font-size:0.8rem;color:var(--green)">&#128100; ' + esc(userData.name.split(' ')[0]) + '</span>' +
-    '<button class="nav-btn ghost" style="font-size:0.78rem;padding:6px 12px" onclick="loadMyBookings()">My Bookings</button>' +
-    '<button class="nav-btn ghost" style="font-size:0.72rem;padding:5px 10px;color:var(--red);border-color:rgba(255,68,68,0.3)" onclick="userLogout()">Sign Out</button>';
-  nav.insertBefore(span, nav.firstChild);
-}
-
-function userLogout() {
-  userToken = null; userData = null;
-  localStorage.removeItem('lf_utoken'); localStorage.removeItem('lf_udata');
-  const s = document.getElementById('userNavSpan'); if(s) s.remove();
-  showToast('Signed out', 'success');
-}
-
-
-// --- WORKER REGISTER, LOGIN, & DASHBOARD ---
 async function doRegister() {
   const btn=document.getElementById('regBtn');
   const body={name:document.getElementById('r_name').value.trim(),phone:document.getElementById('r_phone').value.trim(),skill:document.getElementById('r_skill').value,experience:document.getElementById('r_exp').value,city:document.getElementById('r_city').value.trim(),area:document.getElementById('r_area').value.trim(),about:document.getElementById('r_about').value.trim(),password:document.getElementById('r_pass').value};
@@ -902,23 +940,21 @@ async function doWorkerLogin() {
   const btn = document.querySelector('#loginModal .form-submit');
   const phone=document.getElementById('l_phone').value.trim(), password=document.getElementById('l_pass').value;
   if(!phone||!password){ showToast('Phone and password required','error'); return; }
-  
-  btn.disabled = true; btn.textContent = 'Logging In...';
-  const d = await api('POST','/api/auth/login',{phone,password});
-  btn.disabled = false; btn.textContent = 'Login \u2192';
-
+  btn.disabled=true; btn.textContent='Logging In...';
+  const d=await api('POST','/api/auth/login',{phone,password});
+  btn.disabled=false; btn.textContent='Login \u2192';
   if(d.success){ workerToken=d.token; workerData=d.worker; localStorage.setItem('lf_wtoken',workerToken); localStorage.setItem('lf_wdata',JSON.stringify(workerData)); closeModal('loginModal'); showWorkerNav(); openWorkerDash(); showToast('Welcome back, '+workerData.name.split(' ')[0]+'!','success'); }
   else showToast(d.message||'Login failed','error');
 }
 
 function showWorkerNav() {
-  document.getElementById('navLinks').innerHTML='<span style="font-size:0.82rem;color:var(--text2)">Hi, '+esc(workerData.name.split(' ')[0])+'</span><button class="nav-btn ghost" onclick="openWorkerDash()">My Profile</button><button class="nav-btn ghost" style="color:var(--red);border-color:rgba(255,68,68,0.3);font-size:0.8rem" onclick="doWorkerLogout()">Logout</button>';
+  document.getElementById('navLinks').innerHTML='<span style="font-size:0.82rem;color:var(--text2)">Hi, '+esc(workerData.name.split(' ')[0])+'</span><button class="nav-btn ghost" onclick="openWorkerDash()">My Profile</button><button class="nav-btn ghost" style="color:var(--red);border-color:rgba(255,68,68,0.3);font-size:0.8rem" onclick="doLogout()">Logout</button>';
 }
 
 async function openWorkerDash() {
   openModal('wDashModal');
   const d=await api('GET','/api/auth/me',null,workerToken);
-  if(!d.success){ doWorkerLogout(); return; }
+  if(!d.success){ doLogout(); return; }
   const w=d.data; workerData=w; localStorage.setItem('lf_wdata',JSON.stringify(w));
   document.getElementById('wd_name').textContent=w.name;
   document.getElementById('wd_sub').textContent=w.skill+' \u2022 '+w.area+', '+w.city;
@@ -947,7 +983,7 @@ async function updateProfile() {
   else showToast(d.message||'Error','error');
 }
 
-function doWorkerLogout() {
+function doLogout() {
   workerToken=null; workerData=null;
   localStorage.removeItem('lf_wtoken'); localStorage.removeItem('lf_wdata');
   closeModal('wDashModal');
@@ -955,8 +991,6 @@ function doWorkerLogout() {
   showToast('Logged out','success');
 }
 
-
-// --- ADMIN ---
 async function doAdminLogin() {
   const username=document.getElementById('a_user').value.trim(), password=document.getElementById('a_pass').value;
   const d=await api('POST','/api/admin/login',{username,password});
@@ -1014,8 +1048,6 @@ async function adminApprove(id){ const d=await api('PUT','/api/admin/workers/'+i
 async function adminReject(id){ if(!confirm('Remove this worker from the site?')) return; const d=await api('PUT','/api/admin/workers/'+id+'/reject',null,adminToken); if(d.success){showToast('Worker removed','success');loadAdminDash();loadWorkers();loadStats();loadCategories();}else showToast(d.message||'Error','error'); }
 async function adminDelete(id){ if(!confirm('Permanently delete? Cannot be undone.')) return; const d=await api('DELETE','/api/admin/workers/'+id,null,adminToken); if(d.success){showToast('Worker deleted','success');loadAdminDash();loadWorkers();loadStats();loadCategories();}else showToast(d.message||'Error','error'); }
 
-// --- MAP ---
-let mapInstance=null;
 function initMap(){
   if(mapInstance){mapInstance.remove();mapInstance=null;}
   if(typeof L==='undefined'){showToast('Map loading...','success');return;}
@@ -1037,7 +1069,6 @@ function initMap(){
   }
 }
 
-// --- VOICE & NEARBY ---
 const SKILL_KEYWORDS = { 'Plumber':['pipe','water','leak','tap'], 'Electrician':['electric','fan','light','wire'], 'Carpenter':['wood','door','window'], 'Painter':['paint','wall','colour'], 'AC Technician':['ac','cool','fridge'], 'Mason':['cement','brick','wall'], 'Welder':['weld','iron','metal'], 'Cleaner':['clean','sweep','mop'] };
 let recognition=null, isListening=false;
 function toggleVoice(){
@@ -1072,7 +1103,6 @@ function findNearby(){
   },()=>showToast('Location denied','error'));
 }
 
-// --- BOOKING ---
 function openBooking(workerId,workerName){
   if(!userToken){showToast('Please sign in to book','error');openModal('userLoginModal');return;}
   document.getElementById('booking_worker_id').value=workerId; document.getElementById('booking_worker_name').textContent='Booking for: '+workerName;
@@ -1100,28 +1130,6 @@ async function openWorkerBookings(){
 async function respondBooking(id,status){ const d=await api('PUT','/api/bookings/'+id+'/status',{status},workerToken); if(d.success){showToast('Booking '+status,'success');openWorkerBookings();}else showToast(d.message||'Error','error'); }
 </script>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-
-<button class="ai-fab" id="aiChatBtn" onclick="toggleAIChat()">&#129302;</button>
-<div class="ai-chat-window" id="aiChatWindow">
-  <div class="ai-chat-header">
-    <div class="ai-avatar-ring">&#129302;</div>
-    <div class="ai-chat-info">
-      <div class="ai-chat-name">Lexa - AI Assistant</div>
-      <div class="ai-chat-status"><span class="ai-status-dot"></span>Online now</div>
-    </div>
-    <button class="ai-close-btn" onclick="toggleAIChat()">&#10005;</button>
-  </div>
-  <div class="ai-messages" id="aiMessages"></div>
-  <div class="ai-quick-btns" id="aiQuickBtns">
-    <button class="ai-quick-btn" onclick="aiQuick('I need a plumber')">Plumber</button>
-    <button class="ai-quick-btn" onclick="aiQuick('I need an electrician')">Electrician</button>
-  </div>
-  <div class="ai-input-area">
-    <input class="ai-input" id="aiInput" placeholder="Ask anything..." onkeydown="if(event.key==='Enter') sendAIMsg()"/>
-    <button class="ai-send-btn" onclick="sendAIMsg()">&#9658;</button>
-  </div>
-</div>
-
 <script>
 let aiOpen = false, aiGreeted = false;
 function toggleAIChat() {
