@@ -1,7 +1,7 @@
 const router = require('express').Router();
 const { pool } = require('../db');
 
-// Haversine formula — returns distance in km
+// Haversine formula - returns distance in km
 function haversine(lat1, lng1, lat2, lng2) {
   const R = 6371;
   const dLat = (lat2 - lat1) * Math.PI / 180;
