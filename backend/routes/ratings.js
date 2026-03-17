@@ -2,7 +2,7 @@ const router = require('express').Router();
 const { pool } = require('../db');
 const { verifyUser } = require('../middleware/auth');
 
-// POST /api/ratings — logged-in user rates worker (upsert)
+// POST /api/ratings - logged-in user rates worker (upsert)
 router.post('/', verifyUser, async (req, res) => {
   try {
     const { worker_id, rating, review, booking_id } = req.body;
@@ -19,7 +19,7 @@ router.post('/', verifyUser, async (req, res) => {
         return res.status(403).json({ success: false, message: 'Can only rate after completed booking' });
     }
 
-    // Upsert — update if already rated, insert if new
+    // Upsert - update if already rated, insert if new
     await pool.execute(
       `INSERT INTO ratings (user_id, worker_id, booking_id, rating, review)
        VALUES (?, ?, ?, ?, ?)
@@ -44,7 +44,7 @@ router.post('/', verifyUser, async (req, res) => {
   }
 });
 
-// GET /api/ratings/worker/:id — get all ratings for a worker
+// GET /api/ratings/worker/:id - get all ratings for a worker
 router.get('/worker/:id', async (req, res) => {
   try {
     const [rows] = await pool.execute(
