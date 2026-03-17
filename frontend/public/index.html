@@ -498,7 +498,7 @@
       <div style="background:var(--bg3);border:1px solid var(--border);border-radius:12px;padding:12px;text-align:center"><div style="font-family:'Clash Display',sans-serif;font-size:1.5rem;font-weight:700;color:var(--orange)" id="wd_views">&#8212;</div><div style="font-size:0.65rem;color:var(--text3);margin-top:2px;text-transform:uppercase;letter-spacing:0.5px">Views</div></div>
       <div style="background:var(--bg3);border:1px solid var(--border);border-radius:12px;padding:12px;text-align:center"><div style="font-family:'Clash Display',sans-serif;font-size:1.5rem;font-weight:700;color:var(--orange)" id="wd_calls">&#8212;</div><div style="font-size:0.65rem;color:var(--text3);margin-top:2px;text-transform:uppercase;letter-spacing:0.5px">Calls</div></div>
       <div style="background:var(--bg3);border:1px solid var(--border);border-radius:12px;padding:12px;text-align:center"><div style="font-family:'Clash Display',sans-serif;font-size:1.5rem;font-weight:700;color:var(--orange)" id="wd_wa">&#8212;</div><div style="font-size:0.65rem;color:var(--text3);margin-top:2px;text-transform:uppercase;letter-spacing:0.5px">WhatsApp</div></div>
-    </div>
+          </div>
     <button class="nav-btn ghost" style="width:100%;margin-bottom:12px;padding:11px" onclick="openWorkerBookings()">&#128197; My Booking Requests</button>
     <div class="form-group"><label class="form-label">About</label><textarea class="form-textarea" id="wd_about"></textarea></div>
     <div class="form-row">
@@ -760,8 +760,7 @@ function setWorkerLoginMode(mode){
     const pw=document.getElementById('l_pass'); if(pw) pw.focus();
   }
 }
-
-async function sendWorkerOtp(){
+  async function sendWorkerOtp(){
   const phone=document.getElementById('l_phone').value.trim();
   if(!phone){ showToast('Enter mobile number first','error'); return; }
   const btn=document.getElementById('otpSendBtn');
