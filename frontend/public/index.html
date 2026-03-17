@@ -409,53 +409,14 @@
 <div class="modal-overlay" id="userRegModal">
   <div class="modal" style="max-width:400px">
     <button class="modal-close" onclick="closeModal('userRegModal')">&#10005;</button>
-    <h2 id="regTitle">Create Account</h2>
-    <p class="modal-sub" id="regSub">Join LocalFix to book workers and leave reviews</p>
-
-    <!-- Step 1: Name + Email + Send OTP -->
-    <div id="regStep1">
-      <div class="form-group"><label class="form-label">Full Name</label><input class="form-input" id="reg_name" placeholder="Your full name"/></div>
-      <div class="form-group"><label class="form-label">Email Address</label><input class="form-input" id="reg_email" type="email" placeholder="you@email.com"/></div>
-      <button class="form-submit" id="sendOtpBtn" onclick="regSendOTP()">Send Verification Code &#8594;</button>
-      <p style="text-align:center;margin-top:12px;font-size:0.82rem;color:var(--text2)">Already have account? <a href="#" style="color:var(--orange);font-weight:600" onclick="switchModal('userRegModal','userLoginModal')">Sign in</a></p>
-    </div>
-
-    <!-- Step 2: OTP Verify -->
-    <div id="regStep2" style="display:none">
-      <div style="text-align:center;padding:8px 0 20px">
-        <div style="width:52px;height:52px;border-radius:14px;background:var(--orange3);border:1px solid rgba(255,92,0,0.3);display:flex;align-items:center;justify-content:center;font-size:1.5rem;margin:0 auto 14px">&#128140;</div>
-        <p style="font-size:0.88rem;color:var(--text)">Code sent to <strong id="regEmailShow" style="color:var(--orange)"></strong></p>
-        <p style="font-size:0.78rem;color:var(--text2);margin-top:4px">Check inbox and spam folder &bull; Expires in 5 min</p>
-      </div>
-      <div class="form-group">
-        <label class="form-label">Enter 6-digit Code</label>
-        <input class="form-input" id="reg_otp" placeholder="&#8226; &#8226; &#8226; &#8226; &#8226; &#8226;" maxlength="6" type="number" style="text-align:center;font-size:1.5rem;letter-spacing:10px;font-weight:700" onkeydown="if(event.key==='Enter')regVerifyOTP()"/>
-      </div>
-      <div id="regOtpErr" style="color:var(--red);font-size:0.8rem;margin-bottom:10px;display:none"></div>
-      <button class="form-submit" id="verifyOtpBtn" onclick="regVerifyOTP()">Verify Code &#8594;</button>
-      <p style="text-align:center;margin-top:10px;font-size:0.8rem;color:var(--text2)">
-        <a href="#" style="color:var(--orange)" id="resendOtpLink" onclick="regResendOTP()">Resend code</a>
-        &nbsp;&bull;&nbsp;
-        <a href="#" style="color:var(--text2)" onclick="regGoBack()">Change email</a>
-      </p>
-    </div>
-
-    <!-- Step 3: Set Password -->
-    <div id="regStep3" style="display:none">
-      <div style="background:var(--green2);border:1px solid rgba(0,208,132,0.2);border-radius:12px;padding:12px 14px;margin-bottom:18px;display:flex;align-items:center;gap:8px">
-        <span style="color:var(--green);font-size:1rem">&#10003;</span>
-        <span style="font-size:0.84rem;color:var(--green)">Email verified!</span>
-      </div>
-      <div class="form-group">
-        <label class="form-label">Create Password</label>
-        <input class="form-input" id="reg_pass" type="password" placeholder="Minimum 6 characters" onkeydown="if(event.key==='Enter')regCreateAccount()"/>
-      </div>
-      <div class="form-group">
-        <label class="form-label">Confirm Password</label>
-        <input class="form-input" id="reg_pass2" type="password" placeholder="Re-enter password" onkeydown="if(event.key==='Enter')regCreateAccount()"/>
-      </div>
-      <button class="form-submit" id="createAccBtn" onclick="regCreateAccount()">Create Account &#8594;</button>
-    </div>
+    <h2>Create Account</h2>
+    <p class="modal-sub">Join LocalFix to book workers and leave reviews</p>
+    <div class="form-group"><label class="form-label">Full Name</label><input class="form-input" id="reg_name" placeholder="Your full name"/></div>
+    <div class="form-group"><label class="form-label">Email Address</label><input class="form-input" id="reg_email" type="email" placeholder="you@email.com"/></div>
+    <div class="form-group"><label class="form-label">Password</label><input class="form-input" id="reg_pass" type="password" placeholder="Minimum 6 characters"/></div>
+    <div class="form-group"><label class="form-label">Confirm Password</label><input class="form-input" id="reg_pass2" type="password" placeholder="Re-enter password" onkeydown="if(event.key==='Enter')doDirectRegister()"/></div>
+    <button class="form-submit" id="createAccBtn" onclick="doDirectRegister()">Create Account &#8594;</button>
+    <p style="text-align:center;margin-top:12px;font-size:0.82rem;color:var(--text2)">Already have account? <a href="#" style="color:var(--orange);font-weight:600" onclick="switchModal('userRegModal','userLoginModal')">Sign in</a></p>
   </div>
 </div>
 
@@ -463,41 +424,13 @@
 <div class="modal-overlay" id="forgotModal">
   <div class="modal" style="max-width:400px">
     <button class="modal-close" onclick="closeModal('forgotModal')">&#10005;</button>
-    <h2 id="fpTitle">Forgot Password</h2>
-    <p class="modal-sub" id="fpSub">Enter your email to receive a reset code</p>
-
-    <!-- Step 1: Email -->
-    <div id="fpStep1">
-      <div class="form-group"><label class="form-label">Email Address</label><input class="form-input" id="fp_email" type="email" placeholder="you@email.com"/></div>
-      <button class="form-submit" id="fpSendBtn" onclick="fpSendOTP()">Send Reset Code &#8594;</button>
-      <p style="text-align:center;margin-top:12px;font-size:0.82rem;color:var(--text2)"><a href="#" style="color:var(--text2)" onclick="switchModal('forgotModal','userLoginModal')">&#8592; Back to Sign In</a></p>
-    </div>
-
-    <!-- Step 2: OTP -->
-    <div id="fpStep2" style="display:none">
-      <div style="text-align:center;padding:8px 0 20px">
-        <div style="width:52px;height:52px;border-radius:14px;background:var(--orange3);border:1px solid rgba(255,92,0,0.3);display:flex;align-items:center;justify-content:center;font-size:1.5rem;margin:0 auto 14px">&#128273;</div>
-        <p style="font-size:0.88rem;color:var(--text)">Reset code sent to <strong id="fpEmailShow" style="color:var(--orange)"></strong></p>
-      </div>
-      <div class="form-group">
-        <label class="form-label">Enter 6-digit Code</label>
-        <input class="form-input" id="fp_otp" placeholder="&#8226; &#8226; &#8226; &#8226; &#8226; &#8226;" maxlength="6" type="number" style="text-align:center;font-size:1.5rem;letter-spacing:10px;font-weight:700" onkeydown="if(event.key==='Enter')fpVerifyOTP()"/>
-      </div>
-      <div id="fpOtpErr" style="color:var(--red);font-size:0.8rem;margin-bottom:10px;display:none"></div>
-      <button class="form-submit" onclick="fpVerifyOTP()">Verify Code &#8594;</button>
-      <p style="text-align:center;margin-top:10px;font-size:0.8rem"><a href="#" style="color:var(--orange)" onclick="fpSendOTP()">Resend code</a></p>
-    </div>
-
-    <!-- Step 3: New Password -->
-    <div id="fpStep3" style="display:none">
-      <div style="background:var(--green2);border:1px solid rgba(0,208,132,0.2);border-radius:12px;padding:12px 14px;margin-bottom:18px;display:flex;align-items:center;gap:8px">
-        <span style="color:var(--green)">&#10003;</span>
-        <span style="font-size:0.84rem;color:var(--green)">Identity verified. Set a new password.</span>
-      </div>
-      <div class="form-group"><label class="form-label">New Password</label><input class="form-input" id="fp_pass" type="password" placeholder="Minimum 6 characters"/></div>
-      <div class="form-group"><label class="form-label">Confirm Password</label><input class="form-input" id="fp_pass2" type="password" placeholder="Re-enter password" onkeydown="if(event.key==='Enter')fpResetPassword()"/></div>
-      <button class="form-submit" id="fpResetBtn" onclick="fpResetPassword()">Update Password &#8594;</button>
-    </div>
+    <h2>Reset Password</h2>
+    <p class="modal-sub">Enter your email and new password</p>
+    <div class="form-group"><label class="form-label">Email Address</label><input class="form-input" id="fp_email" type="email" placeholder="you@email.com"/></div>
+    <div class="form-group"><label class="form-label">New Password</label><input class="form-input" id="fp_pass" type="password" placeholder="Minimum 6 characters"/></div>
+    <div class="form-group"><label class="form-label">Confirm Password</label><input class="form-input" id="fp_pass2" type="password" placeholder="Re-enter password" onkeydown="if(event.key==='Enter')doDirectReset()"/></div>
+    <button class="form-submit" id="fpResetBtn" onclick="doDirectReset()">Update Password &#8594;</button>
+    <p style="text-align:center;margin-top:12px;font-size:0.82rem;color:var(--text2)"><a href="#" style="color:var(--text2)" onclick="switchModal('forgotModal','userLoginModal')">&#8592; Back to Sign In</a></p>
   </div>
 </div>
 <!-- BOOKING -->
@@ -1005,68 +938,14 @@ async function doUserLogin() {
   }
 }
 
-// ── SIGN UP STEP 1: Send OTP ──────────────
-async function regSendOTP() {
-  var name = document.getElementById('reg_name').value.trim();
-  var email = document.getElementById('reg_email').value.trim();
-  if (!name) { showToast('Please enter your name', 'error'); return; }
-  if (!email || !email.includes('@')) { showToast('Enter a valid email', 'error'); return; }
-  var btn = document.getElementById('sendOtpBtn');
-  btn.disabled = true; btn.textContent = 'Sending...';
-  var d = await api('POST', '/api/users/send-otp', { email: email, type: 'signup' });
-  btn.disabled = false; btn.textContent = 'Send Verification Code →';
-  if (d.success) {
-    document.getElementById('regStep1').style.display = 'none';
-    document.getElementById('regStep2').style.display = 'block';
-    document.getElementById('regEmailShow').textContent = email;
-    document.getElementById('reg_otp').focus();
-    showToast('Code sent to ' + email, 'success');
-    startResendTimer('resendOtpLink', 60);
-  } else {
-    showToast(d.message || 'Failed to send code', 'error');
-  }
-}
-
-// ── SIGN UP STEP 2: Verify OTP ────────────
-async function regVerifyOTP() {
-  var email = document.getElementById('reg_email').value.trim();
-  var code = document.getElementById('reg_otp').value.trim();
-  if (!code || code.length !== 6) { showRegOtpErr('Enter the 6-digit code'); return; }
-  var btn = document.getElementById('verifyOtpBtn');
-  btn.disabled = true; btn.textContent = 'Verifying...';
-  var d = await api('POST', '/api/users/verify-otp', { email: email, code: code, type: 'signup' });
-  btn.disabled = false; btn.textContent = 'Verify Code →';
-  if (d.success) {
-    document.getElementById('regStep2').style.display = 'none';
-    document.getElementById('regStep3').style.display = 'block';
-    document.getElementById('regTitle').textContent = 'Set Password';
-    document.getElementById('regSub').textContent = 'Almost done! Create a secure password.';
-    document.getElementById('reg_pass').focus();
-  } else { showRegOtpErr(d.message || 'Incorrect code'); }
-}
-function showRegOtpErr(msg) {
-  var el = document.getElementById('regOtpErr');
-  if (el) { el.textContent = msg; el.style.display = 'block'; }
-}
-function regGoBack() {
-  document.getElementById('regStep2').style.display = 'none';
-  document.getElementById('regStep1').style.display = 'block';
-  document.getElementById('reg_otp').value = '';
-}
-async function regResendOTP() {
-  var email = document.getElementById('reg_email').value.trim();
-  if (!email) return;
-  var d = await api('POST', '/api/users/send-otp', { email: email, type: 'signup' });
-  if (d.success) { showToast('New code sent!', 'success'); startResendTimer('resendOtpLink', 60); }
-  else showToast(d.message || 'Could not resend', 'error');
-}
-
-// ── SIGN UP STEP 3: Create Account ────────
-async function regCreateAccount() {
+// ── DIRECT SIGN UP (no OTP) ───────────────
+async function doDirectRegister() {
   var name = document.getElementById('reg_name').value.trim();
   var email = document.getElementById('reg_email').value.trim();
   var pass = document.getElementById('reg_pass').value;
   var pass2 = document.getElementById('reg_pass2').value;
+  if (!name) { showToast('Please enter your name', 'error'); return; }
+  if (!email || !email.includes('@')) { showToast('Enter a valid email', 'error'); return; }
   if (pass.length < 6) { showToast('Password must be at least 6 characters', 'error'); return; }
   if (pass !== pass2) { showToast('Passwords do not match', 'error'); return; }
   var btn = document.getElementById('createAccBtn');
@@ -1083,45 +962,12 @@ async function regCreateAccount() {
   } else { showToast(d.message || 'Registration failed', 'error'); }
 }
 
-// ── FORGOT PASSWORD STEP 1 ─────────────────
-async function fpSendOTP() {
-  var email = document.getElementById('fp_email').value.trim();
-  if (!email || !email.includes('@')) { showToast('Enter a valid email', 'error'); return; }
-  var btn = document.getElementById('fpSendBtn');
-  if (btn) { btn.disabled = true; btn.textContent = 'Sending...'; }
-  var d = await api('POST', '/api/users/send-otp', { email: email, type: 'reset' });
-  if (btn) { btn.disabled = false; btn.textContent = 'Send Reset Code →'; }
-  if (d.success) {
-    document.getElementById('fpStep1').style.display = 'none';
-    document.getElementById('fpStep2').style.display = 'block';
-    document.getElementById('fpEmailShow').textContent = email;
-    showToast('Reset code sent!', 'success');
-  } else { showToast(d.message || 'Failed to send code', 'error'); }
-}
-
-// ── FORGOT PASSWORD STEP 2 ─────────────────
-async function fpVerifyOTP() {
-  var email = document.getElementById('fp_email').value.trim();
-  var code = document.getElementById('fp_otp').value.trim();
-  if (!code || code.length !== 6) { showFpOtpErr('Enter the 6-digit code'); return; }
-  var d = await api('POST', '/api/users/verify-otp', { email: email, code: code, type: 'reset' });
-  if (d.success) {
-    document.getElementById('fpStep2').style.display = 'none';
-    document.getElementById('fpStep3').style.display = 'block';
-    document.getElementById('fpTitle').textContent = 'New Password';
-    document.getElementById('fp_pass').focus();
-  } else { showFpOtpErr(d.message || 'Incorrect code'); }
-}
-function showFpOtpErr(msg) {
-  var el = document.getElementById('fpOtpErr');
-  if (el) { el.textContent = msg; el.style.display = 'block'; }
-}
-
-// ── FORGOT PASSWORD STEP 3 ─────────────────
-async function fpResetPassword() {
+// ── DIRECT PASSWORD RESET (no OTP) ────────
+async function doDirectReset() {
   var email = document.getElementById('fp_email').value.trim();
   var pass = document.getElementById('fp_pass').value;
   var pass2 = document.getElementById('fp_pass2').value;
+  if (!email || !email.includes('@')) { showToast('Enter a valid email', 'error'); return; }
   if (pass.length < 6) { showToast('Password must be at least 6 characters', 'error'); return; }
   if (pass !== pass2) { showToast('Passwords do not match', 'error'); return; }
   var btn = document.getElementById('fpResetBtn');
@@ -1132,30 +978,14 @@ async function fpResetPassword() {
     showToast('Password updated! Please sign in.', 'success');
     closeModal('forgotModal');
     openModal('userLoginModal');
-  } else { showToast(d.message || 'Failed to update', 'error'); }
+  } else { showToast(d.message || 'Account not found', 'error'); }
 }
 
-// ── RESEND TIMER ───────────────────────────
-function startResendTimer(linkId, seconds) {
-  var link = document.getElementById(linkId);
-  if (!link) return;
-  link.style.pointerEvents = 'none'; link.style.opacity = '0.5';
-  var remaining = seconds;
-  var interval = setInterval(function() {
-    remaining--;
-    link.textContent = 'Resend in ' + remaining + 's';
-    if (remaining <= 0) {
-      clearInterval(interval);
-      link.textContent = 'Resend code';
-      link.style.pointerEvents = ''; link.style.opacity = '';
-    }
-  }, 1000);
-}
-
-// ── LEGACY: kept for compatibility ─────────
-async function doUserRegister() { regSendOTP(); }
-async function sendOTP() { regSendOTP(); }
-async function verifyOTP() { regVerifyOTP(); }
+// ── LEGACY stubs (kept for compatibility) ──
+async function regSendOTP() { doDirectRegister(); }
+async function regCreateAccount() { doDirectRegister(); }
+async function fpResetPassword() { doDirectReset(); }
+async function doUserRegister() { doDirectRegister(); }
 
 
 function showUserNav(){
@@ -1520,7 +1350,7 @@ async function callClaudeAI(userMsg) {
     aiMessages_history = aiMessages_history.slice(-6);
   }
 
-  var systemPrompt = 'You are Lexa, a friendly AI assistant for LocalFix, a local service marketplace in Gorakhpur. Reply in fluent English only, max 1-2 sentences. Services offered: Plumber, Electrician, Carpenter, Painter, AC Technician, Mason, Welder, Cleaner. Rules: 1) For our services, confirm searching enthusiastically. 2) For other services like doctor/cook/driver, say sorry we do not offer that and list our 8 services. 3) For ok/show/yes/find - say Showing results now. 4) Booking: sign in then click calendar on worker card. 5) Contact: use Call or WhatsApp button on card.'
+  var systemPrompt = 'You are Lexa, a smart and witty AI assistant for LocalFix 2014 a local service marketplace in Gorakhpur, India. You have a warm, natural personality and NEVER give repetitive or robotic answers. Rules: 1) Reply in natural fluent English only, max 2 sentences, be conversational and occasionally funny. 2) NEVER say the same thing twice in a conversation, always vary your wording. 3) Services: Plumber, Electrician, Carpenter, Painter, AC Technician, Mason, Welder, Cleaner. 4) For service requests: sound genuinely excited, say what you are doing e.g. On it! Pulling up the best electricians right now. 5) For unavailable services like doctor or cook: decline warmly and creatively list our 8 services. 6) For greetings or small talk: respond warmly and ask what they need. 7) For booking questions: sign in first then tap calendar icon on any worker card. 8) For pricing: completely free for customers, zero commission. 9) For frustration or complaints: empathize genuinely and offer help. 10) For unclear messages: ask a smart clarifying question. 11) For ok or yes or show: if context has a service, confirm searching for it specifically. 12) Always sound like a real helpful person, never a chatbot.';
 
   try {
     var response = await fetch('https://api.anthropic.com/v1/messages', {
