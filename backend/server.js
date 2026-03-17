@@ -49,6 +49,7 @@ app.use('/api/users', require('./routes/users'));
 app.use('/api/bookings', require('./routes/bookings'));
 app.use('/api/ratings', require('./routes/ratings'));
 app.use('/api/nearby', require('./routes/nearby'));
+app.use('/api/ai', require('./routes/ai')); // AI Assistant route
 
 // Health check
 app.get('/api/health', (req, res) => {
