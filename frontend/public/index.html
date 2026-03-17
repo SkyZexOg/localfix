@@ -394,8 +394,6 @@
 
 <div class="toast" id="toast"></div>
 
-
-<!-- USER SIGN IN -->
 <div class="modal-overlay" id="userLoginModal">
   <div class="modal" style="max-width:400px">
     <button class="modal-close" onclick="closeModal('userLoginModal')">&#10005;</button>
@@ -408,7 +406,6 @@
   </div>
 </div>
 
-<!-- USER REGISTER -->
 <div class="modal-overlay" id="userRegModal">
   <div class="modal" style="max-width:400px">
     <button class="modal-close" onclick="closeModal('userRegModal')">&#10005;</button>
@@ -422,7 +419,18 @@
   </div>
 </div>
 
-<!-- BOOKING -->
+<div class="modal-overlay" id="otpModal">
+  <div class="modal" style="max-width:400px">
+    <button class="modal-close" onclick="closeModal('otpModal')">&#10005;</button>
+    <h2>Verify OTP</h2>
+    <p class="modal-sub">Enter OTP sent to your email</p>
+    <div class="form-group">
+      <input class="form-input" id="otp_input" placeholder="Enter OTP"/>
+    </div>
+    <button class="form-submit" id="otpVerifyBtn" onclick="verifySignupOtp()">Verify &#8594;</button>
+  </div>
+</div>
+
 <div class="modal-overlay" id="bookingModal">
   <div class="modal" style="max-width:420px">
     <button class="modal-close" onclick="closeModal('bookingModal')">&#10005;</button>
@@ -436,7 +444,6 @@
   </div>
 </div>
 
-<!-- MY BOOKINGS -->
 <div class="modal-overlay" id="myBookingsModal">
   <div class="modal" style="max-width:560px">
     <button class="modal-close" onclick="closeModal('myBookingsModal')">&#10005;</button>
@@ -446,7 +453,6 @@
   </div>
 </div>
 
-<!-- WORKER BOOKINGS -->
 <div class="modal-overlay" id="workerBookingsModal">
   <div class="modal" style="max-width:580px">
     <button class="modal-close" onclick="closeModal('workerBookingsModal')">&#10005;</button>
@@ -456,7 +462,6 @@
   </div>
 </div>
 
-<!-- MAP -->
 <div class="modal-overlay" id="mapModal">
   <div class="modal" style="max-width:720px">
     <button class="modal-close" onclick="closeModal('mapModal')">&#10005;</button>
@@ -466,7 +471,6 @@
   </div>
 </div>
 
-<!-- REGISTER -->
 <div class="modal-overlay" id="registerModal">
   <div class="modal">
     <button class="modal-close" onclick="closeModal('registerModal')">&#10005;</button>
@@ -501,7 +505,6 @@
   </div>
 </div>
 
-<!-- LOGIN -->
 <div class="modal-overlay" id="loginModal">
   <div class="modal" style="max-width:400px">
     <button class="modal-close" onclick="closeModal('loginModal')">&#10005;</button>
@@ -509,12 +512,11 @@
     <p class="modal-sub">Manage your availability and profile.</p>
     <div class="form-group"><label class="form-label">Mobile Number</label><input class="form-input" id="l_phone" placeholder="9XXXXXXXXX" maxlength="10"/></div>
     <div class="form-group"><label class="form-label">Password</label><input class="form-input" id="l_pass" type="password" placeholder="Your password"/></div>
-    <button class="form-submit" onclick="doLogin()">Login &#8594;</button>
+    <button class="form-submit" onclick="doWorkerLogin()">Login &#8594;</button>
     <p style="text-align:center;margin-top:12px;font-size:0.82rem;color:var(--text2)">New here? <a href="#" style="color:var(--orange);font-weight:600" onclick="switchModal('loginModal','registerModal')">Register as worker</a></p>
   </div>
 </div>
 
-<!-- WORKER DASHBOARD -->
 <div class="modal-overlay" id="wDashModal">
   <div class="modal" style="max-width:540px">
     <button class="modal-close" onclick="closeModal('wDashModal')">&#10005;</button>
@@ -540,11 +542,10 @@
       <div class="form-group"><label class="form-label">Area</label><input class="form-input" id="wd_area"/></div>
     </div>
     <button class="form-submit" onclick="updateProfile()">Save Changes &#8594;</button>
-    <button style="width:100%;padding:12px;margin-top:10px;background:transparent;border:1px solid rgba(255,68,68,0.3);color:var(--red);border-radius:12px;cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif;font-size:0.88rem;font-weight:600" onclick="doLogout()">Logout</button>
+    <button style="width:100%;padding:12px;margin-top:10px;background:transparent;border:1px solid rgba(255,68,68,0.3);color:var(--red);border-radius:12px;cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif;font-size:0.88rem;font-weight:600" onclick="doWorkerLogout()">Logout</button>
   </div>
 </div>
 
-<!-- WORKER DETAIL -->
 <div class="modal-overlay" id="workerDetailModal">
   <div class="modal" style="max-width:460px">
     <button class="modal-close" onclick="closeModal('workerDetailModal')">&#10005;</button>
@@ -552,7 +553,6 @@
   </div>
 </div>
 
-<!-- ADMIN LOGIN -->
 <div class="modal-overlay" id="adminLoginModal">
   <div class="modal" style="max-width:360px">
     <button class="modal-close" onclick="closeModal('adminLoginModal')">&#10005;</button>
@@ -564,7 +564,6 @@
   </div>
 </div>
 
-<!-- ADMIN DASHBOARD -->
 <div class="modal-overlay" id="adminDashModal">
   <div class="modal" style="max-width:740px">
     <button class="modal-close" onclick="closeModal('adminDashModal')">&#10005;</button>
@@ -575,10 +574,17 @@
 </div>
 
 <script>
-const API = window.location.origin;
+// --- CORE SETUP ---
+// Dynamic API URL for correct local development and production routing
+const API = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') 
+  ? 'http://localhost:5000' 
+  : window.location.origin;
+
 let workerToken = localStorage.getItem('lf_wtoken') || null;
 let workerData  = JSON.parse(localStorage.getItem('lf_wdata') || 'null');
 let adminToken  = localStorage.getItem('lf_atoken') || null;
+let userToken   = localStorage.getItem('lf_utoken') || null;
+let userData    = JSON.parse(localStorage.getItem('lf_udata') || 'null');
 let currentFilter = 'all', currentCategory = '', currentCity = '';
 
 const CATS = [
@@ -591,6 +597,7 @@ const CATS = [
 document.addEventListener('DOMContentLoaded', () => {
   loadStats(); loadCategories(); loadWorkers();
   if (workerToken && workerData) showWorkerNav();
+  if (userToken && userData) showUserNav();
   if (adminToken) showAdminBar();
 });
 
@@ -602,6 +609,18 @@ async function api(method, path, body, token) {
   catch(e) { return {success:false, message:'Network error'}; }
 }
 
+// --- MODAL UTILITIES ---
+function openModal(id){ document.getElementById(id).classList.add('open'); if(id==='mapModal') setTimeout(initMap,200); }
+function closeModal(id){ document.getElementById(id).classList.remove('open'); }
+function switchModal(c,o){ closeModal(c); openModal(o); }
+document.querySelectorAll('.modal-overlay').forEach(m=>{ m.addEventListener('click',e=>{if(e.target===m) m.classList.remove('open');}); });
+
+let toastT;
+function showToast(msg,type){ type=type||'success'; const t=document.getElementById('toast'); t.innerHTML=(type==='success'?'<span style="color:var(--green);font-size:1rem">&#10003;</span>':'<span style="color:var(--red);font-size:1rem">&#10005;</span>')+' '+msg; t.className='toast '+type+' show'; clearTimeout(toastT); toastT=setTimeout(()=>t.classList.remove('show'),3200); }
+function esc(str){ if(!str) return ''; return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function escJsSingle(str){ return esc(str).replace(/'/g,'&#39;'); }
+
+// --- DASHBOARD / STATS / WORKERS ---
 async function loadStats() {
   const d = await api('GET','/api/workers/stats');
   if(d.success){ animNum('sTotal',d.data.total); animNum('sAvail',d.data.available); animNum('sCities',d.data.cities); }
@@ -676,17 +695,8 @@ function workerCard(w) {
     +'</div></div>';
 }
 
-function setFilter(f,btn) {
-  currentFilter=f;
-  document.querySelectorAll('.ftab').forEach(b=>b.classList.remove('active'));
-  btn.classList.add('active'); loadWorkers();
-}
-function doSearch() {
-  currentCategory=document.getElementById('searchCategory').value;
-  currentCity=document.getElementById('searchCity').value.trim();
-  loadCategories(); loadWorkers();
-  document.getElementById('workers-section').scrollIntoView({behavior:'smooth'});
-}
+function setFilter(f,btn) { currentFilter=f; document.querySelectorAll('.ftab').forEach(b=>b.classList.remove('active')); btn.classList.add('active'); loadWorkers(); }
+function doSearch() { currentCategory=document.getElementById('searchCategory').value; currentCity=document.getElementById('searchCity').value.trim(); loadCategories(); loadWorkers(); document.getElementById('workers-section').scrollIntoView({behavior:'smooth'}); }
 
 async function openWorkerDetail(id) {
   openModal('workerDetailModal');
@@ -729,10 +739,7 @@ async function openWorkerDetail(id) {
 }
 
 let pickedStar=0;
-function pickStar(n) {
-  pickedStar=n;
-  document.querySelectorAll('.star-pick').forEach(s=>s.classList.toggle('on',parseInt(s.dataset.s)<=n));
-}
+function pickStar(n) { pickedStar=n; document.querySelectorAll('.star-pick').forEach(s=>s.classList.toggle('on',parseInt(s.dataset.s)<=n)); }
 async function submitReview(workerId) {
   const name=document.getElementById('rv_name').value.trim();
   const comment=document.getElementById('rv_comment').value.trim();
@@ -742,7 +749,7 @@ async function submitReview(workerId) {
   else showToast(d.message||'Error','error');
 }
 
-// Call and WhatsApp
+// --- CALL & WA TRACKING ---
 async function trackAndCall(id) {
   await api('POST','/api/workers/'+id+'/track',{type:'call'});
   const d = await api('GET','/api/workers/'+id);
@@ -755,11 +762,131 @@ async function trackAndWa(id) {
     const msg = 'Hi ' + encodeURIComponent(d.data.name) + ', I found you on LocalFix. I need your ' + encodeURIComponent(d.data.skill) + ' service. Are you available?';
     await api('POST', '/api/workers/' + id + '/track', {type:'whatsapp'});
     window.location.href = 'https://wa.me/91' + d.data.phone + '?text=' + msg;
+  } else { showToast('Could not get WhatsApp number', 'error'); }
+}
+
+
+// ==========================================
+// --- USER REGISTRATION, OTP, AND LOGIN ---
+// ==========================================
+
+async function doUserRegister() {
+  const btn = document.querySelector('#userRegModal .form-submit');
+  const name = document.getElementById('ur_name').value.trim();
+  const email = document.getElementById('ur_email').value.trim();
+  const password = document.getElementById('ur_pass').value;
+
+  if(!name || !email || !password || password.length < 6) {
+    showToast('Please fill all fields (Password min 6 chars)','error');
+    return;
+  }
+
+  btn.disabled = true;
+  btn.textContent = 'Sending OTP...';
+
+  // Store data persistently during OTP phase
+  localStorage.setItem('lf_tempUser', JSON.stringify({name, email, password}));
+
+  const d = await api('POST', '/api/users/send-otp', { email, type: "signup" });
+
+  btn.disabled = false;
+  btn.textContent = 'Create Account \u2192';
+
+  if(d.success) {
+    switchModal('userRegModal', 'otpModal');
+    showToast('OTP sent to your email', 'success');
   } else {
-    showToast('Could not get WhatsApp number', 'error');
+    showToast(d.message || 'Error sending OTP', 'error');
   }
 }
 
+async function verifySignupOtp() {
+  const btn = document.getElementById('otpVerifyBtn');
+  const otp = document.getElementById('otp_input').value.trim();
+  const tempDataStr = localStorage.getItem('lf_tempUser');
+
+  if(!otp) return showToast('Please enter OTP','error');
+  if(!tempDataStr) return showToast('Session expired. Please register again.', 'error');
+
+  const tempData = JSON.parse(tempDataStr);
+
+  btn.disabled = true;
+  btn.textContent = "Verifying...";
+
+  // 1. Verify OTP
+  const v = await api('POST', '/api/users/verify-otp', { email: tempData.email, otp: otp });
+
+  if(v.success) {
+    // 2. Register the User
+    const r = await api('POST', '/api/users/register', tempData);
+    if(r.success) {
+      showToast('Account created successfully!', 'success');
+      localStorage.removeItem('lf_tempUser'); // Clear temp
+      
+      // Auto login
+      userToken = r.token;
+      userData = r.user;
+      localStorage.setItem('lf_utoken', userToken);
+      localStorage.setItem('lf_udata', JSON.stringify(userData));
+      
+      closeModal('otpModal');
+      showUserNav();
+    } else { showToast(r.message || 'Registration failed', 'error'); }
+  } else { showToast(v.message || 'Invalid OTP', 'error'); }
+  
+  btn.disabled = false;
+  btn.textContent = "Verify \u2192";
+}
+
+async function doUserLogin() {
+  const btn = document.querySelector('#userLoginModal .form-submit');
+  const email = document.getElementById('ul_email').value.trim();
+  const password = document.getElementById('ul_pass').value;
+
+  if(!email || !password) { showToast('Email and password required', 'error'); return; }
+
+  btn.disabled = true;
+  btn.textContent = 'Signing In...';
+
+  const d = await api('POST', '/api/users/login', {email, password});
+  
+  btn.disabled = false;
+  btn.textContent = 'Sign In \u2192';
+
+  if(d.success) {
+    userToken = d.token;
+    userData = d.user;
+    localStorage.setItem('lf_utoken', userToken);
+    localStorage.setItem('lf_udata', JSON.stringify(userData));
+    closeModal('userLoginModal');
+    showUserNav();
+    showToast('Welcome back, ' + userData.name.split(' ')[0] + '!', 'success');
+  } else {
+    showToast(d.message || 'Login failed', 'error');
+  }
+}
+
+function showUserNav() {
+  if(document.getElementById('userNavSpan')) return;
+  const nav = document.getElementById('navLinks');
+  const span = document.createElement('div');
+  span.id = 'userNavSpan';
+  span.style.cssText = 'display:flex;align-items:center;gap:8px';
+  span.innerHTML = '<span style="font-size:0.8rem;color:var(--green)">&#128100; ' + esc(userData.name.split(' ')[0]) + '</span>' +
+    '<button class="nav-btn ghost" style="font-size:0.78rem;padding:6px 12px" onclick="loadMyBookings()">My Bookings</button>' +
+    '<button class="nav-btn ghost" style="font-size:0.72rem;padding:5px 10px;color:var(--red);border-color:rgba(255,68,68,0.3)" onclick="userLogout()">Sign Out</button>';
+  nav.insertBefore(span, nav.firstChild);
+}
+
+function userLogout() {
+  userToken = null; userData = null;
+  localStorage.removeItem('lf_utoken'); localStorage.removeItem('lf_udata');
+  const s = document.getElementById('userNavSpan'); if(s) s.remove();
+  showToast('Signed out', 'success');
+}
+
+
+// --- WORKER REGISTER, LOGIN, & DASHBOARD ---
 async function doRegister() {
   const btn=document.getElementById('regBtn');
   const body={name:document.getElementById('r_name').value.trim(),phone:document.getElementById('r_phone').value.trim(),skill:document.getElementById('r_skill').value,experience:document.getElementById('r_exp').value,city:document.getElementById('r_city').value.trim(),area:document.getElementById('r_area').value.trim(),about:document.getElementById('r_about').value.trim(),password:document.getElementById('r_pass').value};
@@ -771,22 +898,27 @@ async function doRegister() {
   else showToast(d.message||'Registration failed','error');
 }
 
-async function doLogin() {
+async function doWorkerLogin() {
+  const btn = document.querySelector('#loginModal .form-submit');
   const phone=document.getElementById('l_phone').value.trim(), password=document.getElementById('l_pass').value;
   if(!phone||!password){ showToast('Phone and password required','error'); return; }
-  const d=await api('POST','/api/auth/login',{phone,password});
+  
+  btn.disabled = true; btn.textContent = 'Logging In...';
+  const d = await api('POST','/api/auth/login',{phone,password});
+  btn.disabled = false; btn.textContent = 'Login \u2192';
+
   if(d.success){ workerToken=d.token; workerData=d.worker; localStorage.setItem('lf_wtoken',workerToken); localStorage.setItem('lf_wdata',JSON.stringify(workerData)); closeModal('loginModal'); showWorkerNav(); openWorkerDash(); showToast('Welcome back, '+workerData.name.split(' ')[0]+'!','success'); }
   else showToast(d.message||'Login failed','error');
 }
 
 function showWorkerNav() {
-  document.getElementById('navLinks').innerHTML='<span style="font-size:0.82rem;color:var(--text2)">Hi, '+esc(workerData.name.split(' ')[0])+'</span><button class="nav-btn ghost" onclick="openWorkerDash()">My Profile</button><button class="nav-btn ghost" style="color:var(--red);border-color:rgba(255,68,68,0.3);font-size:0.8rem" onclick="doLogout()">Logout</button>';
+  document.getElementById('navLinks').innerHTML='<span style="font-size:0.82rem;color:var(--text2)">Hi, '+esc(workerData.name.split(' ')[0])+'</span><button class="nav-btn ghost" onclick="openWorkerDash()">My Profile</button><button class="nav-btn ghost" style="color:var(--red);border-color:rgba(255,68,68,0.3);font-size:0.8rem" onclick="doWorkerLogout()">Logout</button>';
 }
 
 async function openWorkerDash() {
   openModal('wDashModal');
   const d=await api('GET','/api/auth/me',null,workerToken);
-  if(!d.success){ doLogout(); return; }
+  if(!d.success){ doWorkerLogout(); return; }
   const w=d.data; workerData=w; localStorage.setItem('lf_wdata',JSON.stringify(w));
   document.getElementById('wd_name').textContent=w.name;
   document.getElementById('wd_sub').textContent=w.skill+' \u2022 '+w.area+', '+w.city;
@@ -815,14 +947,16 @@ async function updateProfile() {
   else showToast(d.message||'Error','error');
 }
 
-function doLogout() {
+function doWorkerLogout() {
   workerToken=null; workerData=null;
   localStorage.removeItem('lf_wtoken'); localStorage.removeItem('lf_wdata');
   closeModal('wDashModal');
-  document.getElementById('navLinks').innerHTML='<button class="nav-btn ghost" onclick="openModal(\'loginModal\')">Login</button><button class="nav-btn primary" onclick="openModal(\'registerModal\')">Join as Worker</button><button class="nav-btn ghost sm" onclick="openModal(\'adminLoginModal\')">Admin</button>';
+  document.getElementById('navLinks').innerHTML='<button class="nav-btn ghost" onclick="openModal(\'userLoginModal\')">Sign In</button><button class="nav-btn ghost" onclick="openModal(\'loginModal\')">Worker Login</button><button class="nav-btn primary" onclick="openModal(\'registerModal\')">Join as Worker</button><button class="nav-btn ghost sm" onclick="openModal(\'adminLoginModal\')">Admin</button>';
   showToast('Logged out','success');
 }
 
+
+// --- ADMIN ---
 async function doAdminLogin() {
   const username=document.getElementById('a_user').value.trim(), password=document.getElementById('a_pass').value;
   const d=await api('POST','/api/admin/login',{username,password});
@@ -875,125 +1009,13 @@ async function loadAdminDash() {
     +'<div id="adminWorkerRows" style="display:flex;flex-direction:column;gap:8px;max-height:45vh;overflow-y:auto">'
     +(rowsHtml||'<p style="color:var(--text2);text-align:center;padding:20px">No workers found</p>')+'</div>';
 }
-
 function filterAdminList(q){ q=q.toLowerCase(); document.querySelectorAll('#adminWorkerRows .admin-worker-row').forEach(row=>{row.style.display=row.textContent.toLowerCase().includes(q)?'flex':'none';}); }
-
 async function adminApprove(id){ const d=await api('PUT','/api/admin/workers/'+id+'/approve',null,adminToken); if(d.success){showToast('Worker approved!','success');loadAdminDash();loadWorkers();loadStats();loadCategories();}else showToast(d.message||'Error','error'); }
 async function adminReject(id){ if(!confirm('Remove this worker from the site?')) return; const d=await api('PUT','/api/admin/workers/'+id+'/reject',null,adminToken); if(d.success){showToast('Worker removed','success');loadAdminDash();loadWorkers();loadStats();loadCategories();}else showToast(d.message||'Error','error'); }
 async function adminDelete(id){ if(!confirm('Permanently delete? Cannot be undone.')) return; const d=await api('DELETE','/api/admin/workers/'+id,null,adminToken); if(d.success){showToast('Worker deleted','success');loadAdminDash();loadWorkers();loadStats();loadCategories();}else showToast(d.message||'Error','error'); }
 
-// openModal is overridden in new JS below
-function closeModal(id){ document.getElementById(id).classList.remove('open'); }
-function switchModal(c,o){ closeModal(c); openModal(o); }
-document.querySelectorAll('.modal-overlay').forEach(m=>{ m.addEventListener('click',e=>{if(e.target===m) m.classList.remove('open');}); });
-
-let toastT;
-function showToast(msg,type){ type=type||'success'; const t=document.getElementById('toast'); t.innerHTML=(type==='success'?'<span style="color:var(--green);font-size:1rem">&#10003;</span>':'<span style="color:var(--red);font-size:1rem">&#10005;</span>')+' '+msg; t.className='toast '+type+' show'; clearTimeout(toastT); toastT=setTimeout(()=>t.classList.remove('show'),3200); }
-
-function esc(str){ if(!str) return ''; return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
-function escJsSingle(str){ return esc(str).replace(/'/g,'&#39;'); }
-
-// Voice assistant
-const SKILL_KEYWORDS = {
-  'Plumber':['pipe','water','leak','tap','flush','toilet','bathroom','plumb'],
-  'Electrician':['electric','fan','light','wire','switch','power','current','bulb','socket','fuse'],
-  'Carpenter':['wood','door','window','furniture','cabinet','carpent'],
-  'Painter':['paint','wall','colour','color','brush'],
-  'AC Technician':['ac','air condition','cool','compressor','refriger','fridge'],
-  'Mason':['cement','brick','wall','plaster','construct'],
-  'Welder':['weld','iron','metal','gate','grill'],
-  'Cleaner':['clean','sweep','mop','wash','dust','dirt']
-};
-let recognition=null, isListening=false;
-function toggleVoice(){
-  if(!('webkitSpeechRecognition' in window)&&!('SpeechRecognition' in window)){showToast('Voice not supported in this browser','error');return;}
-  if(isListening){stopVoice();return;}startVoice();
-}
-function startVoice(){
-  const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
-  recognition=new SR(); recognition.lang='en-IN'; recognition.continuous=false; recognition.interimResults=false;
-  recognition.onstart=()=>{isListening=true;document.getElementById('voiceBtn').classList.add('listening');showVoiceStatus('&#127908; Listening... Speak your problem');};
-  recognition.onresult=(e)=>{const t=e.results[0][0].transcript.toLowerCase();showVoiceStatus('You said: "'+t+'"');processVoice(t);};
-  recognition.onerror=()=>{stopVoice();showToast('Could not hear. Try again.','error');};
-  recognition.onend=()=>stopVoice();
-  recognition.start();
-}
-function stopVoice(){isListening=false;document.getElementById('voiceBtn').classList.remove('listening');if(recognition)recognition.stop();}
-function processVoice(text){
-  let detected='';
-  for(const[skill,keywords]of Object.entries(SKILL_KEYWORDS)){if(keywords.some(k=>text.includes(k))){detected=skill;break;}}
-  if(detected){
-    currentCategory=detected; document.getElementById('searchCategory').value=detected;
-    speak('I found '+detected+'s near you. Showing results now.');
-    showVoiceStatus('&#10003; Detected: '+detected+' - searching...');
-    loadCategories(); loadWorkers();
-    setTimeout(()=>{document.getElementById('workers-section').scrollIntoView({behavior:'smooth'});hideVoiceStatus();},2500);
-  } else {
-    speak('Sorry, could not detect service. Try again.');
-    showVoiceStatus('&#10005; Could not detect. Try "pipe leak" or "fan not working"');
-    setTimeout(hideVoiceStatus,3000);
-  }
-}
-function speak(text){if(!('speechSynthesis' in window))return;window.speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(text);u.lang='en-IN';u.rate=0.95;window.speechSynthesis.speak(u);}
-function showVoiceStatus(msg){const el=document.getElementById('voiceStatus');el.innerHTML=msg;el.style.display='block';}
-function hideVoiceStatus(){document.getElementById('voiceStatus').style.display='none';}
-
-// Nearby workers
-let userToken=localStorage.getItem('lf_utoken')||null;
-let userData=JSON.parse(localStorage.getItem('lf_udata')||'null');
-
-function findNearby(){
-  if(!navigator.geolocation){showToast('Geolocation not supported','error');return;}
-  showToast('Getting your location...','success');
-  navigator.geolocation.getCurrentPosition(async pos=>{
-    const{latitude,longitude}=pos.coords;
-    const skill=document.getElementById('searchCategory').value;
-    let url='/api/nearby?lat='+latitude+'&lng='+longitude+'&radius=20';
-    if(skill) url+='&skill='+encodeURIComponent(skill);
-    const d=await api('GET',url);
-    if(d.success){
-      showToast('Found '+d.data.length+' workers near you','success');
-      renderNearbyWorkers(d.data);
-      document.getElementById('workers-section').scrollIntoView({behavior:'smooth'});
-    } else showToast('No nearby workers found','error');
-  },()=>showToast('Location access denied','error'));
-}
-
-function renderNearbyWorkers(workers){
-  const grid=document.getElementById('workersGrid');
-  if(!workers.length){grid.innerHTML='<div class="empty-state"><div class="empty-icon">&#128205;</div><p>No workers found within 20km.</p></div>';return;}
-  grid.innerHTML=workers.map(w=>{
-    const initials=(w.name||'?').split(' ').map(n=>n[0]||'').join('').slice(0,2).toUpperCase();
-    const scol={available:'var(--green)',busy:'var(--yellow)',offline:'var(--text3)'};
-    const slabel={available:'Available Now',busy:'Busy',offline:'Offline'};
-    const rating=parseFloat(w.rating)||0;
-    return '<div class="worker-card" onclick="openWorkerDetail('+w.id+')">'+
-      '<div class="wc-top"><div class="wc-avatar">'+initials+'<div class="verified-badge">&#10003;</div></div>'+
-      '<div class="wc-info"><div class="wc-name">'+esc(w.name)+'</div>'+
-      '<div class="wc-tags"><span class="skill-tag">'+esc(w.skill)+'</span>'+
-      '<span class="status-tag"><span class="sdot '+w.status+'"></span><span style="color:'+(scol[w.status]||'#555')+'">'+(slabel[w.status]||'Offline')+'</span></span>'+
-      '<span class="dist-badge">&#128205; '+w.distance.toFixed(1)+' km</span>'+
-      '</div></div></div>'+
-      '<div class="wc-meta">'+
-      '<div class="wc-meta-row"><span class="ic">&#128205;</span>'+esc(w.area)+', '+esc(w.city)+'</div>'+
-      '<div class="wc-meta-row"><span class="ic">&#128336;</span>'+w.experience+' years experience</div>'+
-      '</div>'+
-      '<div class="wc-rating"><div class="stars-row">'+starsHTML(rating)+'<span class="rating-num">'+rating.toFixed(1)+'</span><span class="rating-count">('+( w.total_reviews||0)+')</span></div>'+
-      '<span class="exp-badge">'+w.experience+'y exp</span></div>'+
-      '<div class="wc-actions" onclick="event.stopPropagation()">'+
-      '<button class="btn-call" onclick="trackAndCall('+w.id+')">&#128222; Call Now</button>'+
-      '<button class="btn-wa" onclick="trackAndWa('+w.id+')">&#128172;</button>'+
-      '<button class="btn-book" onclick="openBooking('+w.id+',\''+escJsSingle(w.name)+'\')">&#128197;</button>'+
-      '</div></div>';
-  }).join('');
-}
-
-// Map
+// --- MAP ---
 let mapInstance=null;
-function openModal(id){
-  document.getElementById(id).classList.add('open');
-  if(id==='mapModal') setTimeout(initMap,200);
-}
 function initMap(){
   if(mapInstance){mapInstance.remove();mapInstance=null;}
   if(typeof L==='undefined'){showToast('Map loading...','success');return;}
@@ -1015,113 +1037,71 @@ function initMap(){
   }
 }
 
-// Booking
+// --- VOICE & NEARBY ---
+const SKILL_KEYWORDS = { 'Plumber':['pipe','water','leak','tap'], 'Electrician':['electric','fan','light','wire'], 'Carpenter':['wood','door','window'], 'Painter':['paint','wall','colour'], 'AC Technician':['ac','cool','fridge'], 'Mason':['cement','brick','wall'], 'Welder':['weld','iron','metal'], 'Cleaner':['clean','sweep','mop'] };
+let recognition=null, isListening=false;
+function toggleVoice(){
+  if(!('webkitSpeechRecognition' in window)&&!('SpeechRecognition' in window)){showToast('Voice not supported','error');return;}
+  if(isListening){stopVoice();return;}startVoice();
+}
+function startVoice(){
+  const SR=window.SpeechRecognition||window.webkitSpeechRecognition; recognition=new SR(); recognition.lang='en-IN';
+  recognition.onstart=()=>{isListening=true;document.getElementById('voiceBtn').classList.add('listening');showVoiceStatus('&#127908; Listening...');};
+  recognition.onresult=(e)=>{const t=e.results[0][0].transcript.toLowerCase();showVoiceStatus('You said: "'+t+'"');processVoice(t);};
+  recognition.onerror=()=>{stopVoice();showToast('Could not hear. Try again.','error');}; recognition.onend=()=>stopVoice(); recognition.start();
+}
+function stopVoice(){isListening=false;document.getElementById('voiceBtn').classList.remove('listening');if(recognition)recognition.stop();}
+function processVoice(text){
+  let detected=''; for(const[skill,keywords]of Object.entries(SKILL_KEYWORDS)){if(keywords.some(k=>text.includes(k))){detected=skill;break;}}
+  if(detected){
+    currentCategory=detected; document.getElementById('searchCategory').value=detected; showVoiceStatus('&#10003; Detected: '+detected); loadCategories(); loadWorkers(); setTimeout(()=>{document.getElementById('workers-section').scrollIntoView({behavior:'smooth'});hideVoiceStatus();},2500);
+  } else { showVoiceStatus('&#10005; Could not detect service.'); setTimeout(hideVoiceStatus,3000); }
+}
+function showVoiceStatus(msg){const el=document.getElementById('voiceStatus');el.innerHTML=msg;el.style.display='block';}
+function hideVoiceStatus(){document.getElementById('voiceStatus').style.display='none';}
+
+function findNearby(){
+  if(!navigator.geolocation){showToast('Geolocation not supported','error');return;}
+  showToast('Getting location...','success');
+  navigator.geolocation.getCurrentPosition(async pos=>{
+    const{latitude,longitude}=pos.coords; const skill=document.getElementById('searchCategory').value;
+    let url='/api/nearby?lat='+latitude+'&lng='+longitude+'&radius=20'; if(skill) url+='&skill='+encodeURIComponent(skill);
+    const d=await api('GET',url);
+    if(d.success){ showToast('Found '+d.data.length+' workers','success'); renderNearbyWorkers(d.data); document.getElementById('workers-section').scrollIntoView({behavior:'smooth'}); }
+    else showToast('No nearby workers','error');
+  },()=>showToast('Location denied','error'));
+}
+
+// --- BOOKING ---
 function openBooking(workerId,workerName){
   if(!userToken){showToast('Please sign in to book','error');openModal('userLoginModal');return;}
-  document.getElementById('booking_worker_id').value=workerId;
-  document.getElementById('booking_worker_name').textContent='Booking for: '+workerName;
-  const today=new Date().toISOString().split('T')[0];
-  document.getElementById('b_date').min=today;
-  document.getElementById('b_date').value='';
-  document.getElementById('b_time').value='';
-  document.getElementById('b_note').value='';
+  document.getElementById('booking_worker_id').value=workerId; document.getElementById('booking_worker_name').textContent='Booking for: '+workerName;
+  const today=new Date().toISOString().split('T')[0]; document.getElementById('b_date').min=today; document.getElementById('b_date').value=''; document.getElementById('b_time').value=''; document.getElementById('b_note').value='';
   openModal('bookingModal');
 }
 async function doBooking(){
-  const worker_id=document.getElementById('booking_worker_id').value;
-  const booking_date=document.getElementById('b_date').value;
-  const booking_time=document.getElementById('b_time').value;
-  const note=document.getElementById('b_note').value.trim();
+  const worker_id=document.getElementById('booking_worker_id').value, booking_date=document.getElementById('b_date').value, booking_time=document.getElementById('b_time').value, note=document.getElementById('b_note').value.trim();
   if(!booking_date||!booking_time){showToast('Date and time required','error');return;}
   const d=await api('POST','/api/bookings',{worker_id,booking_date,booking_time,note},userToken);
-  if(d.success){closeModal('bookingModal');showToast('Booking sent! Worker will confirm soon.','success');}
-  else showToast(d.message||'Booking failed','error');
+  if(d.success){closeModal('bookingModal');showToast('Booking sent!','success');} else showToast(d.message||'Booking failed','error');
 }
 async function loadMyBookings(){
-  openModal('myBookingsModal');
-  document.getElementById('myBookingsContent').innerHTML='<div class="loading"><div class="spinner"></div></div>';
+  openModal('myBookingsModal'); document.getElementById('myBookingsContent').innerHTML='<div class="loading"><div class="spinner"></div></div>';
   const d=await api('GET','/api/bookings/my',null,userToken);
   if(!d.success||!d.data.length){document.getElementById('myBookingsContent').innerHTML='<p style="color:var(--text2);text-align:center;padding:20px">No bookings yet.</p>';return;}
-  document.getElementById('myBookingsContent').innerHTML=d.data.map(b=>
-    '<div class="admin-worker-row" style="margin-bottom:10px">'+
-    '<div style="flex:1"><div style="font-weight:700">'+esc(b.worker_name)+' <span class="skill-tag">'+esc(b.skill)+'</span></div>'+
-    '<div style="font-size:0.78rem;color:var(--text2);margin-top:4px">'+b.booking_date+' at '+b.booking_time+'</div>'+
-    (b.note?'<div style="font-size:0.78rem;color:var(--text3);margin-top:2px">'+esc(b.note)+'</div>':'')+
-    '</div><span class="booking-badge '+b.status+'">'+b.status.toUpperCase()+'</span></div>'
-  ).join('');
+  document.getElementById('myBookingsContent').innerHTML=d.data.map(b=>'<div class="admin-worker-row" style="margin-bottom:10px"><div style="flex:1"><div style="font-weight:700">'+esc(b.worker_name)+' <span class="skill-tag">'+esc(b.skill)+'</span></div><div style="font-size:0.78rem;color:var(--text2);margin-top:4px">'+b.booking_date+' at '+b.booking_time+'</div></div><span class="booking-badge '+b.status+'">'+b.status.toUpperCase()+'</span></div>').join('');
 }
 async function openWorkerBookings(){
-  openModal('workerBookingsModal');
-  document.getElementById('workerBookingsContent').innerHTML='<div class="loading"><div class="spinner"></div></div>';
+  openModal('workerBookingsModal'); document.getElementById('workerBookingsContent').innerHTML='<div class="loading"><div class="spinner"></div></div>';
   const d=await api('GET','/api/bookings/worker',null,workerToken);
-  if(!d.success||!d.data.length){document.getElementById('workerBookingsContent').innerHTML='<p style="color:var(--text2);text-align:center;padding:20px">No booking requests yet.</p>';return;}
-  document.getElementById('workerBookingsContent').innerHTML=d.data.map(b=>
-    '<div class="admin-worker-row" style="margin-bottom:10px">'+
-    '<div style="flex:1"><div style="font-weight:700">'+esc(b.user_name)+'</div>'+
-    '<div style="font-size:0.78rem;color:var(--text2);margin-top:4px">'+b.booking_date+' at '+b.booking_time+'</div>'+
-    (b.note?'<div style="font-size:0.78rem;color:var(--text3);margin-top:2px">'+esc(b.note)+'</div>':'')+
-    '</div><span class="booking-badge '+b.status+'">'+b.status.toUpperCase()+'</span>'+
-    (b.status==='pending'?'<div class="admin-actions"><button class="admin-btn approve" onclick="respondBooking('+b.id+',\'accepted\')">&#10003; Accept</button><button class="admin-btn delete" onclick="respondBooking('+b.id+',\'rejected\')">&#10005; Reject</button></div>':
-    (b.status==='accepted'?'<button class="admin-btn approve" onclick="respondBooking('+b.id+',\'completed\')">&#9989; Done</button>':''))+
-    '</div>'
-  ).join('');
+  if(!d.success||!d.data.length){document.getElementById('workerBookingsContent').innerHTML='<p style="color:var(--text2);text-align:center;padding:20px">No booking requests.</p>';return;}
+  document.getElementById('workerBookingsContent').innerHTML=d.data.map(b=>'<div class="admin-worker-row" style="margin-bottom:10px"><div style="flex:1"><div style="font-weight:700">'+esc(b.user_name)+'</div><div style="font-size:0.78rem;color:var(--text2);margin-top:4px">'+b.booking_date+' at '+b.booking_time+'</div></div><span class="booking-badge '+b.status+'">'+b.status.toUpperCase()+'</span>'+(b.status==='pending'?'<div class="admin-actions"><button class="admin-btn approve" onclick="respondBooking('+b.id+',\'accepted\')">&#10003; Accept</button><button class="admin-btn delete" onclick="respondBooking('+b.id+',\'rejected\')">&#10005; Reject</button></div>':(b.status==='accepted'?'<button class="admin-btn approve" onclick="respondBooking('+b.id+',\'completed\')">&#9989; Done</button>':''))+'</div>').join('');
 }
-async function respondBooking(id,status){
-  const d=await api('PUT','/api/bookings/'+id+'/status',{status},workerToken);
-  if(d.success){showToast('Booking '+status,'success');openWorkerBookings();}else showToast(d.message||'Error','error');
-}
-
-// User auth
-async function doUserLogin(){
-  const email=document.getElementById('ul_email').value.trim(), password=document.getElementById('ul_pass').value;
-  if(!email||!password){showToast('Email and password required','error');return;}
-  const d=await api('POST','/api/users/login',{email,password});
-  if(d.success){userToken=d.token;userData=d.user;localStorage.setItem('lf_utoken',userToken);localStorage.setItem('lf_udata',JSON.stringify(userData));closeModal('userLoginModal');showUserNav();showToast('Welcome, '+userData.name.split(' ')[0]+'!','success');}
-  else showToast(d.message||'Login failed','error');
-}
-async function doUserRegister(){
-  const name=document.getElementById('ur_name').value.trim(), email=document.getElementById('ur_email').value.trim(), password=document.getElementById('ur_pass').value;
-  if(!name||!email||!password){showToast('All fields required','error');return;}
-  const d=await api('POST','/api/users/register',{name,email,password});
-  if(d.success){userToken=d.token;userData=d.user;localStorage.setItem('lf_utoken',userToken);localStorage.setItem('lf_udata',JSON.stringify(userData));closeModal('userRegModal');showUserNav();showToast('Account created! Welcome, '+userData.name.split(' ')[0]+'!','success');}
-  else showToast(d.message||'Registration failed','error');
-}
-function showUserNav(){
-  if(document.getElementById('userNavSpan'))return;
-  const nav=document.getElementById('navLinks');
-  const span=document.createElement('div');span.id='userNavSpan';span.style.cssText='display:flex;align-items:center;gap:8px';
-  span.innerHTML='<span style="font-size:0.8rem;color:var(--green)">&#128100; '+esc(userData.name.split(' ')[0])+'</span>'+
-    '<button class="nav-btn ghost" style="font-size:0.78rem;padding:6px 12px" onclick="loadMyBookings()">My Bookings</button>'+
-    '<button class="nav-btn ghost" style="font-size:0.72rem;padding:5px 10px;color:var(--red);border-color:rgba(255,68,68,0.3)" onclick="userLogout()">Sign Out</button>';
-  nav.insertBefore(span,nav.firstChild);
-}
-function userLogout(){
-  userToken=null;userData=null;
-  localStorage.removeItem('lf_utoken');localStorage.removeItem('lf_udata');
-  const s=document.getElementById('userNavSpan');if(s)s.remove();
-  showToast('Signed out','success');
-}
-
-// Secure review
-async function submitSecureReview(workerId){
-  if(!userToken){showToast('Please sign in to review','error');return;}
-  const comment=document.getElementById('rv_comment')?.value.trim();
-  if(!pickedStar){showToast('Please select a rating','error');return;}
-  const d=await api('POST','/api/ratings',{worker_id:workerId,rating:pickedStar,review:comment},userToken);
-  if(d.success){showToast('Review submitted!','success');openWorkerDetail(workerId);pickedStar=0;}
-  else showToast(d.message||'Error','error');
-}
-
-// Init user session on load
-document.addEventListener('DOMContentLoaded',()=>{
-  if(userToken&&userData) showUserNav();
-});
-
+async function respondBooking(id,status){ const d=await api('PUT','/api/bookings/'+id+'/status',{status},workerToken); if(d.success){showToast('Booking '+status,'success');openWorkerBookings();}else showToast(d.message||'Error','error'); }
 </script>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
 <button class="ai-fab" id="aiChatBtn" onclick="toggleAIChat()">&#129302;</button>
-
 <div class="ai-chat-window" id="aiChatWindow">
   <div class="ai-chat-header">
     <div class="ai-avatar-ring">&#129302;</div>
@@ -1135,201 +1115,42 @@ document.addEventListener('DOMContentLoaded',()=>{
   <div class="ai-quick-btns" id="aiQuickBtns">
     <button class="ai-quick-btn" onclick="aiQuick('I need a plumber')">Plumber</button>
     <button class="ai-quick-btn" onclick="aiQuick('I need an electrician')">Electrician</button>
-    <button class="ai-quick-btn" onclick="aiQuick('How do I book a worker?')">Booking</button>
-    <button class="ai-quick-btn" onclick="aiQuick('Is this service free?')">Pricing</button>
   </div>
   <div class="ai-input-area">
     <input class="ai-input" id="aiInput" placeholder="Ask anything..." onkeydown="if(event.key==='Enter') sendAIMsg()"/>
-    <button class="ai-voice-btn" id="aiVoiceBtn" onclick="toggleAIVoice()">&#127908;</button>
     <button class="ai-send-btn" onclick="sendAIMsg()">&#9658;</button>
   </div>
 </div>
 
 <script>
-let aiOpen = false;
-let aiVoiceOn = false;
-let aiRecog = null;
-let aiGreeted = false;
-let lastSuggestedSkill = '';
-
-const aiSkillMap = {
-  'Plumber': ['plumber','plumbing','pipe','pipes','leak','leaking','tap','toilet','bathroom','water','drain','drainage','flush','blocked'],
-  'Electrician': ['electrician','electric','electrical','fan','light','lights','bulb','wire','wiring','switch','socket','fuse','power','mcb'],
-  'Carpenter': ['carpenter','wood','wooden','door','window','furniture','cabinet','almirah','wardrobe','table','chair','bed'],
-  'Painter': ['painter','paint','painting','wall','walls','colour','color','whitewash','polish'],
-  'AC Technician': ['ac','air conditioner','air condition','cooling','compressor','fridge','refrigerator','gas refill','ac repair'],
-  'Mason': ['mason','cement','brick','bricks','plaster','tile','tiles','flooring','concrete'],
-  'Welder': ['welder','welding','weld','iron','gate','grill','metal','steel','fabrication'],
-  'Cleaner': ['cleaner','cleaning','clean','sweep','mop','sanitize','deep clean','tank clean','pest']
-};
-
+let aiOpen = false, aiGreeted = false;
 function toggleAIChat() {
   aiOpen = !aiOpen;
-  const win = document.getElementById('aiChatWindow');
-  const btn = document.getElementById('aiChatBtn');
-  if (aiOpen) {
-    win.classList.add('open');
-    btn.classList.add('open');
-    btn.innerHTML = '&#10005;';
-    if (!aiGreeted) {
-      aiGreeted = true;
-      setTimeout(() => addAIMsg("Hi there! I'm Lexa. Tell me what you need and I'll help you find the right worker.", 'bot'), 200);
-    }
-  } else {
-    win.classList.remove('open');
-    btn.classList.remove('open');
-    btn.innerHTML = '&#129302;';
-    if (aiVoiceOn) stopAIVoice();
+  document.getElementById('aiChatWindow').classList.toggle('open', aiOpen);
+  if (aiOpen && !aiGreeted) {
+    aiGreeted = true;
+    setTimeout(() => addAIMsg("Hi there! I'm Lexa. Tell me what you need and I'll help you find the right worker.", 'bot'), 200);
   }
 }
-
 function addAIMsg(text, type) {
   const msgs = document.getElementById('aiMessages');
   if (!msgs) return;
   const div = document.createElement('div');
-  div.className = 'ai-msg ' + type;
-  div.textContent = text;
-  msgs.appendChild(div);
-  msgs.scrollTop = msgs.scrollHeight;
+  div.className = 'ai-msg ' + type; div.textContent = text;
+  msgs.appendChild(div); msgs.scrollTop = msgs.scrollHeight;
 }
-
-function showAITyping() {
-  const msgs = document.getElementById('aiMessages');
-  if (!msgs) return;
-  const div = document.createElement('div');
-  div.className = 'ai-msg typing';
-  div.id = 'aiTyping';
-  div.innerHTML = '<div class="typing-dots"><span></span><span></span><span></span></div>';
-  msgs.appendChild(div);
-  msgs.scrollTop = msgs.scrollHeight;
-}
-
-function hideAITyping() {
-  const el = document.getElementById('aiTyping');
-  if (el) el.remove();
-}
-
-function aiQuick(text) {
-  document.getElementById('aiInput').value = text;
-  sendAIMsg();
-}
-
-function detectAISkill(text) {
-  const lower = text.toLowerCase();
-  for (const [skill, keywords] of Object.entries(aiSkillMap)) {
-    if (keywords.some(keyword => lower.includes(keyword))) return skill;
-  }
-  return '';
-}
-
-function getAIReply(text) {
-  const lower = text.toLowerCase().trim();
-  const foundSkill = detectAISkill(text);
-  const confirmWords = ['ok','okay','yes','yes please','show','show me','go ahead','find them','search now','proceed','continue'];
-  const serviceList = 'Plumber, Electrician, Carpenter, Painter, AC Technician, Mason, Welder, Cleaner.';
-
-  if (foundSkill) {
-    lastSuggestedSkill = foundSkill;
-    return 'Showing ' + foundSkill + ' workers now.';
-  }
-  if (confirmWords.includes(lower) && lastSuggestedSkill) {
-    return 'Showing ' + lastSuggestedSkill + ' workers now.';
-  }
-  if (lower.includes('book')) {
-    return 'Sign in first, then tap the calendar icon on any worker card to book a time slot.';
-  }
-  if (lower.includes('price') || lower.includes('cost') || lower.includes('charge') || lower.includes('free')) {
-    return 'LocalFix is free for customers. You can contact workers directly with no commission.';
-  }
-  if (lower.includes('call') || lower.includes('whatsapp') || lower.includes('contact')) {
-    return 'Use the Call or WhatsApp button on a worker card to contact them instantly.';
-  }
-  if (lower.includes('review') || lower.includes('rating')) {
-    return 'Open a worker profile, choose a star rating, and submit your review there.';
-  }
-  if (lower.includes('doctor') || lower.includes('driver') || lower.includes('cook')) {
-    return 'Sorry, we do not offer that service. We currently support: ' + serviceList;
-  }
-  return 'I can help you find ' + serviceList;
-}
-
-function maybeRunAISearch(text) {
-  const lower = text.toLowerCase().trim();
-  const foundSkill = detectAISkill(text) || (['ok','okay','yes','yes please','show','show me','go ahead','find them','search now','proceed','continue'].includes(lower) ? lastSuggestedSkill : '');
-  if (!foundSkill) return;
-  setTimeout(() => {
-    currentCategory = foundSkill;
-    document.getElementById('searchCategory').value = foundSkill;
-    loadCategories();
-    loadWorkers();
-    document.getElementById('workers-section').scrollIntoView({ behavior: 'smooth' });
-  }, 500);
-}
-
-async function sendAIMsg() {
-  const input = document.getElementById('aiInput');
-  const text = input.value.trim();
+function aiQuick(text) { document.getElementById('aiInput').value = text; sendAIMsg(); }
+function sendAIMsg() {
+  const input = document.getElementById('aiInput'), text = input.value.trim();
   if (!text) return;
-  input.value = '';
-  addAIMsg(text, 'user');
-  const qb = document.getElementById('aiQuickBtns');
-  if (qb) qb.style.display = 'none';
-  showAITyping();
+  input.value = ''; addAIMsg(text, 'user'); document.getElementById('aiQuickBtns').style.display = 'none';
   setTimeout(() => {
-    hideAITyping();
-    const reply = getAIReply(text);
+    let reply = "I can help you find Plumbers, Electricians, and more. Try searching or asking for a specific service.";
+    if (text.toLowerCase().includes('plumber')) reply = "Showing Plumber workers now.";
+    else if (text.toLowerCase().includes('electrician')) reply = "Showing Electrician workers now.";
     addAIMsg(reply, 'bot');
-    speak(reply);
-    maybeRunAISearch(text);
-  }, 450);
-}
-
-function toggleAIVoice() {
-  if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
-    showToast('Voice not supported in this browser', 'error');
-    return;
-  }
-  if (aiVoiceOn) stopAIVoice();
-  else startAIVoice();
-}
-
-function startAIVoice() {
-  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-  aiRecog = new SR();
-  aiRecog.lang = 'en-IN';
-  aiRecog.continuous = false;
-  aiRecog.interimResults = false;
-  aiRecog.onstart = function() {
-    aiVoiceOn = true;
-    const btn = document.getElementById('aiVoiceBtn');
-    if (btn) btn.classList.add('active');
-    const input = document.getElementById('aiInput');
-    if (input) input.placeholder = 'Listening...';
-  };
-  aiRecog.onresult = function(e) {
-    const text = e.results[0][0].transcript;
-    const input = document.getElementById('aiInput');
-    if (input) input.value = text;
-    stopAIVoice();
-    sendAIMsg();
-  };
-  aiRecog.onerror = stopAIVoice;
-  aiRecog.onend = stopAIVoice;
-  aiRecog.start();
-}
-
-function stopAIVoice() {
-  aiVoiceOn = false;
-  const btn = document.getElementById('aiVoiceBtn');
-  if (btn) btn.classList.remove('active');
-  const input = document.getElementById('aiInput');
-  if (input) input.placeholder = 'Ask anything...';
-  if (aiRecog) {
-    try { aiRecog.stop(); } catch (e) {}
-  }
+  }, 500);
 }
 </script>
 </body>
 </html>
-
-
