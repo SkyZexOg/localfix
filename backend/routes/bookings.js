@@ -2,7 +2,7 @@ const router = require('express').Router();
 const { pool } = require('../db');
 const { verifyUser, verifyWorker } = require('../middleware/auth');
 
-// POST /api/bookings — user books a worker
+// POST /api/bookings - user books a worker
 router.post('/', verifyUser, async (req, res) => {
   try {
     const { worker_id, booking_date, booking_time, note } = req.body;
@@ -29,7 +29,7 @@ router.post('/', verifyUser, async (req, res) => {
   }
 });
 
-// GET /api/bookings/my — user's bookings
+// GET /api/bookings/my - user's bookings
 router.get('/my', verifyUser, async (req, res) => {
   try {
     const [rows] = await pool.execute(
@@ -46,7 +46,7 @@ router.get('/my', verifyUser, async (req, res) => {
   }
 });
 
-// GET /api/bookings/worker — worker sees their bookings
+// GET /api/bookings/worker - worker sees their bookings
 router.get('/worker', verifyWorker, async (req, res) => {
   try {
     const [rows] = await pool.execute(
@@ -63,7 +63,7 @@ router.get('/worker', verifyWorker, async (req, res) => {
   }
 });
 
-// PUT /api/bookings/:id/status — worker accepts/rejects
+// PUT /api/bookings/:id/status - worker accepts/rejects
 router.put('/:id/status', verifyWorker, async (req, res) => {
   try {
     const { status } = req.body;
