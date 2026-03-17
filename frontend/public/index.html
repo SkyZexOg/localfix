@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>LocalFix — Find Verified Local Workers</title>
+  <title>LocalFix - Find Verified Local Workers</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Clash+Display:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
@@ -250,6 +250,53 @@
     .booking-badge.accepted { background:rgba(0,208,132,0.15); color:var(--green); }
     .booking-badge.rejected { background:rgba(255,68,68,0.15); color:var(--red); }
     .booking-badge.completed { background:rgba(74,158,255,0.15); color:var(--blue); }
+
+    .ai-fab {
+      position:fixed; bottom:24px; right:24px; z-index:9999; width:52px; height:52px;
+      border-radius:14px; background:var(--bg2); border:1px solid var(--border2); cursor:pointer;
+      display:flex; align-items:center; justify-content:center; font-size:1.3rem; transition:all 0.25s;
+      box-shadow:0 8px 32px rgba(0,0,0,0.4);
+    }
+    .ai-fab:hover { border-color:var(--orange); transform:translateY(-2px); box-shadow:0 12px 40px rgba(255,92,0,0.2); }
+    .ai-fab.open { background:var(--bg3); border-color:var(--orange); }
+    .ai-chat-window {
+      position:fixed; bottom:88px; right:24px; z-index:9998; width:360px; max-width:calc(100vw - 40px);
+      background:var(--bg2); border:1px solid var(--border2); border-radius:20px;
+      box-shadow:0 32px 80px rgba(0,0,0,0.6); display:none; flex-direction:column; overflow:hidden;
+    }
+    .ai-chat-window.open { display:flex; animation:slideUp 0.25s cubic-bezier(0.16,1,0.3,1); }
+    @keyframes slideUp { from{opacity:0;transform:translateY(16px)} to{opacity:1;transform:translateY(0)} }
+    .ai-chat-header { padding:16px 18px 14px; border-bottom:1px solid var(--border); display:flex; align-items:center; gap:12px; background:var(--bg3); }
+    .ai-avatar-ring { width:38px; height:38px; border-radius:10px; background:linear-gradient(135deg,var(--orange),var(--orange2)); display:flex; align-items:center; justify-content:center; font-size:1.1rem; flex-shrink:0; }
+    .ai-chat-info { flex:1; }
+    .ai-chat-name { font-weight:700; font-size:0.88rem; color:var(--text); letter-spacing:-0.2px; }
+    .ai-chat-status { font-size:0.68rem; color:var(--green); display:flex; align-items:center; gap:4px; margin-top:1px; }
+    .ai-status-dot { width:5px; height:5px; border-radius:50%; background:var(--green); animation:pulse 2s infinite; }
+    .ai-close-btn { background:var(--bg4); border:none; color:var(--text2); width:28px; height:28px; border-radius:7px; cursor:pointer; font-size:0.8rem; display:flex; align-items:center; justify-content:center; transition:all 0.15s; }
+    .ai-close-btn:hover { color:var(--text); background:var(--border); }
+    .ai-messages { height:300px; overflow-y:auto; padding:16px; display:flex; flex-direction:column; gap:10px; scroll-behavior:smooth; }
+    .ai-messages::-webkit-scrollbar { width:3px; }
+    .ai-messages::-webkit-scrollbar-thumb { background:var(--border); border-radius:3px; }
+    .ai-msg { max-width:80%; padding:10px 14px; font-size:0.84rem; line-height:1.55; }
+    .ai-msg.bot { background:var(--bg3); color:var(--text); border-radius:4px 14px 14px 14px; align-self:flex-start; border:1px solid var(--border); }
+    .ai-msg.user { background:var(--orange); color:#fff; border-radius:14px 4px 14px 14px; align-self:flex-end; }
+    .ai-msg.typing { background:var(--bg3); align-self:flex-start; border:1px solid var(--border); border-radius:4px 14px 14px 14px; padding:12px 16px; }
+    .typing-dots { display:flex; gap:4px; align-items:center; height:14px; }
+    .typing-dots span { width:6px; height:6px; border-radius:50%; background:var(--text3); animation:typingDot 1.2s infinite; }
+    .typing-dots span:nth-child(2) { animation-delay:0.2s; }
+    .typing-dots span:nth-child(3) { animation-delay:0.4s; }
+    @keyframes typingDot { 0%,60%,100%{transform:translateY(0);opacity:0.3} 30%{transform:translateY(-5px);opacity:1} }
+    .ai-quick-btns { padding:10px 14px 0; display:flex; gap:6px; flex-wrap:wrap; }
+    .ai-quick-btn { background:transparent; border:1px solid var(--border2); border-radius:20px; padding:5px 12px; font-size:0.72rem; color:var(--text2); cursor:pointer; transition:all 0.15s; font-family:'Plus Jakarta Sans',sans-serif; white-space:nowrap; }
+    .ai-quick-btn:hover { border-color:var(--orange); color:var(--orange); }
+    .ai-input-area { padding:12px 14px; border-top:1px solid var(--border); display:flex; gap:8px; align-items:center; }
+    .ai-input { flex:1; background:var(--bg3); border:1px solid var(--border); border-radius:10px; padding:9px 13px; color:var(--text); font-family:'Plus Jakarta Sans',sans-serif; font-size:0.84rem; outline:none; transition:border-color 0.2s; }
+    .ai-input:focus { border-color:var(--orange); }
+    .ai-input::placeholder { color:var(--text3); }
+    .ai-send-btn { background:var(--orange); border:none; border-radius:10px; width:36px; height:36px; cursor:pointer; display:flex; align-items:center; justify-content:center; color:#fff; flex-shrink:0; transition:background 0.2s; }
+    .ai-send-btn:hover { background:var(--orange2); }
+    .ai-voice-btn { background:var(--bg3); border:1px solid var(--border); border-radius:10px; width:36px; height:36px; cursor:pointer; display:flex; align-items:center; justify-content:center; font-size:0.95rem; flex-shrink:0; transition:all 0.2s; color:var(--text2); }
+    .ai-voice-btn.active { background:rgba(255,92,0,0.1); border-color:var(--orange); color:var(--orange); }
   </style>
 </head>
 <body>
@@ -278,7 +325,7 @@
   <div class="hero-content">
     <div class="hero-eyebrow"><span class="live-dot"></span>Verified professionals near you</div>
     <h1>Find Trusted <span class="hl">Local Workers</span><br>In Minutes</h1>
-    <p class="hero-sub">Plumbers, electricians, carpenters &amp; more — verified, rated, and ready to help right now.</p>
+    <p class="hero-sub">Plumbers, electricians, carpenters &amp; more - verified, rated, and ready to help right now.</p>
     <div id="voiceStatus"></div>
     <div class="search-wrap">
       <select id="searchCategory">
@@ -333,7 +380,7 @@
   <div class="steps-grid">
     <div class="step-card"><div class="step-num">01</div><div class="step-title">Search Your Need</div><div class="step-desc">Choose service, enter city or area to find verified workers instantly.</div></div>
     <div class="step-card"><div class="step-num">02</div><div class="step-title">See Verified Profiles</div><div class="step-desc">Browse workers with skills, experience, ratings, and verified badges.</div></div>
-    <div class="step-card"><div class="step-num">03</div><div class="step-title">Call or WhatsApp</div><div class="step-desc">Contact directly — no middleman, no commission. One tap away.</div></div>
+    <div class="step-card"><div class="step-num">03</div><div class="step-title">Call or WhatsApp</div><div class="step-desc">Contact directly - no middleman, no commission. One tap away.</div></div>
     <div class="step-card"><div class="step-num">04</div><div class="step-title">Job Done &#10003;</div><div class="step-desc">Worker arrives, fixes the problem. Leave a review to help others.</div></div>
   </div>
 </section>
@@ -341,7 +388,8 @@
 <footer>
   <div class="footer-logo">Local<span>Fix</span></div>
   <p style="color:var(--text2);font-size:0.85rem;margin-top:6px">Connecting people with trusted local professionals.</p>
-  <p style="color:var(--text3);font-size:0.78rem;margin-top:14px">&#169; 2025 LocalFix &#183; Designed by <span style="color:var(--orange);font-weight:600">Rajan Vishwakarma</span></p>
+  <p style="color:var(--text3);font-size:0.78rem;margin-top:14px">&#169; 2026 LocalFix &#183; Designed by <span style="color:var(--orange);font-weight:600">Rajan Vishwakarma</span></p>
+  <button onclick="openModal('adminLoginModal')" style="margin-top:14px;background:transparent;border:1px solid var(--border);border-radius:8px;padding:6px 16px;color:var(--text3);font-size:0.72rem;cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif;letter-spacing:0.3px;transition:all 0.2s" onmouseover="this.style.borderColor='var(--border2)';this.style.color='var(--text2)'" onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--text3)'">&#9881; Admin Access</button>
 </footer>
 
 <div class="toast" id="toast"></div>
@@ -423,7 +471,7 @@
   <div class="modal">
     <button class="modal-close" onclick="closeModal('registerModal')">&#10005;</button>
     <h2>Join as Worker</h2>
-    <p class="modal-sub">Create your profile — customers will find you directly.</p>
+    <p class="modal-sub">Create your profile - customers will find you directly.</p>
     <div id="registerFormWrap">
       <div class="form-row">
         <div class="form-group"><label class="form-label">Full Name *</label><input class="form-input" id="r_name" placeholder="Ramesh Kumar"/></div>
@@ -460,22 +508,8 @@
     <h2>Worker Login</h2>
     <p class="modal-sub">Manage your availability and profile.</p>
     <div class="form-group"><label class="form-label">Mobile Number</label><input class="form-input" id="l_phone" placeholder="9XXXXXXXXX" maxlength="10"/></div>
-    <div style="display:flex;gap:8px;margin:6px 0 12px">
-      <button class="ftab active" id="loginModePass" onclick="setWorkerLoginMode('password')" style="flex:1;justify-content:center">Password</button>
-      <button class="ftab" id="loginModeOtp" onclick="setWorkerLoginMode('otp')" style="flex:1;justify-content:center">OTP</button>
-    </div>
-
-    <div id="workerLoginPassword">
-      <div class="form-group"><label class="form-label">Password</label><input class="form-input" id="l_pass" type="password" placeholder="Your password"/></div>
-      <button class="form-submit" onclick="doLogin()">Login &#8594;</button>
-    </div>
-
-    <div id="workerLoginOtp" style="display:none">
-      <button class="form-submit" id="otpSendBtn" style="margin-bottom:10px" onclick="sendWorkerOtp()">Send OTP &#8594;</button>
-      <div class="form-group"><label class="form-label">Enter OTP</label><input class="form-input" id="l_otp" inputmode="numeric" placeholder="6-digit code" maxlength="8"/></div>
-      <button class="form-submit" id="otpVerifyBtn" onclick="verifyWorkerOtp()">Verify & Login &#8594;</button>
-      <p style="text-align:center;margin-top:10px;font-size:0.75rem;color:var(--text3)">Didn’t receive? <a href="#" style="color:var(--orange);font-weight:600" onclick="sendWorkerOtp();return false;">Resend</a></p>
-    </div>
+    <div class="form-group"><label class="form-label">Password</label><input class="form-input" id="l_pass" type="password" placeholder="Your password"/></div>
+    <button class="form-submit" onclick="doLogin()">Login &#8594;</button>
     <p style="text-align:center;margin-top:12px;font-size:0.82rem;color:var(--text2)">New here? <a href="#" style="color:var(--orange);font-weight:600" onclick="switchModal('loginModal','registerModal')">Register as worker</a></p>
   </div>
 </div>
@@ -498,7 +532,7 @@
       <div style="background:var(--bg3);border:1px solid var(--border);border-radius:12px;padding:12px;text-align:center"><div style="font-family:'Clash Display',sans-serif;font-size:1.5rem;font-weight:700;color:var(--orange)" id="wd_views">&#8212;</div><div style="font-size:0.65rem;color:var(--text3);margin-top:2px;text-transform:uppercase;letter-spacing:0.5px">Views</div></div>
       <div style="background:var(--bg3);border:1px solid var(--border);border-radius:12px;padding:12px;text-align:center"><div style="font-family:'Clash Display',sans-serif;font-size:1.5rem;font-weight:700;color:var(--orange)" id="wd_calls">&#8212;</div><div style="font-size:0.65rem;color:var(--text3);margin-top:2px;text-transform:uppercase;letter-spacing:0.5px">Calls</div></div>
       <div style="background:var(--bg3);border:1px solid var(--border);border-radius:12px;padding:12px;text-align:center"><div style="font-family:'Clash Display',sans-serif;font-size:1.5rem;font-weight:700;color:var(--orange)" id="wd_wa">&#8212;</div><div style="font-size:0.65rem;color:var(--text3);margin-top:2px;text-transform:uppercase;letter-spacing:0.5px">WhatsApp</div></div>
-          </div>
+    </div>
     <button class="nav-btn ghost" style="width:100%;margin-bottom:12px;padding:11px" onclick="openWorkerBookings()">&#128197; My Booking Requests</button>
     <div class="form-group"><label class="form-label">About</label><textarea class="form-textarea" id="wd_about"></textarea></div>
     <div class="form-row">
@@ -708,7 +742,7 @@ async function submitReview(workerId) {
   else showToast(d.message||'Error','error');
 }
 
-// ── CALL & WHATSAPP FIX — phone fetched from API ──
+// Call and WhatsApp
 async function trackAndCall(id) {
   await api('POST','/api/workers/'+id+'/track',{type:'call'});
   const d = await api('GET','/api/workers/'+id);
@@ -743,51 +777,6 @@ async function doLogin() {
   const d=await api('POST','/api/auth/login',{phone,password});
   if(d.success){ workerToken=d.token; workerData=d.worker; localStorage.setItem('lf_wtoken',workerToken); localStorage.setItem('lf_wdata',JSON.stringify(workerData)); closeModal('loginModal'); showWorkerNav(); openWorkerDash(); showToast('Welcome back, '+workerData.name.split(' ')[0]+'!','success'); }
   else showToast(d.message||'Login failed','error');
-}
-
-function setWorkerLoginMode(mode){
-  const passBtn=document.getElementById('loginModePass');
-  const otpBtn=document.getElementById('loginModeOtp');
-  const passWrap=document.getElementById('workerLoginPassword');
-  const otpWrap=document.getElementById('workerLoginOtp');
-  if(mode==='otp'){
-    otpBtn.classList.add('active'); passBtn.classList.remove('active');
-    otpWrap.style.display='block'; passWrap.style.display='none';
-    const p=document.getElementById('l_phone'); if(p) p.focus();
-  } else {
-    passBtn.classList.add('active'); otpBtn.classList.remove('active');
-    passWrap.style.display='block'; otpWrap.style.display='none';
-    const pw=document.getElementById('l_pass'); if(pw) pw.focus();
-  }
-}
-  async function sendWorkerOtp(){
-  const phone=document.getElementById('l_phone').value.trim();
-  if(!phone){ showToast('Enter mobile number first','error'); return; }
-  const btn=document.getElementById('otpSendBtn');
-  btn.disabled=true; btn.textContent='Sending...';
-  const d=await api('POST','/api/auth/otp/send',{phone});
-  btn.disabled=false; btn.textContent='Send OTP →';
-  if(d.success){
-    showToast(d.devOtp?('OTP sent (dev): '+d.devOtp):'OTP sent to your number','success');
-    const o=document.getElementById('l_otp'); if(o) o.focus();
-  } else showToast(d.message||'Could not send OTP','error');
-}
-
-async function verifyWorkerOtp(){
-  const phone=document.getElementById('l_phone').value.trim();
-  const code=document.getElementById('l_otp').value.trim();
-  if(!phone||!code){ showToast('Phone and OTP required','error'); return; }
-  const btn=document.getElementById('otpVerifyBtn');
-  btn.disabled=true; btn.textContent='Verifying...';
-  const d=await api('POST','/api/auth/otp/verify',{phone,code});
-  btn.disabled=false; btn.textContent='Verify & Login →';
-  if(d.success){
-    workerToken=d.token; workerData=d.worker;
-    localStorage.setItem('lf_wtoken',workerToken); localStorage.setItem('lf_wdata',JSON.stringify(workerData));
-    closeModal('loginModal'); showWorkerNav(); openWorkerDash();
-    showToast('Welcome back, '+workerData.name.split(' ')[0]+'!','success');
-    document.getElementById('l_otp').value='';
-  } else showToast(d.message||'OTP login failed','error');
 }
 
 function showWorkerNav() {
@@ -904,7 +893,7 @@ function showToast(msg,type){ type=type||'success'; const t=document.getElementB
 function esc(str){ if(!str) return ''; return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
 function escJsSingle(str){ return esc(str).replace(/'/g,'&#39;'); }
 
-// ══ VOICE ASSISTANT ══
+// Voice assistant
 const SKILL_KEYWORDS = {
   'Plumber':['pipe','water','leak','tap','flush','toilet','bathroom','plumb'],
   'Electrician':['electric','fan','light','wire','switch','power','current','bulb','socket','fuse'],
@@ -936,7 +925,7 @@ function processVoice(text){
   if(detected){
     currentCategory=detected; document.getElementById('searchCategory').value=detected;
     speak('I found '+detected+'s near you. Showing results now.');
-    showVoiceStatus('&#10003; Detected: '+detected+' — searching...');
+    showVoiceStatus('&#10003; Detected: '+detected+' - searching...');
     loadCategories(); loadWorkers();
     setTimeout(()=>{document.getElementById('workers-section').scrollIntoView({behavior:'smooth'});hideVoiceStatus();},2500);
   } else {
@@ -949,7 +938,7 @@ function speak(text){if(!('speechSynthesis' in window))return;window.speechSynth
 function showVoiceStatus(msg){const el=document.getElementById('voiceStatus');el.innerHTML=msg;el.style.display='block';}
 function hideVoiceStatus(){document.getElementById('voiceStatus').style.display='none';}
 
-// ══ NEARBY WORKERS ══
+// Nearby workers
 let userToken=localStorage.getItem('lf_utoken')||null;
 let userData=JSON.parse(localStorage.getItem('lf_udata')||'null');
 
@@ -999,7 +988,7 @@ function renderNearbyWorkers(workers){
   }).join('');
 }
 
-// ══ MAP ══
+// Map
 let mapInstance=null;
 function openModal(id){
   document.getElementById(id).classList.add('open');
@@ -1018,7 +1007,7 @@ function initMap(){
       api('GET','/api/nearby?lat='+latitude+'&lng='+longitude+'&radius=30').then(d=>{
         if(d.success) d.data.forEach(w=>{
           if(!w.lat||!w.lng)return;
-          const popup='<b>'+esc(w.name)+'</b><br><span style="color:#FF5C00">'+esc(w.skill)+'</span> &bull; '+esc(w.city)+'<br>&#11088; '+parseFloat(w.rating||0).toFixed(1)+' &bull; '+w.distance.toFixed(1)+' km<br><button onclick="openWorkerDetail('+w.id+');closeModal(\\'mapModal\\')" style="margin-top:6px;background:#FF5C00;color:#fff;border:none;padding:4px 10px;border-radius:6px;cursor:pointer;font-size:0.8rem">View Profile</button>';
+          const popup='<b>'+esc(w.name)+'</b><br><span style="color:#FF5C00">'+esc(w.skill)+'</span> &bull; '+esc(w.city)+'<br>&#11088; '+parseFloat(w.rating||0).toFixed(1)+' &bull; '+w.distance.toFixed(1)+' km<br><button onclick="openWorkerDetail('+w.id+');closeModal(\'mapModal\')" style="margin-top:6px;background:#FF5C00;color:#fff;border:none;padding:4px 10px;border-radius:6px;cursor:pointer;font-size:0.8rem">View Profile</button>';
           L.marker([parseFloat(w.lat),parseFloat(w.lng)]).addTo(mapInstance).bindPopup(popup);
         });
       });
@@ -1026,13 +1015,16 @@ function initMap(){
   }
 }
 
-// ══ BOOKING ══
+// Booking
 function openBooking(workerId,workerName){
   if(!userToken){showToast('Please sign in to book','error');openModal('userLoginModal');return;}
   document.getElementById('booking_worker_id').value=workerId;
   document.getElementById('booking_worker_name').textContent='Booking for: '+workerName;
   const today=new Date().toISOString().split('T')[0];
   document.getElementById('b_date').min=today;
+  document.getElementById('b_date').value='';
+  document.getElementById('b_time').value='';
+  document.getElementById('b_note').value='';
   openModal('bookingModal');
 }
 async function doBooking(){
@@ -1069,8 +1061,8 @@ async function openWorkerBookings(){
     '<div style="font-size:0.78rem;color:var(--text2);margin-top:4px">'+b.booking_date+' at '+b.booking_time+'</div>'+
     (b.note?'<div style="font-size:0.78rem;color:var(--text3);margin-top:2px">'+esc(b.note)+'</div>':'')+
     '</div><span class="booking-badge '+b.status+'">'+b.status.toUpperCase()+'</span>'+
-    (b.status==='pending'?'<div class="admin-actions"><button class="admin-btn approve" onclick="respondBooking('+b.id+',\\'accepted\\')">&#10003; Accept</button><button class="admin-btn delete" onclick="respondBooking('+b.id+',\\'rejected\\')">&#10005; Reject</button></div>':
-    (b.status==='accepted'?'<button class="admin-btn approve" onclick="respondBooking('+b.id+',\\'completed\\')">&#9989; Done</button>':''))+
+    (b.status==='pending'?'<div class="admin-actions"><button class="admin-btn approve" onclick="respondBooking('+b.id+',\'accepted\')">&#10003; Accept</button><button class="admin-btn delete" onclick="respondBooking('+b.id+',\'rejected\')">&#10005; Reject</button></div>':
+    (b.status==='accepted'?'<button class="admin-btn approve" onclick="respondBooking('+b.id+',\'completed\')">&#9989; Done</button>':''))+
     '</div>'
   ).join('');
 }
@@ -1079,7 +1071,7 @@ async function respondBooking(id,status){
   if(d.success){showToast('Booking '+status,'success');openWorkerBookings();}else showToast(d.message||'Error','error');
 }
 
-// ══ USER AUTH ══
+// User auth
 async function doUserLogin(){
   const email=document.getElementById('ul_email').value.trim(), password=document.getElementById('ul_pass').value;
   if(!email||!password){showToast('Email and password required','error');return;}
@@ -1110,7 +1102,7 @@ function userLogout(){
   showToast('Signed out','success');
 }
 
-// ══ SECURE REVIEW ══
+// Secure review
 async function submitSecureReview(workerId){
   if(!userToken){showToast('Please sign in to review','error');return;}
   const comment=document.getElementById('rv_comment')?.value.trim();
@@ -1127,5 +1119,217 @@ document.addEventListener('DOMContentLoaded',()=>{
 
 </script>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+<button class="ai-fab" id="aiChatBtn" onclick="toggleAIChat()">&#129302;</button>
+
+<div class="ai-chat-window" id="aiChatWindow">
+  <div class="ai-chat-header">
+    <div class="ai-avatar-ring">&#129302;</div>
+    <div class="ai-chat-info">
+      <div class="ai-chat-name">Lexa - AI Assistant</div>
+      <div class="ai-chat-status"><span class="ai-status-dot"></span>Online now</div>
+    </div>
+    <button class="ai-close-btn" onclick="toggleAIChat()">&#10005;</button>
+  </div>
+  <div class="ai-messages" id="aiMessages"></div>
+  <div class="ai-quick-btns" id="aiQuickBtns">
+    <button class="ai-quick-btn" onclick="aiQuick('I need a plumber')">Plumber</button>
+    <button class="ai-quick-btn" onclick="aiQuick('I need an electrician')">Electrician</button>
+    <button class="ai-quick-btn" onclick="aiQuick('How do I book a worker?')">Booking</button>
+    <button class="ai-quick-btn" onclick="aiQuick('Is this service free?')">Pricing</button>
+  </div>
+  <div class="ai-input-area">
+    <input class="ai-input" id="aiInput" placeholder="Ask anything..." onkeydown="if(event.key==='Enter') sendAIMsg()"/>
+    <button class="ai-voice-btn" id="aiVoiceBtn" onclick="toggleAIVoice()">&#127908;</button>
+    <button class="ai-send-btn" onclick="sendAIMsg()">&#9658;</button>
+  </div>
+</div>
+
+<script>
+let aiOpen = false;
+let aiVoiceOn = false;
+let aiRecog = null;
+let aiGreeted = false;
+let lastSuggestedSkill = '';
+
+const aiSkillMap = {
+  'Plumber': ['plumber','plumbing','pipe','pipes','leak','leaking','tap','toilet','bathroom','water','drain','drainage','flush','blocked'],
+  'Electrician': ['electrician','electric','electrical','fan','light','lights','bulb','wire','wiring','switch','socket','fuse','power','mcb'],
+  'Carpenter': ['carpenter','wood','wooden','door','window','furniture','cabinet','almirah','wardrobe','table','chair','bed'],
+  'Painter': ['painter','paint','painting','wall','walls','colour','color','whitewash','polish'],
+  'AC Technician': ['ac','air conditioner','air condition','cooling','compressor','fridge','refrigerator','gas refill','ac repair'],
+  'Mason': ['mason','cement','brick','bricks','plaster','tile','tiles','flooring','concrete'],
+  'Welder': ['welder','welding','weld','iron','gate','grill','metal','steel','fabrication'],
+  'Cleaner': ['cleaner','cleaning','clean','sweep','mop','sanitize','deep clean','tank clean','pest']
+};
+
+function toggleAIChat() {
+  aiOpen = !aiOpen;
+  const win = document.getElementById('aiChatWindow');
+  const btn = document.getElementById('aiChatBtn');
+  if (aiOpen) {
+    win.classList.add('open');
+    btn.classList.add('open');
+    btn.innerHTML = '&#10005;';
+    if (!aiGreeted) {
+      aiGreeted = true;
+      setTimeout(() => addAIMsg("Hi there! I'm Lexa. Tell me what you need and I'll help you find the right worker.", 'bot'), 200);
+    }
+  } else {
+    win.classList.remove('open');
+    btn.classList.remove('open');
+    btn.innerHTML = '&#129302;';
+    if (aiVoiceOn) stopAIVoice();
+  }
+}
+
+function addAIMsg(text, type) {
+  const msgs = document.getElementById('aiMessages');
+  if (!msgs) return;
+  const div = document.createElement('div');
+  div.className = 'ai-msg ' + type;
+  div.textContent = text;
+  msgs.appendChild(div);
+  msgs.scrollTop = msgs.scrollHeight;
+}
+
+function showAITyping() {
+  const msgs = document.getElementById('aiMessages');
+  if (!msgs) return;
+  const div = document.createElement('div');
+  div.className = 'ai-msg typing';
+  div.id = 'aiTyping';
+  div.innerHTML = '<div class="typing-dots"><span></span><span></span><span></span></div>';
+  msgs.appendChild(div);
+  msgs.scrollTop = msgs.scrollHeight;
+}
+
+function hideAITyping() {
+  const el = document.getElementById('aiTyping');
+  if (el) el.remove();
+}
+
+function aiQuick(text) {
+  document.getElementById('aiInput').value = text;
+  sendAIMsg();
+}
+
+function detectAISkill(text) {
+  const lower = text.toLowerCase();
+  for (const [skill, keywords] of Object.entries(aiSkillMap)) {
+    if (keywords.some(keyword => lower.includes(keyword))) return skill;
+  }
+  return '';
+}
+
+function getAIReply(text) {
+  const lower = text.toLowerCase().trim();
+  const foundSkill = detectAISkill(text);
+  const confirmWords = ['ok','okay','yes','yes please','show','show me','go ahead','find them','search now','proceed','continue'];
+  const serviceList = 'Plumber, Electrician, Carpenter, Painter, AC Technician, Mason, Welder, Cleaner.';
+
+  if (foundSkill) {
+    lastSuggestedSkill = foundSkill;
+    return 'Showing ' + foundSkill + ' workers now.';
+  }
+  if (confirmWords.includes(lower) && lastSuggestedSkill) {
+    return 'Showing ' + lastSuggestedSkill + ' workers now.';
+  }
+  if (lower.includes('book')) {
+    return 'Sign in first, then tap the calendar icon on any worker card to book a time slot.';
+  }
+  if (lower.includes('price') || lower.includes('cost') || lower.includes('charge') || lower.includes('free')) {
+    return 'LocalFix is free for customers. You can contact workers directly with no commission.';
+  }
+  if (lower.includes('call') || lower.includes('whatsapp') || lower.includes('contact')) {
+    return 'Use the Call or WhatsApp button on a worker card to contact them instantly.';
+  }
+  if (lower.includes('review') || lower.includes('rating')) {
+    return 'Open a worker profile, choose a star rating, and submit your review there.';
+  }
+  if (lower.includes('doctor') || lower.includes('driver') || lower.includes('cook')) {
+    return 'Sorry, we do not offer that service. We currently support: ' + serviceList;
+  }
+  return 'I can help you find ' + serviceList;
+}
+
+function maybeRunAISearch(text) {
+  const lower = text.toLowerCase().trim();
+  const foundSkill = detectAISkill(text) || (['ok','okay','yes','yes please','show','show me','go ahead','find them','search now','proceed','continue'].includes(lower) ? lastSuggestedSkill : '');
+  if (!foundSkill) return;
+  setTimeout(() => {
+    currentCategory = foundSkill;
+    document.getElementById('searchCategory').value = foundSkill;
+    loadCategories();
+    loadWorkers();
+    document.getElementById('workers-section').scrollIntoView({ behavior: 'smooth' });
+  }, 500);
+}
+
+async function sendAIMsg() {
+  const input = document.getElementById('aiInput');
+  const text = input.value.trim();
+  if (!text) return;
+  input.value = '';
+  addAIMsg(text, 'user');
+  const qb = document.getElementById('aiQuickBtns');
+  if (qb) qb.style.display = 'none';
+  showAITyping();
+  setTimeout(() => {
+    hideAITyping();
+    const reply = getAIReply(text);
+    addAIMsg(reply, 'bot');
+    speak(reply);
+    maybeRunAISearch(text);
+  }, 450);
+}
+
+function toggleAIVoice() {
+  if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
+    showToast('Voice not supported in this browser', 'error');
+    return;
+  }
+  if (aiVoiceOn) stopAIVoice();
+  else startAIVoice();
+}
+
+function startAIVoice() {
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  aiRecog = new SR();
+  aiRecog.lang = 'en-IN';
+  aiRecog.continuous = false;
+  aiRecog.interimResults = false;
+  aiRecog.onstart = function() {
+    aiVoiceOn = true;
+    const btn = document.getElementById('aiVoiceBtn');
+    if (btn) btn.classList.add('active');
+    const input = document.getElementById('aiInput');
+    if (input) input.placeholder = 'Listening...';
+  };
+  aiRecog.onresult = function(e) {
+    const text = e.results[0][0].transcript;
+    const input = document.getElementById('aiInput');
+    if (input) input.value = text;
+    stopAIVoice();
+    sendAIMsg();
+  };
+  aiRecog.onerror = stopAIVoice;
+  aiRecog.onend = stopAIVoice;
+  aiRecog.start();
+}
+
+function stopAIVoice() {
+  aiVoiceOn = false;
+  const btn = document.getElementById('aiVoiceBtn');
+  if (btn) btn.classList.remove('active');
+  const input = document.getElementById('aiInput');
+  if (input) input.placeholder = 'Ask anything...';
+  if (aiRecog) {
+    try { aiRecog.stop(); } catch (e) {}
+  }
+}
+</script>
 </body>
 </html>
+
+
