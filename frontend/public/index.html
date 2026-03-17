@@ -1342,132 +1342,126 @@ function aiQuick(text) {
 async function callClaudeAI(userMsg) {
   showTypingIndicator();
 
-  // Build conversation history
   aiMessages_history.push({ role: 'user', content: userMsg });
+  if (aiMessages_history.length > 10) aiMessages_history = aiMessages_history.slice(-10);
 
-  // Keep only last 6 messages to save tokens
-  if (aiMessages_history.length > 6) {
-    aiMessages_history = aiMessages_history.slice(-6);
+  var skillMap = {
+    'Plumber': ['plumber','plumbing','pipe','pipes','leak','leaking','tap','toilet','bathroom','water','drain','drainage','sewage','flush','blockage','blocked','overflow','tank','motor pump','pump','bore','borewell','geyser','hot water','cold water','dripping','burst pipe'],
+    'Electrician': ['electrician','electric','electrical','fan','fans','ceiling fan','light','lights','bulb','bulbs','wire','wiring','switch','switches','power','current','socket','fuse','short circuit','mcb','tripping','meter','inverter','generator','panel','board','fitting','tube light','led'],
+    'Carpenter': ['carpenter','carpentry','wood','wooden','door','doors','window','windows','furniture','cabinet','almirah','wardrobe','table','chair','bed','shelf','shelves','cupboard','sofa','repair wood','plywood','hinge','lock','sliding'],
+    'Painter': ['painter','painting','paint','painted','wall','walls','ceiling','colour','color','whitewash','distemper','emulsion','texture','waterproof','exterior','interior','touch up','polish','varnish','spray'],
+    'AC Technician': ['ac','air condition','aircon','air conditioner','cooling','cool','compressor','refrigerator','fridge','freezer','gas refill','ac service','ac repair','ac not working','split ac','window ac','ac cleaning','ac gas','thermostat'],
+    'Mason': ['mason','masonry','cement','brick','bricks','plaster','plastering','construction','tile','tiles','tiling','flooring','slab','concrete','demolition','wall crack','marble','granite','bathroom tiles','kitchen tiles','waterproofing','roof leak','terrace'],
+    'Welder': ['welder','welding','iron','iron work','gate','grill','grills','metal','steel','fabrication','railing','staircase','shed','aluminium','window grill','door frame','iron door','cutting','grinding'],
+    'Cleaner': ['cleaner','cleaning','clean','sweep','mop','sanitize','deep clean','house clean','office clean','sofa clean','carpet clean','pest control','termite','cockroach','rats','mosquito','fumigation','tank clean','water tank','garbage']
+  };
+
+  var confirmWords = ['ok show','show me','yes show','find them','search now','go ahead','show','yes please','show results','ok search','yep','sure','okay show','display','list them','get them','bring','fetch','load','ok','okay','alright','done','proceed','continue','next','haan','dikha','dhundo'];
+  var lower = userMsg.toLowerCase();
+  var isConfirm = confirmWords.some(function(w){ return lower === w || lower.indexOf(w) >= 0; });
+
+  var foundSkill = '';
+  for (var skill in skillMap) {
+    var kws = skillMap[skill];
+    for (var i = 0; i < kws.length; i++) {
+      if (lower.indexOf(kws[i]) >= 0) { foundSkill = skill; break; }
+    }
+    if (foundSkill) break;
   }
 
-  var systemPrompt = 'You are Lexa, a smart and witty AI assistant for LocalFix 2014 a local service marketplace in Gorakhpur, India. You have a warm, natural personality and NEVER give repetitive or robotic answers. Rules: 1) Reply in natural fluent English only, max 2 sentences, be conversational and occasionally funny. 2) NEVER say the same thing twice in a conversation, always vary your wording. 3) Services: Plumber, Electrician, Carpenter, Painter, AC Technician, Mason, Welder, Cleaner. 4) For service requests: sound genuinely excited, say what you are doing e.g. On it! Pulling up the best electricians right now. 5) For unavailable services like doctor or cook: decline warmly and creatively list our 8 services. 6) For greetings or small talk: respond warmly and ask what they need. 7) For booking questions: sign in first then tap calendar icon on any worker card. 8) For pricing: completely free for customers, zero commission. 9) For frustration or complaints: empathize genuinely and offer help. 10) For unclear messages: ask a smart clarifying question. 11) For ok or yes or show: if context has a service, confirm searching for it specifically. 12) Always sound like a real helpful person, never a chatbot.';
+  if (!foundSkill && isConfirm && aiMessages_history.length > 1) {
+    var prevMsgs = aiMessages_history.map(function(m){ return m.content.toLowerCase(); }).join(' ');
+    for (var skill in skillMap) {
+      var kws = skillMap[skill];
+      for (var i = 0; i < kws.length; i++) {
+        if (prevMsgs.indexOf(kws[i]) >= 0) { foundSkill = skill; break; }
+      }
+      if (foundSkill) break;
+    }
+  }
 
+  // Try backend AI first
   try {
-    var response = await fetch('https://api.anthropic.com/v1/messages', {
+    var response = await fetch(API + '/api/ai/chat', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        model: 'claude-haiku-4-5-20251001',
-        max_tokens: 120,
-        system: systemPrompt,
-        messages: aiMessages_history
-      })
+      body: JSON.stringify({ messages: aiMessages_history })
     });
-
     var data = await response.json();
     removeTypingIndicator();
 
     var reply = '';
-    if (data.content && data.content[0] && data.content[0].text) {
-      reply = data.content[0].text.trim();
+    if (data.success && data.reply) {
+      reply = data.reply;
     } else {
-      reply = "I'm here to help! Tell me what service you need - plumber, electrician, or any other worker.";
+      reply = getFallbackReply(userMsg);
     }
 
     aiMessages_history.push({ role: 'assistant', content: reply });
     addAIMsg(reply, 'bot');
     speak_ai(reply);
 
-    // Auto search: detect skill OR follow-up confirmations
-    var lower = userMsg.toLowerCase();
-    var skillMap = {
-      'Plumber': ['plumber','plumbing','pipe','pipes','leak','leaking','tap','toilet','bathroom','water','drain','drainage','sewage','flush','blockage','blocked','overflow','tank','motor pump','pump','bore','borewell','geyser','hot water','cold water','dripping','burst pipe'],
-      'Electrician': ['electrician','electric','electrical','fan','fans','ceiling fan','light','lights','bulb','bulbs','wire','wiring','switch','switches','power','current','socket','fuse','short circuit','mcb','tripping','meter','inverter','generator','ac wiring','panel','board','fitting','installation','tube light','led','repair'],
-      'Carpenter': ['carpenter','carpentry','wood','wooden','door','doors','window','windows','furniture','cabinet','almirah','wardrobe','table','chair','bed','shelf','shelves','cupboard','sofa','repair wood','wood work','ply','plywood','fitting','hinge','lock','sliding'],
-      'Painter': ['painter','painting','paint','painted','wall','walls','ceiling','colour','color','whitewash','distemper','emulsion','texture','waterproof','exterior','interior','touch up','polish','varnish','wood paint','spray'],
-      'AC Technician': ['ac','air condition','aircon','air conditioner','cooling','cool','compressor','refrigerator','fridge','freezer','gas refill','ac service','ac repair','ac not working','ac installation','split ac','window ac','inverter ac','ac cleaning','ac gas','pcb','thermostat'],
-      'Mason': ['mason','masonry','cement','brick','bricks','plaster','plastering','construction','tile','tiles','tiling','flooring','slab','concrete','rcc','demolition','wall crack','repair wall','marble','granite','bathroom tiles','kitchen tiles','waterproofing','roof leak','terrace'],
-      'Welder': ['welder','welding','iron','iron work','gate','grill','grills','metal','steel','fabrication','railing','staircase','shed','tin shed','aluminium','window grill','door frame','iron door','cutting','grinding'],
-      'Cleaner': ['cleaner','cleaning','clean','sweep','mop','sanitize','sanitisation','deep clean','house clean','office clean','sofa clean','carpet clean','pest control','termite','cockroach','rats','mosquito','fumigation','tank clean','water tank','drainage clean','garbage']
-    };
-
-    // Check follow-up confirmations — use last searched skill
-    var confirmWords = ['ok show','show me','yes show','find them','search now','go ahead','show','yes please','show results','ok search','yep','sure','okay show','display','list them','get them','bring','fetch','load','ok','okay','alright','done','proceed','continue','next'];
-    var isConfirm = confirmWords.some(function(w){ return lower === w || lower.indexOf(w) >= 0; });
-
-    var foundSkill = '';
-    for (var skill in skillMap) {
-      var kws = skillMap[skill];
-      for (var i = 0; i < kws.length; i++) {
-        if (lower.indexOf(kws[i]) >= 0) { foundSkill = skill; break; }
-      }
-      if (foundSkill) break;
-    }
-
-    // If confirmation + previous context had a skill, use that skill
-    if (!foundSkill && isConfirm && aiMessages_history.length > 1) {
-      var prevMsgs = aiMessages_history.map(function(m){ return m.content.toLowerCase(); }).join(' ');
-      for (var skill in skillMap) {
-        var kws = skillMap[skill];
-        for (var i = 0; i < kws.length; i++) {
-          if (prevMsgs.indexOf(kws[i]) >= 0) { foundSkill = skill; break; }
-        }
-        if (foundSkill) break;
-      }
-    }
-
-    if (foundSkill) {
-      setTimeout(function() {
-        currentCategory = foundSkill;
-        document.getElementById('searchCategory').value = foundSkill;
-        loadCategories();
-        loadWorkers();
-        document.getElementById('workers-section').scrollIntoView({ behavior: 'smooth' });
-      }, 800);
-    } else if (isConfirm && !foundSkill) {
-      // Generic confirm — just scroll to workers
-      setTimeout(function() {
-        loadWorkers();
-        document.getElementById('workers-section').scrollIntoView({ behavior: 'smooth' });
-      }, 800);
-    }
-
   } catch(err) {
     removeTypingIndicator();
-    var fallback = getFallbackReply(userMsg);
-    addAIMsg(fallback, 'bot');
-    speak_ai(fallback);
+    var reply = getFallbackReply(userMsg);
+    aiMessages_history.push({ role: 'assistant', content: reply });
+    addAIMsg(reply, 'bot');
+    speak_ai(reply);
+  }
+
+  // Auto-search skill
+  if (foundSkill) {
+    setTimeout(function() {
+      currentCategory = foundSkill;
+      document.getElementById('searchCategory').value = foundSkill;
+      loadCategories(); loadWorkers();
+      document.getElementById('workers-section').scrollIntoView({ behavior: 'smooth' });
+    }, 800);
+  } else if (isConfirm && !foundSkill) {
+    setTimeout(function() {
+      loadWorkers();
+      document.getElementById('workers-section').scrollIntoView({ behavior: 'smooth' });
+    }, 800);
   }
 }
 
 function getFallbackReply(msg) {
   var lower = msg.toLowerCase();
-  var ourServices = 'We provide: Plumber, Electrician, Carpenter, Painter, AC Technician, Mason, Welder, Cleaner.';
+  // Service responses - multiple variants per service to avoid repetition
+  var plumberReplies = ["Your plumber search is live! Scroll down to see verified plumbers near you.", "On it — pulling up top-rated plumbers in your area!", "Great, I've got plumbers lined up for you. Check the list below!"];
+  var electricianReplies = ["Searching for electricians near you right now!", "On it! Fetching the best electricians in Gorakhpur.", "Found some great electricians — scroll down to see them!"];
+  var carpenterReplies = ["Looking up skilled carpenters in your area!", "On it — finding top carpenters near you!", "Great choice! Showing verified carpenters below."];
+  var painterReplies = ["Searching for painters near you!", "On it — finding skilled painters in Gorakhpur!", "Pulling up the best painters for you right now!"];
+  var acReplies = ["Finding AC technicians near you!", "On it — searching for AC repair experts!", "Got it! Showing AC technicians in your area."];
+  var masonReplies = ["Looking up skilled masons near you!", "On it — finding experienced masons!", "Great! Showing verified masons below."];
+  var welderReplies = ["Searching for welders in your area!", "On it — finding skilled welders near you!", "Got it! Showing welders below."];
+  var cleanerReplies = ["Finding cleaners near you right now!", "On it — searching for professional cleaners!", "Great! Showing verified cleaners in your area."];
 
-  if (lower.indexOf('plumber') >= 0 || lower.indexOf('pipe') >= 0 || lower.indexOf('leak') >= 0 || lower.indexOf('water') >= 0 || lower.indexOf('drain') >= 0 || lower.indexOf('tap') >= 0 || lower.indexOf('toilet') >= 0)
-    return "Looking for a plumber! Showing you verified plumbers right now.";
-  if (lower.indexOf('electric') >= 0 || lower.indexOf('fan') >= 0 || lower.indexOf('light') >= 0 || lower.indexOf('bulb') >= 0 || lower.indexOf('wiring') >= 0 || lower.indexOf('switch') >= 0)
-    return "Finding electricians near you right now!";
-  if (lower.indexOf('carpenter') >= 0 || lower.indexOf('wood') >= 0 || lower.indexOf('door') >= 0 || lower.indexOf('furniture') >= 0)
-    return "Searching for skilled carpenters near you!";
-  if (lower.indexOf('paint') >= 0 || lower.indexOf('colour') >= 0 || lower.indexOf('color') >= 0 || lower.indexOf('wall') >= 0)
-    return "Finding painters near you!";
-  if (lower.indexOf('ac') >= 0 || lower.indexOf('air con') >= 0 || lower.indexOf('cool') >= 0 || lower.indexOf('fridge') >= 0)
-    return "Looking for an AC technician for you!";
-  if (lower.indexOf('mason') >= 0 || lower.indexOf('cement') >= 0 || lower.indexOf('tile') >= 0 || lower.indexOf('brick') >= 0)
-    return "Searching for skilled masons near you!";
-  if (lower.indexOf('weld') >= 0 || lower.indexOf('iron') >= 0 || lower.indexOf('gate') >= 0 || lower.indexOf('grill') >= 0)
-    return "Finding welders near you!";
-  if (lower.indexOf('clean') >= 0 || lower.indexOf('sweep') >= 0 || lower.indexOf('pest') >= 0 || lower.indexOf('sanitize') >= 0)
-    return "Looking for cleaners near you!";
-  if (lower.indexOf('book') >= 0)
-    return "Sign In first, then tap the calendar icon on any worker card to book a time slot.";
-  if (lower.indexOf('price') >= 0 || lower.indexOf('cost') >= 0 || lower.indexOf('free') >= 0 || lower.indexOf('charge') >= 0)
-    return "LocalFix is completely free for customers. Zero commission!";
-  if (lower.indexOf('ok') >= 0 || lower.indexOf('show') >= 0 || lower.indexOf('yes') >= 0 || lower.indexOf('find') >= 0 || lower.indexOf('go') >= 0)
-    return "Showing results now! Scroll down to see workers.";
-  // Unknown service
-  return "Sorry, we don't offer that service. " + ourServices;
+  function pick(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
+
+  if (lower.indexOf('plumber') >= 0 || lower.indexOf('pipe') >= 0 || lower.indexOf('leak') >= 0 || lower.indexOf('tap') >= 0 || lower.indexOf('toilet') >= 0 || lower.indexOf('drain') >= 0) return pick(plumberReplies);
+  if (lower.indexOf('electric') >= 0 || lower.indexOf('fan') >= 0 || lower.indexOf('light') >= 0 || lower.indexOf('bulb') >= 0 || lower.indexOf('wiring') >= 0 || lower.indexOf('switch') >= 0) return pick(electricianReplies);
+  if (lower.indexOf('carpenter') >= 0 || lower.indexOf('wood') >= 0 || lower.indexOf('door') >= 0 || lower.indexOf('furniture') >= 0 || lower.indexOf('cabinet') >= 0) return pick(carpenterReplies);
+  if (lower.indexOf('paint') >= 0 || lower.indexOf('colour') >= 0 || lower.indexOf('color') >= 0 || lower.indexOf('wall') >= 0) return pick(painterReplies);
+  if (lower.indexOf(' ac') >= 0 || lower.indexOf('air con') >= 0 || lower.indexOf('cooling') >= 0 || lower.indexOf('fridge') >= 0 || lower.indexOf('compressor') >= 0) return pick(acReplies);
+  if (lower.indexOf('mason') >= 0 || lower.indexOf('cement') >= 0 || lower.indexOf('tile') >= 0 || lower.indexOf('brick') >= 0 || lower.indexOf('plaster') >= 0) return pick(masonReplies);
+  if (lower.indexOf('weld') >= 0 || lower.indexOf('gate') >= 0 || lower.indexOf('grill') >= 0 || lower.indexOf('iron work') >= 0) return pick(welderReplies);
+  if (lower.indexOf('clean') >= 0 || lower.indexOf('sweep') >= 0 || lower.indexOf('pest') >= 0 || lower.indexOf('sanitize') >= 0 || lower.indexOf('cockroach') >= 0) return pick(cleanerReplies);
+
+  if (lower.indexOf('book') >= 0 || lower.indexOf('appointment') >= 0 || lower.indexOf('schedule') >= 0) return "To book a worker, sign in first — then tap the 📅 calendar icon on any worker card to pick a date and time!";
+  if (lower.indexOf('price') >= 0 || lower.indexOf('cost') >= 0 || lower.indexOf('charge') >= 0 || lower.indexOf('fee') >= 0 || lower.indexOf('free') >= 0) return "Great news — LocalFix is completely free for customers! Zero commission, no hidden charges. You only pay the worker directly.";
+  if (lower.indexOf('rate') >= 0 || lower.indexOf('rating') >= 0 || lower.indexOf('review') >= 0) return "You can see each worker's star rating and reviews on their card. Tap any card to read detailed reviews from real customers!";
+  if (lower.indexOf('contact') >= 0 || lower.indexOf('call') >= 0 || lower.indexOf('whatsapp') >= 0 || lower.indexOf('number') >= 0) return "Just tap the 📞 Call or 💬 WhatsApp button on any worker card — it connects you directly, no middleman!";
+  if (lower.indexOf('login') >= 0 || lower.indexOf('sign in') >= 0 || lower.indexOf('account') >= 0 || lower.indexOf('register') >= 0) return "Click 'Sign In' in the top right to access your account. New here? Click 'Create account' — it only takes 30 seconds!";
+  if (lower.indexOf('location') >= 0 || lower.indexOf('near') >= 0 || lower.indexOf('area') >= 0 || lower.indexOf('city') >= 0) return "Use the search bar to filter by city or area, or tap '📍 Workers Near Me' to find workers closest to your location!";
+  if (lower.indexOf('how') >= 0 && (lower.indexOf('work') >= 0 || lower.indexOf('use') >= 0)) return "It's super simple — search for a service, browse verified worker profiles with ratings, then call or WhatsApp them directly. No middleman, no fees!";
+  if (lower.indexOf('hello') >= 0 || lower.indexOf('hi') >= 0 || lower.indexOf('hey') >= 0 || lower.indexOf('namaste') >= 0) return "Hey there! 👋 I'm Lexa, your LocalFix assistant. Tell me what's broken or what you need fixed, and I'll find the right worker for you!";
+  if (lower.indexOf('thank') >= 0 || lower.indexOf('thanks') >= 0 || lower.indexOf('shukriya') >= 0) return "Happy to help! 😊 Let me know if you need anything else — I'm always here.";
+  if (lower.indexOf('ok') >= 0 || lower.indexOf('show') >= 0 || lower.indexOf('yes') >= 0 || lower.indexOf('find') >= 0 || lower.indexOf('go') >= 0) return "Showing the workers now — scroll down to browse!";
+
+  // Unknown/unavailable service
+  var notAvail = ["Hmm, that's not something we cover yet! We do have: Plumber, Electrician, Carpenter, Painter, AC Technician, Mason, Welder, and Cleaner.", "That service isn't on our list yet — but we've got: Plumber, Electrician, Carpenter, Painter, AC Technician, Mason, Welder & Cleaner!", "We don't offer that one, but don't worry! Pick from our 8 services: Plumber, Electrician, Carpenter, Painter, AC Technician, Mason, Welder, or Cleaner."];
+  return pick(notAvail);
 }
 
 function speak_ai(text) {
