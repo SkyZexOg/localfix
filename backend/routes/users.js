@@ -26,7 +26,7 @@ return Math.floor(100000 + Math.random() * 900000).toString();
 
 // ── OTP Email HTML Template ───────────────────────────────
 function otpEmailHTML(code, title, subtitle) {
-return 
+return `
 
   <!DOCTYPE html>
 
