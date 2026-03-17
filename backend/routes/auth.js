@@ -4,7 +4,7 @@ const jwt = require('jsonwebtoken');
 const { pool } = require('../db');
 const { verifyWorker } = require('../middleware/auth');
 
-// ── POST /api/auth/login ── Worker login
+// -- POST /api/auth/login -- Worker login
 router.post('/login', async (req, res) => {
   try {
     const { phone, password } = req.body;
@@ -41,7 +41,7 @@ router.post('/login', async (req, res) => {
   }
 });
 
-// ── GET /api/auth/me ── Get own profile
+// -- GET /api/auth/me -- Get own profile
 router.get('/me', verifyWorker, async (req, res) => {
   try {
     const [rows] = await pool.execute(
@@ -57,7 +57,7 @@ router.get('/me', verifyWorker, async (req, res) => {
   }
 });
 
-// ── POST /api/auth/change-password ── Change password
+// -- POST /api/auth/change-password -- Change password
 router.post('/change-password', verifyWorker, async (req, res) => {
   try {
     const { oldPassword, newPassword } = req.body;
