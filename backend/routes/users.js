@@ -4,8 +4,9 @@ const jwt = require('jsonwebtoken');
 const https = require('https');
 const { pool } = require('../db');
 
-const otpStore = new Map();
-const resendThrottle = new Map();
+// ─────────────────────────────────────────────
+// HELPERS
+// ─────────────────────────────────────────────
 
 function generateOTP() {
   return Math.floor(100000 + Math.random() * 900000).toString();
@@ -25,12 +26,14 @@ function otpEmailHTML(code, type) {
     + '</div></div></body></html>';
 }
 
-// Send email via Brevo API - no SMTP, pure HTTPS, works on Railway
-// No domain needed, send to any email free
+// ─────────────────────────────────────────────
+// BREVO EMAIL SENDER (API - works on Railway)
+// ─────────────────────────────────────────────
+
 function sendBrevoEmail(to, code, type) {
-  return new Promise(function(resolve, reject) {
+  return new Promise(function (resolve, reject) {
     if (!process.env.BREVO_API_KEY) {
-      return reject(new Error('BREVO_API_KEY not set in Railway variables.'));
+      return reject(new Error('BREVO_API_KEY not set in environment variables.'));
     }
 
     var subject = type === 'signup'
@@ -38,7 +41,10 @@ function sendBrevoEmail(to, code, type) {
       : 'Reset your LocalFix password';
 
     var body = JSON.stringify({
-      sender: { name: 'LocalFix', email: 'localfix.otp@gmail.com' },
+      sender: {
+        name: 'LocalFix',
+        email: process.env.BREVO_SENDER_EMAIL
+      },
       to: [{ email: to }],
       subject: subject,
       htmlContent: otpEmailHTML(code, type)
@@ -56,21 +62,26 @@ function sendBrevoEmail(to, code, type) {
       }
     };
 
-    var req = https.request(options, function(response) {
+    var req = https.request(options, function (response) {
       var data = '';
-      response.on('data', function(chunk) { data += chunk; });
-      response.on('end', function() {
+      response.on('data', function (chunk) { data += chunk; });
+      response.on('end', function () {
         if (response.statusCode === 201) {
-          console.log('OTP sent via Brevo to:', to);
+          try {
+            var parsed = JSON.parse(data);
+            console.log('[Brevo] OTP sent to:', to, '| messageId:', parsed.messageId);
+          } catch (e) {
+            console.log('[Brevo] OTP sent to:', to);
+          }
           resolve(true);
         } else {
-          console.error('Brevo error response:', data);
+          console.error('[Brevo] Error response:', response.statusCode, data);
           reject(new Error('Brevo API error: ' + response.statusCode + ' ' + data));
         }
       });
     });
 
-    req.on('error', function(err) {
+    req.on('error', function (err) {
       reject(new Error('Brevo request failed: ' + err.message));
     });
 
@@ -79,7 +90,56 @@ function sendBrevoEmail(to, code, type) {
   });
 }
 
-router.post('/send-otp', async function(req, res) {
+// ─────────────────────────────────────────────
+// OTP DB HELPERS (stored in MySQL, not memory)
+// ─────────────────────────────────────────────
+
+async function saveOTP(email, code, type) {
+  await pool.execute(
+    'DELETE FROM otp_store WHERE email = ? AND type = ?',
+    [email, type]
+  );
+  await pool.execute(
+    'INSERT INTO otp_store (email, code, type, expires_at, attempts, verified) VALUES (?, ?, ?, DATE_ADD(NOW(), INTERVAL 5 MINUTE), 0, FALSE)',
+    [email, code, type]
+  );
+}
+
+async function getOTP(email, type) {
+  var rows = await pool.execute(
+    'SELECT * FROM otp_store WHERE email = ? AND type = ? AND expires_at > NOW() ORDER BY created_at DESC LIMIT 1',
+    [email, type]
+  );
+  return rows[0][0] || null;
+}
+
+async function incrementOTPAttempts(id) {
+  await pool.execute('UPDATE otp_store SET attempts = attempts + 1 WHERE id = ?', [id]);
+}
+
+async function markOTPVerified(id) {
+  await pool.execute('UPDATE otp_store SET verified = TRUE WHERE id = ?', [id]);
+}
+
+async function deleteOTP(email, type) {
+  await pool.execute('DELETE FROM otp_store WHERE email = ? AND type = ?', [email, type]);
+}
+
+async function getLastSentTime(email) {
+  var rows = await pool.execute(
+    'SELECT created_at FROM otp_store WHERE email = ? ORDER BY created_at DESC LIMIT 1',
+    [email]
+  );
+  if (!rows[0][0]) return null;
+  return new Date(rows[0][0].created_at).getTime();
+}
+
+// ─────────────────────────────────────────────
+// ROUTES
+// ─────────────────────────────────────────────
+
+// POST /api/users/send-otp
+router.post('/send-otp', async function (req, res) {
   try {
     var email = (req.body.email || '').toLowerCase().trim();
     var type = req.body.type;
@@ -91,7 +151,7 @@ router.post('/send-otp', async function(req, res) {
       return res.status(400).json({ success: false, message: 'Type must be signup or reset.' });
     }
     if (!process.env.BREVO_API_KEY) {
-      return res.status(500).json({ success: false, message: 'Email service not configured. Add BREVO_API_KEY in Railway.' });
+      return res.status(500).json({ success: false, message: 'Email service not configured. Add BREVO_API_KEY in environment.' });
     }
 
     if (type === 'signup') {
@@ -107,32 +167,26 @@ router.post('/send-otp', async function(req, res) {
       }
     }
 
-    var last = resendThrottle.get(email);
-    if (last && Date.now() - last < 60000) {
-      var secs = Math.ceil((60000 - (Date.now() - last)) / 1000);
+    var lastSent = await getLastSentTime(email);
+    if (lastSent && Date.now() - lastSent < 60000) {
+      var secs = Math.ceil((60000 - (Date.now() - lastSent)) / 1000);
       return res.status(429).json({ success: false, message: 'Wait ' + secs + ' seconds before requesting another code.' });
     }
 
     var code = generateOTP();
-    otpStore.set(email, {
-      code: code,
-      expires: Date.now() + 300000,
-      attempts: 0,
-      type: type,
-      verified: false
-    });
-    resendThrottle.set(email, Date.now());
-
+    await saveOTP(email, code, type);
     await sendBrevoEmail(email, code, type);
+
     return res.json({ success: true, message: 'Code sent to ' + email + '. Check your inbox.' });
 
   } catch (err) {
-    console.error('send-otp error:', err.message);
+    console.error('[send-otp] error:', err.message);
     return res.status(500).json({ success: false, message: 'Failed to send code. Please try again.' });
   }
 });
 
-router.post('/verify-otp', async function(req, res) {
+// POST /api/users/verify-otp
+router.post('/verify-otp', async function (req, res) {
   try {
     var email = (req.body.email || '').toLowerCase().trim();
     var code = (req.body.code || '').toString().trim();
@@ -141,33 +195,34 @@ router.post('/verify-otp', async function(req, res) {
     if (!email || !code || !type) {
       return res.status(400).json({ success: false, message: 'Email, code and type required.' });
     }
-    var entry = otpStore.get(email);
-    if (!entry || entry.type !== type) {
-      return res.status(400).json({ success: false, message: 'No code found. Request a new one.' });
+
+    var entry = await getOTP(email, type);
+    if (!entry) {
+      return res.status(400).json({ success: false, message: 'No valid code found. Request a new one.' });
     }
-    if (Date.now() > entry.expires) {
-      otpStore.delete(email);
-      return res.status(400).json({ success: false, message: 'Code expired. Request a new one.' });
-    }
-    entry.attempts += 1;
-    if (entry.attempts > 3) {
-      otpStore.delete(email);
+
+    if (entry.attempts >= 3) {
+      await deleteOTP(email, type);
       return res.status(429).json({ success: false, message: 'Too many wrong attempts. Request a new code.' });
     }
+
     if (entry.code !== code) {
-      var left = 3 - entry.attempts;
+      await incrementOTPAttempts(entry.id);
+      var left = 3 - (entry.attempts + 1);
       return res.status(400).json({ success: false, message: 'Wrong code. ' + left + ' attempt(s) left.' });
     }
-    entry.verified = true;
-    otpStore.set(email, entry);
+
+    await markOTPVerified(entry.id);
     return res.json({ success: true, message: 'Code verified.' });
 
   } catch (err) {
+    console.error('[verify-otp] error:', err.message);
     return res.status(500).json({ success: false, message: 'Server error.' });
   }
 });
 
-router.post('/register', async function(req, res) {
+// POST /api/users/register
+router.post('/register', async function (req, res) {
   try {
     var name = (req.body.name || '').trim();
     var email = (req.body.email || '').toLowerCase().trim();
@@ -179,96 +234,116 @@ router.post('/register', async function(req, res) {
     if (password.length < 6) {
       return res.status(400).json({ success: false, message: 'Password must be at least 6 characters.' });
     }
-    var entry = otpStore.get(email);
-    if (!entry || !entry.verified || entry.type !== 'signup') {
+
+    var entry = await getOTP(email, 'signup');
+    if (!entry || !entry.verified) {
       return res.status(403).json({ success: false, message: 'Email not verified. Complete OTP first.' });
     }
+
     var existing = await pool.execute('SELECT id FROM users WHERE email = ?', [email]);
     if (existing[0].length) {
       return res.status(409).json({ success: false, message: 'Email already registered.' });
     }
+
     var hash = await bcrypt.hash(password, 10);
     var result = await pool.execute(
       'INSERT INTO users (name, email, password_hash) VALUES (?, ?, ?)',
       [name, email, hash]
     );
-    otpStore.delete(email);
-    resendThrottle.delete(email);
+
+    await deleteOTP(email, 'signup');
+
     var token = jwt.sign(
       { id: result[0].insertId, role: 'user', name: name },
       process.env.JWT_SECRET,
       { expiresIn: '7d' }
     );
-    console.log('User registered:', email);
+
+    console.log('[register] User registered:', email);
     return res.status(201).json({
       success: true,
       token: token,
       user: { id: result[0].insertId, name: name, email: email }
     });
+
   } catch (err) {
-    console.error('register error:', err.message);
+    console.error('[register] error:', err.message);
     return res.status(500).json({ success: false, message: 'Server error.' });
   }
 });
 
-router.post('/login', async function(req, res) {
+// POST /api/users/login
+router.post('/login', async function (req, res) {
   try {
     var email = (req.body.email || '').toLowerCase().trim();
     var password = req.body.password || '';
+
     if (!email || !password) {
       return res.status(400).json({ success: false, message: 'Email and password required.' });
     }
+
     var rows = await pool.execute('SELECT * FROM users WHERE email = ?', [email]);
     if (!rows[0].length) {
       return res.status(401).json({ success: false, message: 'Invalid email or password.' });
     }
+
     var user = rows[0][0];
     var valid = await bcrypt.compare(password, user.password_hash);
     if (!valid) {
       return res.status(401).json({ success: false, message: 'Invalid email or password.' });
     }
+
     var token = jwt.sign(
       { id: user.id, role: 'user', name: user.name },
       process.env.JWT_SECRET,
       { expiresIn: '7d' }
     );
+
     return res.json({ success: true, token: token, user: { id: user.id, name: user.name, email: user.email } });
+
   } catch (err) {
-    console.error('login error:', err.message);
+    console.error('[login] error:', err.message);
     return res.status(500).json({ success: false, message: 'Server error.' });
   }
 });
 
-router.post('/reset-password', async function(req, res) {
+// POST /api/users/reset-password
+router.post('/reset-password', async function (req, res) {
   try {
     var email = (req.body.email || '').toLowerCase().trim();
     var password = req.body.password || '';
+
     if (!email || !password) {
       return res.status(400).json({ success: false, message: 'Email and password required.' });
     }
     if (password.length < 6) {
       return res.status(400).json({ success: false, message: 'Password must be at least 6 characters.' });
     }
-    var entry = otpStore.get(email);
-    if (!entry || !entry.verified || entry.type !== 'reset') {
+
+    var entry = await getOTP(email, 'reset');
+    if (!entry || !entry.verified) {
       return res.status(403).json({ success: false, message: 'Email not verified. Complete OTP first.' });
     }
+
     var hash = await bcrypt.hash(password, 10);
     var result = await pool.execute('UPDATE users SET password_hash = ? WHERE email = ?', [hash, email]);
     if (!result[0].affectedRows) {
       return res.status(404).json({ success: false, message: 'Account not found.' });
     }
-    otpStore.delete(email);
-    resendThrottle.delete(email);
-    console.log('Password reset:', email);
+
+    await deleteOTP(email, 'reset');
+
+    console.log('[reset-password] Password reset for:', email);
     return res.json({ success: true, message: 'Password updated. Please sign in.' });
+
   } catch (err) {
-    console.error('reset-password error:', err.message);
+    console.error('[reset-password] error:', err.message);
     return res.status(500).json({ success: false, message: 'Server error.' });
   }
 });
 
-router.get('/me', require('../middleware/auth').verifyUser, async function(req, res) {
+// GET /api/users/me
+router.get('/me', require('../middleware/auth').verifyUser, async function (req, res) {
   try {
     var rows = await pool.execute('SELECT id, name, email, created_at FROM users WHERE id = ?', [req.user.id]);
     if (!rows[0].length) {
