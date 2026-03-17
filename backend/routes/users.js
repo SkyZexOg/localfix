@@ -1,7 +1,7 @@
 const router = require('express').Router();
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
-const { Resend } = require('resend');
+const https = require('https');
 const { pool } = require('../db');
 
 const otpStore = new Map();
@@ -13,50 +13,70 @@ function generateOTP() {
 
 function otpEmailHTML(code, type) {
   var title = type === 'signup' ? 'Verify your email' : 'Reset your password';
-  var subtitle = type === 'signup'
-    ? 'Complete your LocalFix registration'
-    : 'Reset your LocalFix password';
   return '<!DOCTYPE html><html><body style="margin:0;padding:20px;background:#f4f4f4;font-family:Arial,sans-serif">'
     + '<div style="max-width:460px;margin:0 auto;background:#080A0E;border-radius:12px;overflow:hidden">'
-    + '<div style="background:#FF5C00;padding:20px 28px">'
-    + '<h2 style="margin:0;color:#fff">LocalFix</h2>'
-    + '<p style="margin:4px 0 0;color:rgba(255,255,255,0.8);font-size:14px">' + subtitle + '</p>'
-    + '</div>'
+    + '<div style="background:#FF5C00;padding:20px 28px"><h2 style="margin:0;color:#fff">LocalFix</h2></div>'
     + '<div style="padding:28px">'
     + '<p style="color:#F0F2F5;font-weight:600;margin:0 0 16px">' + title + '</p>'
     + '<div style="background:#141820;border-radius:10px;padding:20px;text-align:center;margin-bottom:20px">'
     + '<span style="font-size:40px;font-weight:900;letter-spacing:14px;color:#FF5C00;font-family:monospace">' + code + '</span>'
     + '</div>'
-    + '<p style="color:#8B95A8;font-size:13px;margin:0">Expires in 5 minutes. Do not share this code.</p>'
-    + '</div>'
-    + '<div style="padding:14px 28px;border-top:1px solid #1A2030">'
-    + '<p style="color:#4A5568;font-size:12px;margin:0">(c) 2026 LocalFix, Gorakhpur</p>'
+    + '<p style="color:#8B95A8;font-size:13px;margin:0">Expires in 5 minutes. Do not share.</p>'
     + '</div></div></body></html>';
 }
 
-async function sendOTPEmail(to, code, type) {
-  if (!process.env.RESEND_API_KEY) {
-    throw new Error('RESEND_API_KEY not set in Railway variables.');
-  }
+// Send email via Brevo API - no SMTP, pure HTTPS, works on Railway
+// No domain needed, send to any email free
+function sendBrevoEmail(to, code, type) {
+  return new Promise(function(resolve, reject) {
+    if (!process.env.BREVO_API_KEY) {
+      return reject(new Error('BREVO_API_KEY not set in Railway variables.'));
+    }
 
-  var resendClient = new Resend(process.env.RESEND_API_KEY);
-  var from = process.env.RESEND_FROM || 'onboarding@resend.dev';
-  var subject = type === 'signup'
-    ? 'Your LocalFix verification code'
-    : 'Reset your LocalFix password';
+    var subject = type === 'signup'
+      ? 'Your LocalFix verification code'
+      : 'Reset your LocalFix password';
 
-  var result = await resendClient.emails.send({
-    from: 'LocalFix <' + from + '>',
-    to: [to],
-    subject: subject,
-    html: otpEmailHTML(code, type)
+    var body = JSON.stringify({
+      sender: { name: 'LocalFix', email: 'localfix.otp@gmail.com' },
+      to: [{ email: to }],
+      subject: subject,
+      htmlContent: otpEmailHTML(code, type)
+    });
+
+    var options = {
+      hostname: 'api.brevo.com',
+      path: '/v3/smtp/email',
+      method: 'POST',
+      headers: {
+        'accept': 'application/json',
+        'api-key': process.env.BREVO_API_KEY,
+        'content-type': 'application/json',
+        'content-length': Buffer.byteLength(body)
+      }
+    };
+
+    var req = https.request(options, function(response) {
+      var data = '';
+      response.on('data', function(chunk) { data += chunk; });
+      response.on('end', function() {
+        if (response.statusCode === 201) {
+          console.log('OTP sent via Brevo to:', to);
+          resolve(true);
+        } else {
+          console.error('Brevo error response:', data);
+          reject(new Error('Brevo API error: ' + response.statusCode + ' ' + data));
+        }
+      });
+    });
+
+    req.on('error', function(err) {
+      reject(new Error('Brevo request failed: ' + err.message));
+    });
+
+    req.write(body);
+    req.end();
   });
-
-  if (result.error) {
-    throw new Error('Resend error: ' + result.error.message);
-  }
-
-  console.log('OTP sent via Resend to:', to, '| id:', result.data.id);
 }
 
 router.post('/send-otp', async function(req, res) {
@@ -70,9 +90,8 @@ router.post('/send-otp', async function(req, res) {
     if (type !== 'signup' && type !== 'reset') {
       return res.status(400).json({ success: false, message: 'Type must be signup or reset.' });
     }
-    if (!process.env.RESEND_API_KEY) {
-      console.error('RESEND_API_KEY missing in Railway variables');
-      return res.status(500).json({ success: false, message: 'Email service not configured. Add RESEND_API_KEY in Railway.' });
+    if (!process.env.BREVO_API_KEY) {
+      return res.status(500).json({ success: false, message: 'Email service not configured. Add BREVO_API_KEY in Railway.' });
     }
 
     if (type === 'signup') {
@@ -104,7 +123,7 @@ router.post('/send-otp', async function(req, res) {
     });
     resendThrottle.set(email, Date.now());
 
-    await sendOTPEmail(email, code, type);
+    await sendBrevoEmail(email, code, type);
     return res.json({ success: true, message: 'Code sent to ' + email + '. Check your inbox.' });
 
   } catch (err) {
@@ -122,7 +141,6 @@ router.post('/verify-otp', async function(req, res) {
     if (!email || !code || !type) {
       return res.status(400).json({ success: false, message: 'Email, code and type required.' });
     }
-
     var entry = otpStore.get(email);
     if (!entry || entry.type !== type) {
       return res.status(400).json({ success: false, message: 'No code found. Request a new one.' });
@@ -140,13 +158,11 @@ router.post('/verify-otp', async function(req, res) {
       var left = 3 - entry.attempts;
       return res.status(400).json({ success: false, message: 'Wrong code. ' + left + ' attempt(s) left.' });
     }
-
     entry.verified = true;
     otpStore.set(email, entry);
     return res.json({ success: true, message: 'Code verified.' });
 
   } catch (err) {
-    console.error('verify-otp error:', err.message);
     return res.status(500).json({ success: false, message: 'Server error.' });
   }
 });
@@ -163,39 +179,32 @@ router.post('/register', async function(req, res) {
     if (password.length < 6) {
       return res.status(400).json({ success: false, message: 'Password must be at least 6 characters.' });
     }
-
     var entry = otpStore.get(email);
     if (!entry || !entry.verified || entry.type !== 'signup') {
       return res.status(403).json({ success: false, message: 'Email not verified. Complete OTP first.' });
     }
-
     var existing = await pool.execute('SELECT id FROM users WHERE email = ?', [email]);
     if (existing[0].length) {
       return res.status(409).json({ success: false, message: 'Email already registered.' });
     }
-
     var hash = await bcrypt.hash(password, 10);
     var result = await pool.execute(
       'INSERT INTO users (name, email, password_hash) VALUES (?, ?, ?)',
       [name, email, hash]
     );
-
     otpStore.delete(email);
     resendThrottle.delete(email);
-
     var token = jwt.sign(
       { id: result[0].insertId, role: 'user', name: name },
       process.env.JWT_SECRET,
       { expiresIn: '7d' }
     );
-
     console.log('User registered:', email);
     return res.status(201).json({
       success: true,
       token: token,
       user: { id: result[0].insertId, name: name, email: email }
     });
-
   } catch (err) {
     console.error('register error:', err.message);
     return res.status(500).json({ success: false, message: 'Server error.' });
@@ -206,34 +215,24 @@ router.post('/login', async function(req, res) {
   try {
     var email = (req.body.email || '').toLowerCase().trim();
     var password = req.body.password || '';
-
     if (!email || !password) {
       return res.status(400).json({ success: false, message: 'Email and password required.' });
     }
-
     var rows = await pool.execute('SELECT * FROM users WHERE email = ?', [email]);
     if (!rows[0].length) {
       return res.status(401).json({ success: false, message: 'Invalid email or password.' });
     }
-
     var user = rows[0][0];
     var valid = await bcrypt.compare(password, user.password_hash);
     if (!valid) {
       return res.status(401).json({ success: false, message: 'Invalid email or password.' });
     }
-
     var token = jwt.sign(
       { id: user.id, role: 'user', name: user.name },
       process.env.JWT_SECRET,
       { expiresIn: '7d' }
     );
-
-    return res.json({
-      success: true,
-      token: token,
-      user: { id: user.id, name: user.name, email: user.email }
-    });
-
+    return res.json({ success: true, token: token, user: { id: user.id, name: user.name, email: user.email } });
   } catch (err) {
     console.error('login error:', err.message);
     return res.status(500).json({ success: false, message: 'Server error.' });
@@ -244,35 +243,25 @@ router.post('/reset-password', async function(req, res) {
   try {
     var email = (req.body.email || '').toLowerCase().trim();
     var password = req.body.password || '';
-
     if (!email || !password) {
       return res.status(400).json({ success: false, message: 'Email and password required.' });
     }
     if (password.length < 6) {
       return res.status(400).json({ success: false, message: 'Password must be at least 6 characters.' });
     }
-
     var entry = otpStore.get(email);
     if (!entry || !entry.verified || entry.type !== 'reset') {
       return res.status(403).json({ success: false, message: 'Email not verified. Complete OTP first.' });
     }
-
     var hash = await bcrypt.hash(password, 10);
-    var result = await pool.execute(
-      'UPDATE users SET password_hash = ? WHERE email = ?',
-      [hash, email]
-    );
-
+    var result = await pool.execute('UPDATE users SET password_hash = ? WHERE email = ?', [hash, email]);
     if (!result[0].affectedRows) {
       return res.status(404).json({ success: false, message: 'Account not found.' });
     }
-
     otpStore.delete(email);
     resendThrottle.delete(email);
-
     console.log('Password reset:', email);
     return res.json({ success: true, message: 'Password updated. Please sign in.' });
-
   } catch (err) {
     console.error('reset-password error:', err.message);
     return res.status(500).json({ success: false, message: 'Server error.' });
@@ -281,10 +270,7 @@ router.post('/reset-password', async function(req, res) {
 
 router.get('/me', require('../middleware/auth').verifyUser, async function(req, res) {
   try {
-    var rows = await pool.execute(
-      'SELECT id, name, email, created_at FROM users WHERE id = ?',
-      [req.user.id]
-    );
+    var rows = await pool.execute('SELECT id, name, email, created_at FROM users WHERE id = ?', [req.user.id]);
     if (!rows[0].length) {
       return res.status(404).json({ success: false, message: 'User not found.' });
     }
