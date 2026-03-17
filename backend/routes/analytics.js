@@ -1,7 +1,7 @@
 const router = require('express').Router();
 const { pool } = require('../db');
 
-// ── POST /api/analytics/search ── Log a search event
+// -- POST /api/analytics/search -- Log a search event
 router.post('/search', async (req, res) => {
   try {
     const { query } = req.body;
